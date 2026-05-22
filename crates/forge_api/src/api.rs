@@ -265,4 +265,9 @@ pub trait API: Sync + Send {
 
     /// Check the OAuth authentication status of an MCP server
     async fn mcp_auth_status(&self, server_url: &str) -> Result<String>;
+
+    /// Test all configured models by sending a simple chat request to each,
+    /// measuring time-to-first-token and total latency, then returning a
+    /// report sorted by score (best first).
+    async fn model_test(&self) -> Result<forge_domain::ModelTestReport>;
 }

@@ -153,6 +153,8 @@ impl ForgeCommandManager {
                 | "sync-info"
                 | "workspace-init"
                 | "sync-init"
+                | "model-test"
+                | "mt"
         )
     }
 
@@ -612,6 +614,12 @@ pub enum AppCommand {
     #[command(alias = "t")]
     Tools,
 
+    /// Test all models and score them by performance.
+    /// This can be triggered with the '/model-test' command (alias: mt).
+    #[strum(props(usage = "Test all models and score them by performance [alias: mt]"))]
+    #[command(name = "model-test", alias = "mt")]
+    ModelTest,
+
     /// Handles custom command defined in workflow file.
     #[command(skip)]
     Custom(UserCommand),
@@ -739,6 +747,7 @@ impl AppCommand {
             AppCommand::WorkspaceStatus => "workspace-status",
             AppCommand::WorkspaceInfo => "workspace-info",
             AppCommand::WorkspaceInit => "workspace-init",
+            AppCommand::ModelTest => "model-test",
         }
     }
 
