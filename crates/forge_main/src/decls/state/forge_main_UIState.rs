@@ -1,0 +1,1 @@
+use std :: path :: PathBuf ; use derive_setters :: Setters ; use forge_api :: { ConversationId , Environment } ; # [doc = " State information for the UI"] # [derive (Debug , Default , Clone , Setters)] # [setters (strip_option)] pub struct UIState { pub cwd : PathBuf , pub conversation_id : Option < ConversationId > , }

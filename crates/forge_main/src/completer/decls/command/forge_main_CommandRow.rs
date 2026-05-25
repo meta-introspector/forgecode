@@ -1,0 +1,1 @@
+use std :: sync :: Arc ; use forge_select :: ForgeWidget ; use reedline :: { Completer , Span , Suggestion } ; use crate :: model :: { ForgeCommand , ForgeCommandManager } ; # [doc = " A display wrapper for `ForgeCommand` that renders the name and description"] # [doc = " side-by-side for the interactive picker."] # [derive (Clone)] struct CommandRow (ForgeCommand) ;

@@ -1,0 +1,1 @@
+use std :: sync :: Arc ; use anyhow :: Result ; use forge_domain :: { AgentId , ModelId , Provider } ; use crate :: { AgentRegistry , AppConfigService , ProviderAuthService , ProviderService } ; # [doc = " Resolver for agent providers and models."] # [doc = " Handles provider resolution, credential refresh, and model lookup."] pub struct AgentProviderResolver < S > (Arc < S >) ;

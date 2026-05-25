@@ -1,0 +1,1 @@
+use :: std :: collections :: HashMap ; use :: std :: hash :: Hash ; use std :: collections :: HashMap ; use merge :: Merge ; use super :: Key ; # [allow (unused)] pub fn hashmap < K : Eq + Hash , V > (base : & mut HashMap < K , V > , other : HashMap < K , V >) { for (key , value) in other { base . insert (key , value) ; } }

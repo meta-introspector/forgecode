@@ -1,0 +1,1 @@
+use forge_domain :: Conversation ; use forge_domain :: { Context , ConversationId } ; use pretty_assertions :: assert_eq ; use super :: * ; # [doc = " Sets the conversation_id on the conversation context"] # [derive (Debug , Clone , Copy , Default)] pub struct SetConversationId ;

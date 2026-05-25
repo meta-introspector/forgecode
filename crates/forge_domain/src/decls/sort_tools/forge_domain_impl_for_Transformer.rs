@@ -1,0 +1,1 @@
+use super :: Transformer ; use crate :: { Context , ToolOrder } ; use pretty_assertions :: assert_eq ; use super :: * ; use crate :: ToolDefinition ; use crate :: ToolName ; impl Transformer for SortTools { type Value = Context ; fn transform (& mut self , mut context : Self :: Value) -> Self :: Value { self . order . sort (& mut context . tools) ; context } }

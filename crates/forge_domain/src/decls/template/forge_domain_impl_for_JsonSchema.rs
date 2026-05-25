@@ -1,0 +1,1 @@
+use std :: borrow :: Cow ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use serde_json :: Value ; impl < T > JsonSchema for Template < T > { fn schema_name () -> Cow < 'static , str > { String :: schema_name () } fn json_schema (r#gen : & mut schemars :: generate :: SchemaGenerator) -> schemars :: Schema { String :: json_schema (r#gen) } }

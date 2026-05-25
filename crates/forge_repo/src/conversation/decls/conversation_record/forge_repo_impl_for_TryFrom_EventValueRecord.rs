@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; impl TryFrom < EventValueRecord > for forge_domain :: EventValue { type Error = anyhow :: Error ; fn try_from (record : EventValueRecord) -> anyhow :: Result < Self > { Ok (serde_json :: from_value (record . 0) ?) } }

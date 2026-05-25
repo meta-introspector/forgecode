@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; # [doc = " Repository-specific representation of ToolCallId"] # [derive (Debug , Clone , Serialize , Deserialize , PartialEq)] # [serde (transparent)] pub (super) struct ToolCallIdRecord (String) ;

@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use super :: * ; impl < 'de > Deserialize < 'de > for FunctionType { fn deserialize < D > (_deserializer : D) -> Result < FunctionType , D :: Error > where D : serde :: Deserializer < 'de > , { Ok (FunctionType) } }

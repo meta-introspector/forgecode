@@ -1,0 +1,1 @@
+use std :: path :: PathBuf ; use derive_setters :: Setters ; use forge_api :: { ConversationId , Environment } ; impl UIState { pub fn new (env : Environment) -> Self { Self { cwd : env . cwd , conversation_id : Default :: default () } } }

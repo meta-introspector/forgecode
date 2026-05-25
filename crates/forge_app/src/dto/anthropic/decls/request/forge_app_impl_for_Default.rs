@@ -1,0 +1,1 @@
+use derive_setters :: Setters ; use forge_domain :: { ContextMessage , Image } ; use serde :: { Deserialize , Serialize } ; use forge_domain :: { Context , ReasoningConfig } ; use pretty_assertions :: assert_eq ; use super :: * ; impl Default for Content { fn default () -> Self { Content :: Thinking { signature : None , thinking : None } } }

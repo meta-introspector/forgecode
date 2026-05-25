@@ -1,0 +1,1 @@
+use chrono :: Utc ; use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use uuid :: Uuid ; impl Query { pub fn new (embedding : Vec < f32 >) -> Self { Self { embedding , limit : None , distance : None } } }

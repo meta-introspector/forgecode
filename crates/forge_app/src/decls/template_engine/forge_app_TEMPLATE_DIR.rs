@@ -1,0 +1,1 @@
+use std :: sync :: LazyLock ; use forge_domain :: Template ; use handlebars :: { Handlebars , no_escape } ; use include_dir :: { Dir , include_dir } ; use serde :: Serialize ; use serde_json :: json ; use super :: * ; static TEMPLATE_DIR : Dir < 'static > = include_dir ! ("$CARGO_MANIFEST_DIR/../../templates") ;

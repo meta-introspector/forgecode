@@ -1,0 +1,1 @@
+use std :: path :: Path ; use std :: sync :: Arc ; use anyhow :: Result ; use forge_domain :: { Environment , Snapshot , SnapshotRepository } ; impl ForgeFileSnapshotService { pub fn new (env : Environment) -> Self { Self { inner : Arc :: new (forge_snaps :: SnapshotService :: new (env . snapshot_path ())) , } } }

@@ -1,0 +1,1 @@
+use std :: path :: Path ; use crate :: Match ; use crate :: utils :: format_match ; use pretty_assertions :: assert_eq ; use super :: * ; impl From < Vec < String > > for TruncatedSearchOutput { fn from (value : Vec < String >) -> Self { TruncatedSearchOutput { start : 0 , end : value . len () , total : value . len () , data : value , strategy : TruncationMode :: Full , } } }

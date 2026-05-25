@@ -1,0 +1,1 @@
+use std :: fmt :: Display ; use regex :: Regex ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use pretty_assertions :: assert_eq ; use super :: * ; impl Display for ToolName { fn fmt (& self , f : & mut std :: fmt :: Formatter < '_ >) -> std :: fmt :: Result { write ! (f , "{}" , self . 0) } }

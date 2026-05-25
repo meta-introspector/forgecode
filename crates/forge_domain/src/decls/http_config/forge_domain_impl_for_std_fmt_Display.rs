@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use strum_macros :: EnumString ; use std :: str :: FromStr ; use super :: * ; impl std :: fmt :: Display for TlsBackend { fn fmt (& self , f : & mut std :: fmt :: Formatter < '_ >) -> std :: fmt :: Result { match self { TlsBackend :: Default => write ! (f , "default") , TlsBackend :: Rustls => write ! (f , "rustls") , } } }

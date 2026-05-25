@@ -1,0 +1,1 @@
+use std :: collections :: BTreeMap ; use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use thiserror :: Error ; use pretty_assertions :: assert_eq ; use super :: * ; # [derive (Debug , Deserialize , Serialize , Clone , PartialEq)] # [serde (untagged)] pub enum ErrorCode { String (String) , Number (u16) , }

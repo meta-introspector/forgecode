@@ -1,0 +1,1 @@
+use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use crate :: { ConversationId , Event } ; # [derive (Debug , Serialize , Deserialize , Clone , Setters)] # [setters (into , strip_option)] pub struct ChatRequest { pub event : Event , pub conversation_id : ConversationId , }

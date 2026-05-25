@@ -1,0 +1,1 @@
+use derive_more :: derive :: Display ; use derive_setters :: Setters ; use fake :: Dummy ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use strum_macros :: EnumString ; impl ModelId { pub fn as_str (& self) -> & str { & self . 0 } }

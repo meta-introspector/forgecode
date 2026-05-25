@@ -1,0 +1,1 @@
+use super :: Transformer ; use crate :: { Context , ModelId } ; use insta :: assert_yaml_snapshot ; use pretty_assertions :: assert_eq ; use serde :: Serialize ; use super :: * ; use crate :: { ContextMessage , Role , TextMessage } ; impl SetModel { pub fn new (model : ModelId) -> Self { Self { model } } }

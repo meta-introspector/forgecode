@@ -1,0 +1,1 @@
+use std :: path :: PathBuf ; use crate :: ProviderId ; use std :: path :: PathBuf ; use pretty_assertions :: assert_eq ; use super :: * ; impl MigrationResult { # [doc = " Creates a result indicating successful migration"] pub fn new (credentials_path : PathBuf , migrated_providers : Vec < ProviderId >) -> Self { Self { credentials_path , migrated_providers } } }

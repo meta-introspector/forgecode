@@ -1,0 +1,1 @@
+use std :: { fmt , io } ; use colored :: Colorize ; use forge_tracker :: VERSION ; impl DisplayBox { # [doc = " Creates a new Box with the given messages."] fn new (messages : Vec < String >) -> Self { Self { messages } } }

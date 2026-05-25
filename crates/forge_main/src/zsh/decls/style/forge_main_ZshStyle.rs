@@ -1,0 +1,1 @@
+use std :: fmt :: { self , Display } ; use super :: * ; # [doc = " Extension trait for styling strings for ZSH prompts."] pub trait ZshStyle { # [doc = " Creates a ZSH-styled wrapper for this string."] fn zsh (& self) -> ZshStyled < '_ > ; }

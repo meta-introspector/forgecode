@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; # [doc = " Repository-specific representation of ToolOutput"] # [derive (Debug , Clone , Serialize , Deserialize)] pub (crate) struct ToolOutputRecord { is_error : bool , values : Vec < ToolValueRecord > , }

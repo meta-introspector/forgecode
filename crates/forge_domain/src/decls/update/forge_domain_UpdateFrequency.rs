@@ -1,0 +1,1 @@
+use std :: time :: Duration ; use derive_setters :: Setters ; use merge :: Merge ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; # [derive (Default , Debug , Clone , Serialize , Deserialize , JsonSchema , PartialEq)] # [serde (rename_all = "snake_case")] pub enum UpdateFrequency { Daily , Weekly , Never , # [default] Always , }

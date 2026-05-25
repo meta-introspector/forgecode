@@ -1,0 +1,1 @@
+use std :: fmt ; use super :: * ; impl fmt :: Display for CommandType { fn fmt (& self , f : & mut fmt :: Formatter < '_ >) -> fmt :: Result { write ! (f , "{}" , self . as_str ()) } }

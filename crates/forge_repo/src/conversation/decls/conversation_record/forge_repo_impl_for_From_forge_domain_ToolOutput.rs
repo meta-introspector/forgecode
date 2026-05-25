@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; impl From < & forge_domain :: ToolOutput > for ToolOutputRecord { fn from (output : & forge_domain :: ToolOutput) -> Self { Self { is_error : output . is_error , values : output . values . iter () . map (ToolValueRecord :: from) . collect () , } } }

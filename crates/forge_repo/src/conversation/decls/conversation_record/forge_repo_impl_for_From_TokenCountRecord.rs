@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; impl From < TokenCountRecord > for forge_domain :: TokenCount { fn from (record : TokenCountRecord) -> Self { match record { TokenCountRecord :: Actual (n) => Self :: Actual (n) , TokenCountRecord :: Approx (n) => Self :: Approx (n) , } } }

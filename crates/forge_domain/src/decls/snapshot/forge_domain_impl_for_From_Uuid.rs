@@ -1,0 +1,1 @@
+use std :: fmt :: { Display , Formatter } ; use std :: hash :: Hasher ; use std :: path :: PathBuf ; use std :: time :: { Duration , SystemTime , UNIX_EPOCH } ; use serde :: { Deserialize , Serialize } ; use uuid :: Uuid ; use super :: * ; impl From < Uuid > for SnapshotId { fn from (uuid : Uuid) -> Self { Self (uuid) } }

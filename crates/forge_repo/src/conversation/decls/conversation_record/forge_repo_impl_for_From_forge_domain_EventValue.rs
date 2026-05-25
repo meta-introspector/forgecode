@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; impl From < & forge_domain :: EventValue > for EventValueRecord { fn from (event : & forge_domain :: EventValue) -> Self { Self (serde_json :: to_value (event) . unwrap_or_default ()) } }

@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; impl Plan { pub fn is_upgradeable (& self) -> bool { matches ! (self . r#type . to_lowercase () . as_str () , "free" | "pro") } }

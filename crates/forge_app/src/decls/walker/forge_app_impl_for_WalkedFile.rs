@@ -1,0 +1,1 @@
+use std :: path :: PathBuf ; use derive_setters :: Setters ; impl WalkedFile { # [doc = " Returns true if this represents a directory"] pub fn is_dir (& self) -> bool { self . path . ends_with ('/') } }

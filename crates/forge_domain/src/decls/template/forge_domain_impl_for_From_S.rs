@@ -1,0 +1,1 @@
+use std :: borrow :: Cow ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use serde_json :: Value ; impl < S : AsRef < str > > From < S > for Template < Value > { fn from (value : S) -> Self { Template :: new (value . as_ref ()) } }

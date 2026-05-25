@@ -1,0 +1,1 @@
+use forge_domain :: ModelId ; use serde :: { Deserialize , Serialize } ; use serde :: de :: Error ; use pretty_assertions :: assert_eq ; use super :: * ; # [derive (Debug , Deserialize , Clone , Serialize)] pub struct ListModelResponse { pub data : Vec < Model > , }

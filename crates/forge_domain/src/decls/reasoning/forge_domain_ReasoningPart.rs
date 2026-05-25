@@ -1,0 +1,1 @@
+use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use super :: * ; # [doc = " Type alias for partial reasoning (used in streaming)"] pub type ReasoningPart = ReasoningDetail ;

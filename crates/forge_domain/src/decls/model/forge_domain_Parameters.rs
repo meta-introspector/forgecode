@@ -1,0 +1,1 @@
+use derive_more :: derive :: Display ; use derive_setters :: Setters ; use fake :: Dummy ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use strum_macros :: EnumString ; # [derive (Default , Debug , Clone , Serialize , Deserialize)] pub struct Parameters { pub tool_supported : bool , }

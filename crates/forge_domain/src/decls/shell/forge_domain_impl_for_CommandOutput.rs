@@ -1,0 +1,1 @@
+impl CommandOutput { pub fn success (& self) -> bool { self . exit_code . is_none_or (| code | code >= 0) } }

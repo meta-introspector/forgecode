@@ -1,0 +1,1 @@
+use std :: fmt ; use chrono :: Local ; use colored :: Colorize ; use forge_domain :: { Category , TitleFormat } ; impl fmt :: Display for TitleDisplay { fn fmt (& self , f : & mut fmt :: Formatter < '_ >) -> fmt :: Result { if self . with_colors { write ! (f , "{}" , self . format_with_colors ()) } else { write ! (f , "{}" , self . format_plain ()) } } }

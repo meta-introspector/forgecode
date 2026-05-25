@@ -1,0 +1,1 @@
+use std :: fmt :: { self , Display } ; use super :: * ; # [doc = " A styled string for ZSH prompts."] # [doc = ""] # [doc = " Wraps text with ZSH prompt escape sequences for colors and formatting."] # [derive (Debug , Clone)] pub struct ZshStyled < 'a > { text : & 'a str , fg : Option < ZshColor > , bold : bool , }

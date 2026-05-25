@@ -1,0 +1,1 @@
+use forge_domain :: ModelId ; use serde :: { Deserialize , Serialize } ; use serde :: de :: Error ; use pretty_assertions :: assert_eq ; use super :: * ; impl From < PriceValue > for Option < f32 > { fn from (value : PriceValue) -> Self { match value { PriceValue :: Number (n) => Some (n) , PriceValue :: String (s) => s . parse () . ok () , } } }

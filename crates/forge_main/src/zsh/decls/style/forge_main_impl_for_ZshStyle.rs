@@ -1,0 +1,1 @@
+use std :: fmt :: { self , Display } ; use super :: * ; impl ZshStyle for String { fn zsh (& self) -> ZshStyled < '_ > { ZshStyled :: new (self . as_str ()) } }

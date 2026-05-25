@@ -1,0 +1,1 @@
+use std :: collections :: HashMap ; use derive_more :: { Deref , From } ; use url :: Url ; use super :: { ApiKey , AuthorizationCode , DeviceCode , OAuthConfig , PkceVerifier , State , URLParam , URLParamSpec , URLParamValue , UserCode , } ; # [doc = " Response containing authorization code"] # [derive (Debug , Clone)] pub struct CodeResponse { pub code : AuthorizationCode , }

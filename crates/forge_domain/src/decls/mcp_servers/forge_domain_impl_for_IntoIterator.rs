@@ -1,0 +1,1 @@
+use std :: collections :: { HashMap , hash_map } ; use serde :: { Deserialize , Serialize } ; use crate :: { ServerName , ToolDefinition } ; impl IntoIterator for McpServers { type Item = (ServerName , Vec < ToolDefinition >) ; type IntoIter = hash_map :: IntoIter < ServerName , Vec < ToolDefinition > > ; fn into_iter (self) -> Self :: IntoIter { self . servers . into_iter () } }

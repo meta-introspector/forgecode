@@ -1,0 +1,1 @@
+use crate :: { Context , Transformer } ; use insta :: assert_yaml_snapshot ; use pretty_assertions :: assert_eq ; use serde :: Serialize ; use super :: * ; use crate :: { ContextMessage , ReasoningConfig , ReasoningFull , Role , TextMessage , ToolCallId , ToolName , ToolOutput , ToolResult , } ; # [derive (Default)] pub struct DropReasoningDetails ;

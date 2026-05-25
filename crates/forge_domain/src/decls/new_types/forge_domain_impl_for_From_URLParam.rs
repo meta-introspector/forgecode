@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use pretty_assertions :: assert_eq ; use super :: * ; impl From < URLParam > for URLParamSpec { fn from (name : URLParam) -> Self { Self :: new (name) } }

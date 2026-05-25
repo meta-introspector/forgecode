@@ -1,0 +1,1 @@
+use derive_setters :: Setters ; use forge_domain :: { McpServers , ToolDefinition } ; use serde :: { Deserialize , Serialize } ; impl From < ToolsOverview > for Vec < ToolDefinition > { fn from (value : ToolsOverview) -> Self { value . as_vec () . into_iter () . cloned () . collect () } }

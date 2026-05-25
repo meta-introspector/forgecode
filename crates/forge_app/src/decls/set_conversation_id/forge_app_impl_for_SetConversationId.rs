@@ -1,0 +1,1 @@
+use forge_domain :: Conversation ; use forge_domain :: { Context , ConversationId } ; use pretty_assertions :: assert_eq ; use super :: * ; impl SetConversationId { pub fn apply (self , mut conversation : Conversation) -> Conversation { let ctx = conversation . context . take () . unwrap_or_default () . conversation_id (conversation . id) ; conversation . context (ctx) } }

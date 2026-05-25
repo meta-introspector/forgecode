@@ -1,0 +1,1 @@
+use chrono :: Utc ; use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use uuid :: Uuid ; # [derive (Debug , Clone , Setters)] # [setters (strip_option , into)] pub struct Query { pub embedding : Vec < f32 > , pub limit : Option < u64 > , pub distance : Option < f32 > , }

@@ -1,0 +1,1 @@
+use std :: sync :: Arc ; use forge_select :: ForgeWidget ; use reedline :: { Completer , Span , Suggestion } ; use crate :: model :: { ForgeCommand , ForgeCommandManager } ; impl std :: fmt :: Display for CommandRow { fn fmt (& self , f : & mut std :: fmt :: Formatter < '_ >) -> std :: fmt :: Result { write ! (f , "{:<30} {}" , self . 0 . name , self . 0 . description) } }

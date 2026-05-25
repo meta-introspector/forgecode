@@ -1,0 +1,1 @@
+use chrono :: { DateTime , Local , Utc } ; use forge_domain :: Conversation ; use forge_domain :: ConversationId ; use super :: * ; # [doc = " Initializes conversation metrics with start time"] # [derive (Debug , Clone , Copy)] pub struct InitConversationMetrics { current_time : DateTime < Local > , }

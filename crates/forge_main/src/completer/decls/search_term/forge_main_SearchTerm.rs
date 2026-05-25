@@ -1,0 +1,1 @@
+use reedline :: Span ; use insta :: assert_debug_snapshot ; use super :: SearchTerm ; pub struct SearchTerm { line : String , position : usize , }

@@ -1,0 +1,1 @@
+use forge_tracker :: { EventKind , ToolCallPayload } ; use crate :: TRACKER ; # [doc = " For tool call events"] pub fn tool_call (payload : ToolCallPayload) { dispatch (EventKind :: ToolCall (payload)) ; }

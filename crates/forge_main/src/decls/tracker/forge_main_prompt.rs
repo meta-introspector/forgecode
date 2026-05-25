@@ -1,0 +1,1 @@
+use forge_tracker :: { EventKind , ToolCallPayload } ; use crate :: TRACKER ; # [doc = " For prompt events"] pub fn prompt (text : String) { dispatch (EventKind :: Prompt (text)) ; }

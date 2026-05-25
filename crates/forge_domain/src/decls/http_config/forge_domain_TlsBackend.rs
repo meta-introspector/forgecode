@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use strum_macros :: EnumString ; use std :: str :: FromStr ; use super :: * ; # [derive (Default , Debug , Clone , PartialEq , Serialize , Deserialize , EnumString , fake :: Dummy)] # [serde (rename_all = "camelCase")] # [strum (serialize_all = "lowercase")] pub enum TlsBackend { # [default] Default , Rustls , }

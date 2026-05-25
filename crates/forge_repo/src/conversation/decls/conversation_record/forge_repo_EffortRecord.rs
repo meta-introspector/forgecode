@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; # [doc = " Repository-specific representation of Effort"] # [derive (Debug , Clone , Serialize , Deserialize)] # [serde (rename_all = "lowercase")] pub (super) enum EffortRecord { None , Minimal , Low , Medium , High , XHigh , Max , }

@@ -1,0 +1,1 @@
+use std :: fmt ; use std :: ops :: Deref ; use schemars :: JsonSchema ; use serde :: { Deserialize , Deserializer , Serialize , Serializer } ; use serde :: de :: Error ; use pretty_assertions :: assert_eq ; use serde_json :: json ; use super :: * ; impl From < TopP > for f32 { fn from (top_p : TopP) -> Self { top_p . 0 } }

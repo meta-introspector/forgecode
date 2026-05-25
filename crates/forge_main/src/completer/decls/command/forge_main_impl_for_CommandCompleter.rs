@@ -1,0 +1,1 @@
+use std :: sync :: Arc ; use forge_select :: ForgeWidget ; use reedline :: { Completer , Span , Suggestion } ; use crate :: model :: { ForgeCommand , ForgeCommandManager } ; impl CommandCompleter { pub fn new (command_manager : Arc < ForgeCommandManager >) -> Self { Self (command_manager) } }

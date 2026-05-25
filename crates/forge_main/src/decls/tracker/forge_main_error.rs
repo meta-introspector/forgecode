@@ -1,0 +1,1 @@
+use forge_tracker :: { EventKind , ToolCallPayload } ; use crate :: TRACKER ; # [doc = " For error events with Debug formatting"] pub fn error < E : std :: fmt :: Debug > (error : E) { dispatch (EventKind :: Error (format ! ("{error:?}"))) ; }

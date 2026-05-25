@@ -1,0 +1,1 @@
+use chrono :: Utc ; use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use uuid :: Uuid ; # [derive (Debug , Clone , Serialize , Deserialize)] pub struct Point < C > { pub id : PointId , pub content : C , pub embedding : Vec < f32 > , pub created_at : chrono :: DateTime < chrono :: Utc > , pub updated_at : chrono :: DateTime < chrono :: Utc > , }

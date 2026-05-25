@@ -1,0 +1,1 @@
+use std :: fmt ; use chrono :: Local ; use colored :: Colorize ; use forge_domain :: { Category , TitleFormat } ; # [doc = " Implementation of Display for TitleFormat in the presentation layer"] pub struct TitleDisplay { inner : TitleFormat , with_colors : bool , }

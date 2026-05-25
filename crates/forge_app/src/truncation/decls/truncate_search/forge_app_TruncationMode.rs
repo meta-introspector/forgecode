@@ -1,0 +1,1 @@
+use std :: path :: Path ; use crate :: Match ; use crate :: utils :: format_match ; use pretty_assertions :: assert_eq ; use super :: * ; # [derive (PartialEq , Eq , Debug)] pub enum TruncationMode { # [doc = " Truncation applied by number of lines"] Line , # [doc = " Truncation applied by number of bytes"] Byte , # [doc = " No truncation applied"] Full , }

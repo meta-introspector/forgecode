@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; # [doc = " Repository-specific representation of ToolResult"] # [derive (Debug , Clone , Serialize , Deserialize)] pub (super) struct ToolResultRecord { name : ToolNameRecord , call_id : Option < ToolCallIdRecord > , output : ToolOutputRecord , }

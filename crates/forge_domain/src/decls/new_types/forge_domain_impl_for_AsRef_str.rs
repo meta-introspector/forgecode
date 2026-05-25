@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use pretty_assertions :: assert_eq ; use super :: * ; impl AsRef < str > for ApiKey { fn as_ref (& self) -> & str { & self . 0 } }

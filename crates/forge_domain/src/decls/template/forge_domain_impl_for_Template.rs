@@ -1,0 +1,1 @@
+use std :: borrow :: Cow ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use serde_json :: Value ; impl < V > Template < V > { pub fn new (template : impl ToString) -> Self { Self { template : template . to_string () , _marker : std :: marker :: PhantomData , } } }

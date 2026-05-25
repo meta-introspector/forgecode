@@ -1,0 +1,1 @@
+use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use super :: * ; # [derive (Clone , Debug , PartialEq)] pub enum Reasoning { Part (Vec < ReasoningPart >) , Full (Vec < ReasoningFull >) , }

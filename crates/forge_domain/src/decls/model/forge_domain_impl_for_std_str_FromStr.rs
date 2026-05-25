@@ -1,0 +1,1 @@
+use derive_more :: derive :: Display ; use derive_setters :: Setters ; use fake :: Dummy ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use strum_macros :: EnumString ; impl std :: str :: FromStr for ModelId { type Err = std :: convert :: Infallible ; fn from_str (s : & str) -> Result < Self , Self :: Err > { Ok (ModelId (s . to_string ())) } }

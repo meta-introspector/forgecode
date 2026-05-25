@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use pretty_assertions :: assert_eq ; use super :: * ; # [derive (Debug , Clone , PartialEq , Eq , Serialize , Deserialize , derive_more :: Deref , Hash , derive_more :: From , derive_more :: Display ,)] # [serde (transparent)] pub struct URLParam (String) ;

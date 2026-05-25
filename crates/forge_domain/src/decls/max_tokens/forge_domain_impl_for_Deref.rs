@@ -1,0 +1,1 @@
+use std :: fmt ; use std :: ops :: Deref ; use schemars :: JsonSchema ; use serde :: { Deserialize , Deserializer , Serialize , Serializer } ; use serde :: de :: Error ; use pretty_assertions :: assert_eq ; use serde_json :: json ; use super :: * ; impl Deref for MaxTokens { type Target = u32 ; fn deref (& self) -> & Self :: Target { & self . 0 } }

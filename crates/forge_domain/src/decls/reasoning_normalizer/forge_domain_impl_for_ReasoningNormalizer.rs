@@ -1,0 +1,1 @@
+use crate :: { Context , ModelId , Transformer } ; use insta :: assert_yaml_snapshot ; use serde :: Serialize ; use super :: * ; use crate :: { ContextMessage , ReasoningConfig , ReasoningFull , Role , TextMessage } ; impl ReasoningNormalizer { # [doc = " Creates a normalizer for the given current model."] pub fn new (model_id : ModelId) -> Self { Self { model_id } } }

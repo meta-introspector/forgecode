@@ -1,0 +1,1 @@
+use derive_more :: derive :: Display ; use derive_setters :: Setters ; use fake :: Dummy ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use strum_macros :: EnumString ; impl From < & str > for ModelId { fn from (value : & str) -> Self { ModelId (value . to_string ()) } }

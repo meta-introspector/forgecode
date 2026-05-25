@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; # [doc = " Repository-specific representation of ToolDefinition"] # [derive (Debug , Clone , Serialize , Deserialize)] pub (super) struct ToolDefinitionRecord { name : ToolNameRecord , description : String , input_schema : serde_json :: Value , }

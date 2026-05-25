@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; impl From < & forge_domain :: Image > for ImageRecord { fn from (image : & forge_domain :: Image) -> Self { Self { url : image . url () . to_string () , mime_type : image . mime_type () . to_string () , } } }

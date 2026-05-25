@@ -1,0 +1,4 @@
+use std :: collections :: HashMap ; use std :: path :: PathBuf ; use chrono :: { DateTime , Local } ; use derive_setters :: Setters ; use forge_config :: ForgeConfig ; use forge_domain :: { Agent , AgentId , Attachment , ChatCompletionMessage , ChatResponse , Conversation , Environment , Event , File , MessageEntry , Metrics , ModelId , ProviderId , Role , Template , ToolCallFull , ToolDefinition , ToolResult , } ; use crate :: ShellOutput ; use crate :: orch_spec :: orch_runner :: Runner ; const USER_PROMPT : & str = r#"
+  <{{event.name}}>{{event.value}}</{{event.name}}>
+  <system_date>{{current_date}}</system_date>
+"# ;

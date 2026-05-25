@@ -1,0 +1,1 @@
+use derive_more :: derive :: Display ; use derive_setters :: Setters ; use fake :: Dummy ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use strum_macros :: EnumString ; # [derive (Clone , Debug , Deserialize , PartialEq , Serialize , Hash , Eq , Display , JsonSchema , Dummy)] # [serde (transparent)] pub struct ModelId (String) ;

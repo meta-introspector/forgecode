@@ -1,0 +1,1 @@
+use std :: fmt ; use chrono :: Local ; use colored :: Colorize ; use forge_domain :: { Category , TitleFormat } ; # [doc = " Extension trait to easily convert TitleFormat to displayable form"] pub trait TitleDisplayExt { fn display (self) -> TitleDisplay ; fn display_with_colors (self , with_colors : bool) -> TitleDisplay ; }

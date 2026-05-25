@@ -1,0 +1,1 @@
+use std :: fmt :: Display ; use super :: * ; pub trait LineNumbers { # [doc = " Returns the text with each line numbered, starting at 1."] fn to_numbered (& self) -> NumberedContent < '_ > { self . to_numbered_from (1) } # [doc = " Returns the text with each line numbered, starting at the given offset."] fn to_numbered_from (& self , start : usize) -> NumberedContent < '_ > ; }

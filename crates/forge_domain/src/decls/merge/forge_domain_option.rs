@@ -1,0 +1,1 @@
+use :: std :: collections :: HashMap ; use :: std :: hash :: Hash ; use std :: collections :: HashMap ; use merge :: Merge ; use super :: Key ; pub fn option < A > (base : & mut Option < A > , other : Option < A >) { if other . is_some () { * base = other ; } }

@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; impl From < super :: node :: FileNode > for FileHash { fn from (node : super :: node :: FileNode) -> Self { Self { path : node . file_path , hash : node . hash } } }

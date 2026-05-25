@@ -1,0 +1,1 @@
+use std :: cmp :: Ordering ; use std :: collections :: HashMap ; use forge_domain :: { Node , NodeId } ; use forge_domain :: { Node , NodeData } ; use pretty_assertions :: assert_eq ; use super :: * ; impl PartialOrd for Score { fn partial_cmp (& self , other : & Self) -> Option < Ordering > { Some (self . cmp (other)) } }

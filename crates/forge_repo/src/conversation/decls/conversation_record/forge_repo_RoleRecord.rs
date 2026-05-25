@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; # [doc = " Repository-specific representation of Role"] # [derive (Debug , Clone , Serialize , Deserialize , PartialEq)] pub enum RoleRecord { System , User , Assistant , }

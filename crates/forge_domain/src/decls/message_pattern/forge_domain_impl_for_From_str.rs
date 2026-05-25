@@ -1,0 +1,1 @@
+use serde_json :: json ; use crate :: { Context , ContextMessage , MessageEntry , ModelId , ToolCallFull , ToolCallId , ToolName , ToolResult , } ; use pretty_assertions :: assert_eq ; use super :: * ; use crate :: { ContextMessage , ModelId , Role , TextMessage } ; impl From < & str > for MessagePattern { fn from (pattern : & str) -> Self { Self :: new (pattern) } }

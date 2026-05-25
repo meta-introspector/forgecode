@@ -1,0 +1,1 @@
+use pretty_assertions :: assert_eq ; use super :: * ; # [doc = " Result of shell output truncation"] # [derive (Debug , PartialEq , Default , derive_setters :: Setters)] # [setters (strip_option , into)] pub struct TruncatedShellOutput { pub stdout : Stdout , pub stderr : Stderr , }

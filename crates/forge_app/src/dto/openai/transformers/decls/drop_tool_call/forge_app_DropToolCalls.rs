@@ -1,0 +1,1 @@
+use forge_domain :: Transformer ; use crate :: dto :: openai :: { Request , Role } ; use forge_domain :: { Context , ContextMessage , Role , TextMessage , ToolCallFull , ToolCallId , ToolName , ToolResult , } ; use super :: * ; # [doc = " Drops all tool call messages and converts them to user/assistant messages"] pub struct DropToolCalls ;

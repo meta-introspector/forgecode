@@ -1,0 +1,1 @@
+use std :: sync :: Arc ; use forge_domain :: { TitleFormat , ToolCallContext , ToolCallFull , ToolName , ToolOutput } ; use crate :: McpService ; pub struct McpExecutor < S > { services : Arc < S > , }

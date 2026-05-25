@@ -1,0 +1,1 @@
+use forge_domain :: Transformer ; use crate :: dto :: openai :: { Request , ToolChoice } ; use forge_domain :: { Context , ModelId , ToolDefinition } ; use super :: * ; pub struct SetToolChoice { pub choice : ToolChoice , }

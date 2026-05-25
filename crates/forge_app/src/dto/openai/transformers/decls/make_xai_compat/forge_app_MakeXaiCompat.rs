@@ -1,0 +1,1 @@
+use forge_domain :: Transformer ; use crate :: dto :: openai :: Request ; # [doc = " Makes the Request compatible with xAI's API."] # [doc = " xAI's /v1/chat/completions is OpenAI-compatible but rejects several"] # [doc = " parameters that OpenAI accepts."] pub struct MakeXaiCompat ;

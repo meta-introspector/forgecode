@@ -1,0 +1,1 @@
+use forge_domain :: Transformer ; use crate :: dto :: openai :: Request ; use pretty_assertions :: assert_eq ; use super :: * ; use crate :: dto :: openai :: Request ; use crate :: dto :: openai :: { FunctionDescription , FunctionType , Request , Tool } ; # [doc = " makes the Request compatible with the OpenAI API."] pub struct MakeOpenAiCompat ;

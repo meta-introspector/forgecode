@@ -1,0 +1,1 @@
+use std :: collections :: { BTreeMap , HashSet } ; use std :: fmt :: Display ; use serde :: Serialize ; use serde_json :: Value ; use crate :: ToolDefinition ; use insta :: assert_snapshot ; use strum :: IntoEnumIterator ; use super :: * ; use crate :: ToolCatalog ; pub struct ToolUsagePrompt < 'a > { tools : & 'a Vec < ToolDefinition > , }

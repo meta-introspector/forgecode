@@ -1,0 +1,1 @@
+use std :: collections :: HashMap ; use derive_more :: { Deref , From } ; use url :: Url ; use super :: { ApiKey , AuthorizationCode , DeviceCode , OAuthConfig , PkceVerifier , State , URLParam , URLParamSpec , URLParamValue , UserCode , } ; # [doc = " Response for device code flow"] # [derive (Debug , Clone)] pub struct DeviceCodeResponse ;

@@ -1,0 +1,1 @@
+pub mod forge_domain_CompactionResult ; pub mod forge_domain_impl_for_CompactionResult ;

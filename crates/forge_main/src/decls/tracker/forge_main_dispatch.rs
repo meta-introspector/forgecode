@@ -1,0 +1,1 @@
+use forge_tracker :: { EventKind , ToolCallPayload } ; use crate :: TRACKER ; # [doc = " Helper functions to eliminate duplication of tokio::spawn + TRACKER patterns"] # [doc = " Generic dispatcher for any event"] fn dispatch (event : EventKind) { tokio :: spawn (TRACKER . dispatch (event)) ; }

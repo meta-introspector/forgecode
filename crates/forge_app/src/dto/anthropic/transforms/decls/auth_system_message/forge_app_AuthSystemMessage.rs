@@ -1,0 +1,1 @@
+use forge_domain :: Transformer ; use crate :: dto :: anthropic :: { Request , SystemMessage } ; use forge_domain :: { Context , ContextMessage , ModelId , Role , TextMessage } ; use pretty_assertions :: assert_eq ; use super :: * ; # [doc = " Adds authentication system message when OAuth is enabled."] pub struct AuthSystemMessage { message : String , }

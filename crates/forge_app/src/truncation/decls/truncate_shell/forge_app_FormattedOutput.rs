@@ -1,0 +1,1 @@
+use pretty_assertions :: assert_eq ; use super :: * ; # [doc = " Represents formatted output with truncation metadata"] # [derive (Debug , PartialEq)] struct FormattedOutput { head : String , tail : Option < String > , suffix_start_line : Option < usize > , suffix_end_line : Option < usize > , prefix_end_line : usize , truncated_lines_count : usize , }

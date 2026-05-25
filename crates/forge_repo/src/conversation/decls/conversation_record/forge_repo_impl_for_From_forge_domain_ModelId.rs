@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; impl From < & forge_domain :: ModelId > for ModelIdRecord { fn from (id : & forge_domain :: ModelId) -> Self { Self (id . to_string ()) } }

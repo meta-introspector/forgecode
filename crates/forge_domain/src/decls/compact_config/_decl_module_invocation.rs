@@ -1,0 +1,1 @@
+pub mod forge_domain_Compact ; pub mod forge_domain_deserialize_percentage ; pub mod forge_domain_deserialize_optional_percentage ; pub mod forge_domain_impl_for_Default ; pub mod forge_domain_impl_for_Compact ;

@@ -1,0 +1,1 @@
+use std :: path :: Path ; use crate :: Match ; use crate :: utils :: format_match ; use pretty_assertions :: assert_eq ; use super :: * ; # [derive (PartialEq , Eq , Debug)] pub struct TruncatedSearchOutput { pub data : Vec < String > , pub start : usize , pub total : usize , pub end : usize , pub strategy : TruncationMode , }

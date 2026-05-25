@@ -1,0 +1,1 @@
+use std :: borrow :: Cow ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use serde_json :: Value ; # [derive (Clone , Default , Serialize , Deserialize , Debug , PartialEq , Eq)] # [serde (transparent)] pub struct Template < V > { pub template : String , _marker : std :: marker :: PhantomData < V > , }

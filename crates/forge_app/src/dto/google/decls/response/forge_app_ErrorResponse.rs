@@ -1,0 +1,1 @@
+use forge_domain :: { ChatCompletionMessage , FinishReason , Reasoning , ReasoningPart , TokenCount , ToolCallId , ToolCallPart , ToolName , } ; use serde :: Deserialize ; use serde_json :: json ; use super :: * ; # [derive (Deserialize , Debug , Clone , PartialEq)] pub struct ErrorResponse { pub error : ErrorContent , }

@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; impl From < & forge_domain :: ToolCallArguments > for ToolCallArgumentsRecord { fn from (args : & forge_domain :: ToolCallArguments) -> Self { Self (serde_json :: to_value (args) . unwrap_or_default ()) } }

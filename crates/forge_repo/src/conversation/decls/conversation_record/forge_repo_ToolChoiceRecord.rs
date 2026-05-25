@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; # [doc = " Repository-specific representation of ToolChoice"] # [derive (Debug , Clone , Serialize , Deserialize)] # [serde (rename_all = "PascalCase")] pub (super) enum ToolChoiceRecord { None , Auto , Required , Call (ToolNameRecord) , }

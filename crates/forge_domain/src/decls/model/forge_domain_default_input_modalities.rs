@@ -1,0 +1,1 @@
+use derive_more :: derive :: Display ; use derive_setters :: Setters ; use fake :: Dummy ; use schemars :: JsonSchema ; use serde :: { Deserialize , Serialize } ; use strum_macros :: EnumString ; # [doc = " Default input modalities when not specified (text-only)"] fn default_input_modalities () -> Vec < InputModality > { vec ! [InputModality :: Text] }

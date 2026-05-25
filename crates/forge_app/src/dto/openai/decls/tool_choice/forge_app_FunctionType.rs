@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use super :: * ; # [derive (Default , Debug , Clone , PartialEq , Eq)] pub struct FunctionType ;

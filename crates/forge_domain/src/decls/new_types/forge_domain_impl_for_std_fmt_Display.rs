@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use pretty_assertions :: assert_eq ; use super :: * ; impl std :: fmt :: Display for ApiKey { fn fmt (& self , f : & mut std :: fmt :: Formatter < '_ >) -> std :: fmt :: Result { write ! (f , "{}" , truncate_key (& self . 0)) } }

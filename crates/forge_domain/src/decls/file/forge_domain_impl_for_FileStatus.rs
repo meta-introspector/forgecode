@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; impl FileStatus { # [doc = " Create a new file status entry"] pub fn new (path : String , status : SyncStatus) -> Self { Self { path , status } } }

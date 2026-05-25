@@ -1,0 +1,1 @@
+use pretty_assertions :: assert_eq ; use super :: * ; # [doc = " Represents the result of processing a stream"] # [derive (Debug , PartialEq)] struct ProcessedStream { output : FormattedOutput , total_lines : usize , }

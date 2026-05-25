@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use pretty_assertions :: assert_eq ; use super :: * ; # [derive (Clone , Serialize , Deserialize , derive_more :: From , derive_more :: Display , derive_more :: Deref , Debug , PartialEq , Eq ,)] # [serde (transparent)] pub struct UserCode (String) ;

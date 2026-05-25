@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; impl AuthProviderId { pub fn new (id : impl ToString) -> Self { Self (id . to_string ()) } pub fn into_string (self) -> String { self . 0 } }

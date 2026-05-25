@@ -1,0 +1,1 @@
+use std :: collections :: { BTreeSet , HashMap } ; use std :: path :: { Path , PathBuf } ; use forge_domain :: { FileHash , FileStatus , SyncProgress , SyncStatus } ; use pretty_assertions :: assert_eq ; use super :: * ; # [doc = " Tracks progress of sync operations"] pub struct SyncProgressCounter { total_files : usize , total_operations : usize , completed_operation : usize , }

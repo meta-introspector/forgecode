@@ -1,0 +1,1 @@
+pub mod forge_domain_PointId ; pub mod forge_domain_impl_for_PointId ; pub mod forge_domain_Point ; pub mod forge_domain_impl_for_Point ; pub mod forge_domain_Query ; pub mod forge_domain_impl_for_Query ;

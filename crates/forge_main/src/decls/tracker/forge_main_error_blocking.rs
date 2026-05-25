@@ -1,0 +1,1 @@
+use forge_tracker :: { EventKind , ToolCallPayload } ; use crate :: TRACKER ; pub fn error_blocking < E : std :: fmt :: Debug > (error : E) { dispatch_blocking (EventKind :: Error (format ! ("{error:?}"))) ; }

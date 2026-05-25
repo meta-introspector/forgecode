@@ -1,0 +1,1 @@
+use derive_more :: Display ; use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use uuid :: Uuid ; use crate :: WorkspaceId ; use pretty_assertions :: assert_eq ; use super :: * ; # [doc = " Note content"] # [derive (Debug , Clone , PartialEq , serde :: Serialize , serde :: Deserialize)] pub struct Note { # [doc = " Note content"] pub content : String , }

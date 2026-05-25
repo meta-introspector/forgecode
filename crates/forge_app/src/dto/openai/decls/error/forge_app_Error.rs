@@ -1,0 +1,1 @@
+use std :: collections :: BTreeMap ; use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use thiserror :: Error ; use pretty_assertions :: assert_eq ; use super :: * ; # [derive (Debug , derive_more :: From , Error)] pub enum Error { # [error ("{0}")] Response (ErrorResponse) , # [error ("Invalid Status Code: {0}")] InvalidStatusCode (u16) , }

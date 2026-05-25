@@ -1,0 +1,1 @@
+use reedline :: Span ; use insta :: assert_debug_snapshot ; use super :: SearchTerm ; # [derive (Debug)] pub struct TermResult < 'a > { pub span : Span , pub term : & 'a str , }

@@ -1,0 +1,1 @@
+use std :: fmt :: Display ; use super :: * ; impl < T : AsRef < str > > LineNumbers for T { fn to_numbered_from (& self , start : usize) -> NumberedContent < '_ > { NumberedContent { start , raw_content : self . as_ref () } } }

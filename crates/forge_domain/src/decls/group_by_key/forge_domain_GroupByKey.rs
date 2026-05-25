@@ -1,0 +1,1 @@
+use std :: collections :: HashMap ; use std :: hash :: Hash ; # [doc = " Trait for grouping a collection of items by a key extracted from each item."] pub trait GroupByKey < K , V > { fn group_by_key (value : Vec < V > , key_fn : impl Fn (& V) -> K) -> HashMap < K , Vec < V > > ; }

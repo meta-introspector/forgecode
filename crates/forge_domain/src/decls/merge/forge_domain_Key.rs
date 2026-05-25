@@ -1,0 +1,1 @@
+use :: std :: collections :: HashMap ; use :: std :: hash :: Hash ; use std :: collections :: HashMap ; use merge :: Merge ; use super :: Key ; # [allow (unused)] pub trait Key { type Id : Eq ; fn key (& self) -> & Self :: Id ; }

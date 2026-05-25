@@ -1,0 +1,1 @@
+use forge_domain :: ModelId ; use serde :: { Deserialize , Serialize } ; use serde :: de :: Error ; use pretty_assertions :: assert_eq ; use super :: * ; # [derive (Debug , Deserialize , Serialize , Clone)] pub struct TopProvider { pub context_length : Option < u64 > , pub max_completion_tokens : Option < u64 > , pub is_moderated : bool , }

@@ -1,0 +1,1 @@
+use derive_more :: Display ; use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use uuid :: Uuid ; use crate :: WorkspaceId ; use pretty_assertions :: assert_eq ; use super :: * ; pub type CodeSearchQuery < 'a > = CodeBase < SearchParams < 'a > > ;

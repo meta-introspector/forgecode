@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; # [doc = " Information about a file's sync status"] # [derive (Debug , Clone , PartialEq , Eq , Serialize , Deserialize)] pub struct FileStatus { # [doc = " Relative file path from workspace root"] pub path : String , # [doc = " Sync status of the file"] pub status : SyncStatus , }

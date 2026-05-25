@@ -1,0 +1,1 @@
+use std :: fmt :: { self , Display } ; use super :: * ; # [doc = " ZSH prompt color using 256-color palette."] # [doc = ""] # [doc = " Maps to ZSH's `%F{N}` prompt escape sequence where N is a color code."] # [derive (Debug , Clone , Copy)] pub struct ZshColor (u8) ;

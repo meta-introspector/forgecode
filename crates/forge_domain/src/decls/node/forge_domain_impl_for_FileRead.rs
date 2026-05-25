@@ -1,0 +1,1 @@
+use derive_more :: Display ; use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use uuid :: Uuid ; use crate :: WorkspaceId ; use pretty_assertions :: assert_eq ; use super :: * ; impl FileRead { # [doc = " Create a new file read entry"] pub fn new (path : String , content : String) -> Self { Self { path , content } } }

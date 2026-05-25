@@ -1,0 +1,1 @@
+use forge_domain :: Transformer ; use crate :: dto :: anthropic :: { Request , SystemMessage } ; use forge_domain :: { Context , ContextMessage , ModelId , Role , TextMessage } ; use pretty_assertions :: assert_eq ; use super :: * ; impl Default for AuthSystemMessage { fn default () -> Self { Self :: new (Self :: AUTH_MESSAGE . to_string ()) } }

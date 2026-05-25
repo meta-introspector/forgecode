@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; impl From < & forge_domain :: ToolCallId > for ToolCallIdRecord { fn from (id : & forge_domain :: ToolCallId) -> Self { Self (id . as_str () . to_string ()) } }

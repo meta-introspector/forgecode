@@ -1,0 +1,1 @@
+use chrono :: Utc ; use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use uuid :: Uuid ; impl PointId { pub fn generate () -> Self { Self (Uuid :: new_v4 ()) } pub fn into_uuid (self) -> Uuid { self . 0 } }

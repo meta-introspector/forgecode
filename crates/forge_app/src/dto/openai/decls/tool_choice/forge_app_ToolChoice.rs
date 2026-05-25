@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use super :: * ; # [derive (Debug , Serialize , Deserialize , Clone , PartialEq , Eq)] # [serde (rename_all = "snake_case")] pub enum ToolChoice { None , Auto , Required , # [serde (untagged)] Function { r#type : FunctionType , function : FunctionName , } , }

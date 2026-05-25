@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; # [doc = " Legacy record for FileDiff - kept for backward compatibility"] # [derive (Debug , Clone , Serialize , Deserialize)] pub (super) struct FileDiffRecord { pub path : String , pub old_text : Option < String > , pub new_text : String , }

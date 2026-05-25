@@ -1,0 +1,1 @@
+use serde :: { Deserialize , Serialize } ; use pretty_assertions :: assert_eq ; use super :: * ; # [derive (Clone , Serialize , Deserialize , derive_more :: From , derive_more :: Deref , PartialEq , Eq , Hash , Debug ,)] # [serde (transparent)] pub struct ApiKey (String) ;

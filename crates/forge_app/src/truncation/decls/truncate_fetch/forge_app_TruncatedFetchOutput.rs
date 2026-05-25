@@ -1,0 +1,1 @@
+# [doc = " Represents the result of fetch content truncation"] # [derive (Debug)] pub struct TruncatedFetchOutput { pub content : String , }

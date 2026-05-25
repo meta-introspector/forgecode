@@ -1,0 +1,1 @@
+use std :: collections :: HashMap ; use derive_more :: { Deref , From } ; use derive_setters :: Setters ; use serde :: { Deserialize , Serialize } ; use serde_json :: Value ; use crate :: { Attachment , NamedTool , Template , TerminalContext , ToolName } ; use super :: * ; impl NamedTool for Event { fn tool_name () -> ToolName { ToolName :: new ("forge_tool_event_dispatch") } }

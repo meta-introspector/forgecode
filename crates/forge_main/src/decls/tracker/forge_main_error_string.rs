@@ -1,0 +1,1 @@
+use forge_tracker :: { EventKind , ToolCallPayload } ; use crate :: TRACKER ; # [doc = " For error events with string input"] pub fn error_string (error : String) { dispatch (EventKind :: Error (error)) ; }

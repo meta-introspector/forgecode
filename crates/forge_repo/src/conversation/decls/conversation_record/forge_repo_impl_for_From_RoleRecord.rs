@@ -1,0 +1,1 @@
+use anyhow :: Context as _ ; use forge_domain :: { Context , ConversationId } ; use serde :: { Deserialize , Serialize } ; impl From < RoleRecord > for forge_domain :: Role { fn from (record : RoleRecord) -> Self { match record { RoleRecord :: System => Self :: System , RoleRecord :: User => Self :: User , RoleRecord :: Assistant => Self :: Assistant , } } }
