@@ -439,6 +439,10 @@ impl<
         Ok(forge_infra::mcp_auth_status(server_url, &env).await)
     }
 
+    async fn model_test(&self) -> Result<forge_domain::ModelTestReport> {
+        self.app().model_test().await
+    }
+
     fn hydrate_channel(&self) -> Result<()> {
         self.infra.hydrate();
         Ok(())

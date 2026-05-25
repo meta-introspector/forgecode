@@ -5,6 +5,7 @@ use chrono::Local;
 use forge_config::ForgeConfig;
 use forge_domain::*;
 use forge_stream::MpscStream;
+use url::Url;
 
 use crate::apply_tunable_parameters::ApplyTunableParameters;
 use crate::changed_files::ChangedFiles;
@@ -295,6 +296,143 @@ impl<S: Services + EnvironmentInfra<Config = forge_config::ForgeConfig>> ForgeAp
             .await?;
 
         self.services.models(provider).await
+    }
+
+    /// Tests all configured models by sending a minimal chat request to each,
+    /// measuring time-to-first-token and total latency, then returning a report
+    /// sorted by score (best first).
+    ///
+    /// Each provider + model combination is tested concurrently across providers,
+    /// but sequentially within a provider to avoid rate-limiting.
+    pub async fn model_test(&self) -> Result<ModelTestReport> {
+        let all_provider_models = self.get_all_provider_models().await?;
+
+        // Build one future per provider, testing its models sequentially.
+        let futures: Vec<_> = all_provider_models
+            .into_iter()
+            .map(|pm| {
+                let services = self.services.clone();
+                async move {
+                    let mut results = Vec::new();
+
+                    // Resolve and refresh the provider credential once for the
+                    // whole batch.
+                    let provider = match services.get_provider(pm.provider_id.clone()).await {
+                        Ok(p) => p,
+                        Err(e) => {
+                            for model in &pm.models {
+                                results.push(ModelTestResult::failure(
+                                    pm.provider_id.clone(),
+                                    model.id.clone(),
+                                    format!("Provider lookup failed: {e}"),
+                                ));
+                            }
+                            return results;
+                        }
+                    };
+
+                    let provider = match services
+                        .provider_auth_service()
+                        .refresh_provider_credential(provider)
+                        .await
+                    {
+                        Ok(p) => p,
+                        Err(e) => {
+                            for model in &pm.models {
+                                results.push(ModelTestResult::failure(
+                                    pm.provider_id.clone(),
+                                    model.id.clone(),
+                                    format!("Credential refresh failed: {e}"),
+                                ));
+                            }
+                            return results;
+                        }
+                    };
+
+                    for model in &pm.models {
+                        let test_result = Self::test_single_model(
+                            &services,
+                            &pm.provider_id,
+                            &model.id,
+                            &provider,
+                        )
+                        .await;
+                        results.push(test_result);
+                    }
+
+                    results
+                }
+            })
+            .collect();
+
+        // Execute all provider batches concurrently.
+        let all_results: Vec<ModelTestResult> = futures::future::join_all(futures)
+            .await
+            .into_iter()
+            .flatten()
+            .collect();
+
+        Ok(ModelTestReport::new(all_results))
+    }
+
+    /// Sends a minimal chat request to a single model and measures TTFT and
+    /// total duration.
+    async fn test_single_model(
+        services: &Arc<S>,
+        provider_id: &ProviderId,
+        model_id: &ModelId,
+        provider: &Provider<Url>,
+    ) -> ModelTestResult {
+        use std::time::Instant;
+
+        use futures::StreamExt;
+
+        let context = Context::default().messages(vec![MessageEntry::from(ContextMessage::Text(
+            TextMessage::new(Role::User, "Reply with exactly the word \"ok\" and nothing else."),
+        ))]);
+
+        let start = Instant::now();
+        let mut ttft: Option<std::time::Duration> = None;
+
+        match services.chat(model_id, context, provider.clone()).await {
+            Ok(mut stream) => {
+                // Consume the stream, recording TTFT on the first chunk.
+                let mut got_first = false;
+                let mut stream_error = None;
+                while let Some(item) = stream.next().await {
+                    if !got_first {
+                        ttft = Some(start.elapsed());
+                        got_first = true;
+                    }
+                    if item.is_err() && stream_error.is_none() {
+                        stream_error = Some(format!("{:?}", item.unwrap_err()));
+                    }
+                }
+
+                let total = start.elapsed();
+
+                if let Some(err) = stream_error {
+                    ModelTestResult::failure(
+                        provider_id.clone(),
+                        model_id.clone(),
+                        format!("Stream error: {err}"),
+                    )
+                } else {
+                    let ttft_val = ttft.unwrap_or(total);
+                    ModelTestResult::success(
+                        provider_id.clone(),
+                        model_id.clone(),
+                        ttft_val,
+                        total,
+                    )
+                }
+            }
+            Err(e) => ModelTestResult::failure(
+                provider_id.clone(),
+                model_id.clone(),
+                format!("Chat request failed: {e}"),
+            ),
+        }
     }
 
     /// Gets available models from all configured providers concurrently.
