@@ -8,7 +8,7 @@ mod widget;
 
 pub use input::InputBuilder;
 pub use multi::MultiSelectBuilder;
-pub use pager::{PermissionPagerResult, show_permission_pager};
+pub use pager::{PermissionPagerResult, show_permission_pager, show_reasoning_pager};
 pub use preview::{PreviewLayout, PreviewPlacement, SelectMode, SelectRow, SelectUiOptions};
 pub use select::SelectBuilder;
 pub use widget::ForgeWidget;

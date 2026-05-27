@@ -10,10 +10,17 @@ use forge_api::{ConversationId, Environment};
 pub struct UIState {
     pub cwd: PathBuf,
     pub conversation_id: Option<ConversationId>,
+    /// Buffer accumulating reasoning/thought text during streaming.
+    /// Cleared at the start of each chat message.
+    pub reasoning_buffer: String,
 }
 
 impl UIState {
     pub fn new(env: Environment) -> Self {
-        Self { cwd: env.cwd, conversation_id: Default::default() }
+        Self {
+            cwd: env.cwd,
+            conversation_id: Default::default(),
+            reasoning_buffer: String::new(),
+        }
     }
 }

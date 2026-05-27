@@ -21,7 +21,7 @@ use forge_domain::{
     AuthMethod, ChatResponseContent, ConsoleWriter, ContextMessage, Role, TitleFormat, UserCommand,
 };
 use forge_fs::ForgeFS;
-use forge_select::{ForgeWidget, SelectRow};
+use forge_select::{ForgeWidget, SelectRow, show_reasoning_pager};
 use forge_spinner::SpinnerManager;
 use forge_tracker::ToolCallPayload;
 use forge_walker::Walker;
@@ -3898,6 +3898,9 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
     async fn on_chat(&mut self, chat: ChatRequest) -> Result<()> {
         let mut stream = self.api.chat(chat).await?;
 
+        // Clear reasoning buffer from any previous response
+        self.state.reasoning_buffer.clear();
+
         // Always use streaming content writer
         let mut writer = StreamingWriter::new(self.spinner.clone(), self.api.clone());
 
@@ -3916,6 +3919,13 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
         writer.finish()?;
         self.spinner.stop(None)?;
         self.spinner.reset();
+
+        // Show reasoning viewer if there was reasoning/thought content
+        if !self.state.reasoning_buffer.is_empty() {
+            self.spinner.pause();
+            let _ = show_reasoning_pager(&self.state.reasoning_buffer);
+            self.spinner.resume();
+        }
 
         Ok(())
     }
@@ -4115,7 +4125,10 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
                 }
             }
             ChatResponse::TaskReasoning { content } => {
+                // Still stream dimmed text to terminal for live visibility
                 writer.write_dimmed(&content)?;
+                // Also buffer for the post-response reasoning pager
+                self.state.reasoning_buffer.push_str(&content);
             }
             ChatResponse::TaskComplete => {
                 writer.finish()?;
