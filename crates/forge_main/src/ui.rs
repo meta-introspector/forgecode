@@ -4063,9 +4063,14 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
 
                 writer.finish()?;
 
-                // Stop spinner only for tools that require stdout/stderr access
+                // Pause spinner during tool execution to prevent the spinner
+                // thread from writing to stderr (which contains "Reasoning…"
+                // text) while a permission pager is showing on stderr in raw
+                // mode. The spinner is restarted in ToolCallEnd.
                 if tool_call.requires_stdout() {
                     self.spinner.stop(None)?;
+                } else {
+                    self.spinner.pause();
                 }
 
                 // Notify orch that the UI has rendered the tool header.
