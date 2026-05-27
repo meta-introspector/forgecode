@@ -13,7 +13,7 @@ use crate::hooks::{
     CompactionHandler, DecisionCaptureHandler, DoomLoopDetector, PendingTodosHandler,
     TitleGenerationHandler, TracingHandler,
 };
-use crate::init_conversation_metrics::InitConversationMetrics;
+use crate::init_conversation_metrics::{compute_git_tree_hash, InitConversationMetrics};
 use crate::orch::Orchestrator;
 use crate::services::{AgentRegistry, CustomInstructionsService, ProviderAuthService};
 use crate::set_conversation_id::SetConversationId;
@@ -139,7 +139,7 @@ impl<S: Services + EnvironmentInfra<Config = forge_config::ForgeConfig>> ForgeAp
             .update_file_stats(conversation)
             .await;
 
-        let conversation = InitConversationMetrics::new(current_time).apply(conversation);
+        let conversation = InitConversationMetrics::new(current_time, compute_git_tree_hash(&environment.cwd)).apply(conversation);
         let conversation = ApplyTunableParameters::new(agent.clone(), tool_definitions.clone())
             .apply(conversation);
         let conversation = SetConversationId.apply(conversation);

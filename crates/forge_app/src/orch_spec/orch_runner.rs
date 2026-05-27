@@ -13,7 +13,7 @@ pub use super::orch_setup::TestContext;
 use crate::app::build_template_config;
 use crate::apply_tunable_parameters::ApplyTunableParameters;
 use crate::hooks::{DoomLoopDetector, PendingTodosHandler};
-use crate::init_conversation_metrics::InitConversationMetrics;
+use crate::init_conversation_metrics::{compute_git_tree_hash, InitConversationMetrics};
 use crate::orch::Orchestrator;
 use crate::set_conversation_id::SetConversationId;
 use crate::system_prompt::SystemPrompt;
@@ -118,7 +118,7 @@ impl Runner {
         .add_user_prompt(conversation)
         .await?;
 
-        let conversation = InitConversationMetrics::new(setup.current_time).apply(conversation);
+        let conversation = InitConversationMetrics::new(setup.current_time, compute_git_tree_hash(&setup.env.cwd)).apply(conversation);
         // Apply initial metrics (including todos) if provided by the test
         let conversation = if let Some(ref metrics) = setup.initial_metrics {
             conversation.metrics(metrics.clone())

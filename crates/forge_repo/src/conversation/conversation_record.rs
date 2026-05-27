@@ -872,6 +872,8 @@ pub(super) struct MetricsRecord {
     files_changed: std::collections::HashMap<String, FileOperationOrArray>,
     #[serde(default, skip_serializing_if = "std::collections::HashSet::is_empty")]
     files_accessed: std::collections::HashSet<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    git_tree_hash: Option<String>,
 }
 
 impl From<&forge_domain::Metrics> for MetricsRecord {
@@ -889,6 +891,7 @@ impl From<&forge_domain::Metrics> for MetricsRecord {
                 })
                 .collect(),
             files_accessed: metrics.files_accessed.clone(),
+            git_tree_hash: metrics.git_tree_hash.clone(),
         }
     }
 }
@@ -933,6 +936,7 @@ impl From<MetricsRecord> for forge_domain::Metrics {
             file_operations,
             files_accessed,
             todos: Vec::new(),
+            git_tree_hash: record.git_tree_hash,
         }
     }
 }

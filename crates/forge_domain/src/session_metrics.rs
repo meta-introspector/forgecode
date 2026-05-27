@@ -15,6 +15,11 @@ pub struct Metrics {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub started_at: Option<DateTime<Utc>>,
 
+    /// Git tree hash (HEAD^{tree}) of the workspace at conversation start.
+    /// Used for sorting conversations by git state for file-centric recall.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub git_tree_hash: Option<String>,
+
     /// Holds the last file operation for each file
     #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub file_operations: HashMap<String, FileOperation>,

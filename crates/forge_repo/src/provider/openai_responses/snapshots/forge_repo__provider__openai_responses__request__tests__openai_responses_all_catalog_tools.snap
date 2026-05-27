@@ -79,6 +79,10 @@ expression: actual.tools
           "description": "The content to write to the file",
           "type": "string"
         },
+        "context": {
+          "description": "The reason or context for this write operation. Used for permission\ncase tracking — explains why this change is being made so the user\ncan make an informed decision.\nThis field is required in tool call JSON — the LLM must provide\na justification for every write operation.",
+          "type": "string"
+        },
         "file_path": {
           "description": "The absolute path to the file to write (must be absolute, not relative)",
           "type": "string"
@@ -90,6 +94,7 @@ expression: actual.tools
       },
       "required": [
         "content",
+        "context",
         "file_path",
         "overwrite"
       ],
@@ -334,6 +339,10 @@ expression: actual.tools
     "parameters": {
       "additionalProperties": false,
       "properties": {
+        "context": {
+          "description": "The reason or context for this patch operation. Used for permission\ncase tracking — explains why this change is being made so the user\ncan make an informed decision.\nThis field is required in tool call JSON — the LLM must provide\na justification for every patch operation.",
+          "type": "string"
+        },
         "file_path": {
           "description": "The absolute path to the file to modify",
           "type": "string"
@@ -353,6 +362,7 @@ expression: actual.tools
         }
       },
       "required": [
+        "context",
         "file_path",
         "new_string",
         "old_string",
@@ -369,6 +379,10 @@ expression: actual.tools
     "parameters": {
       "additionalProperties": false,
       "properties": {
+        "context": {
+          "description": "The reason or context for this multi-patch operation. Used for\npermission case tracking — explains why this change is being made\nso the user can make an informed decision.\nThis field is required in tool call JSON — the LLM must provide\na justification for every multi-patch operation.",
+          "type": "string"
+        },
         "edits": {
           "description": "Array of edit operations to perform sequentially on the file",
           "items": {
@@ -404,6 +418,7 @@ expression: actual.tools
         }
       },
       "required": [
+        "context",
         "edits",
         "file_path"
       ],
@@ -439,6 +454,10 @@ expression: actual.tools
       "properties": {
         "command": {
           "description": "The shell command to execute.",
+          "type": "string"
+        },
+        "context": {
+          "description": "A short justification for why this shell command needs to run.\nThe LLM must explain what the command does and why it's necessary.\nExamples: \"Check git status to see uncommitted changes\",\n\"Install the `ripgrep` package via cargo for text searching\".",
           "type": "string"
         },
         "cwd": {
@@ -484,6 +503,7 @@ expression: actual.tools
       },
       "required": [
         "command",
+        "context",
         "cwd",
         "description",
         "env",
