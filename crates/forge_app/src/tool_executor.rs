@@ -359,11 +359,15 @@ impl<
             self.require_prior_read(context, path, "edit it")?;
         }
 
-        // Enforce read-before-edit for overwrite writes
+        // Enforce read-before-edit for overwrite writes of existing files.
+        // New files don't exist yet so there is nothing to read first.
         if let ToolCatalog::Write(input) = &tool_input
             && input.overwrite
         {
-            self.require_prior_read(context, &input.file_path, "overwrite it")?;
+            let target_path = self.normalize_path(input.file_path.clone());
+            if std::path::Path::new(&target_path).exists() {
+                self.require_prior_read(context, &input.file_path, "overwrite it")?;
+            }
         }
 
         let execution_result = self.call_internal(tool_input.clone(), context).await;
