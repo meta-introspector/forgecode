@@ -10,8 +10,8 @@ use crate::apply_tunable_parameters::ApplyTunableParameters;
 use crate::changed_files::ChangedFiles;
 use crate::dto::ToolsOverview;
 use crate::hooks::{
-    CompactionHandler, DoomLoopDetector, PendingTodosHandler, TitleGenerationHandler,
-    TracingHandler,
+    CompactionHandler, DecisionCaptureHandler, DoomLoopDetector, PendingTodosHandler,
+    TitleGenerationHandler, TracingHandler,
 };
 use crate::init_conversation_metrics::InitConversationMetrics;
 use crate::orch::Orchestrator;
@@ -165,7 +165,8 @@ impl<S: Services + EnvironmentInfra<Config = forge_config::ForgeConfig>> ForgeAp
             .on_response(
                 tracing_handler
                     .clone()
-                    .and(CompactionHandler::new(agent.clone(), environment.clone())),
+                    .and(CompactionHandler::new(agent.clone(), environment.clone()))
+                    .and(DecisionCaptureHandler::new()),
             )
             .on_toolcall_start(tracing_handler.clone())
             .on_toolcall_end(tracing_handler)
