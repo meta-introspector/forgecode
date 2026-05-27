@@ -3,9 +3,13 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    pipelight = {
+      url = "path:/mnt/data1/nix-controller/he-lattice/pipelight";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, pipelight }:
     let
       systems = [
         "x86_64-linux"
@@ -98,6 +102,35 @@
         {
           default = forge;
           forge = forge;
+          forge-pipelight-mcp = pkgs.rustPlatform.buildRustPackage {
+            pname = "forge-pipelight-mcp";
+            version = "0.1.0-dev";
+            inherit src;
+            cargoLock = {
+              lockFile = ./Cargo.lock;
+              allowBuiltinFetchGit = true;
+            };
+            cargoBuildFlags = [
+              "-p"
+              "forge-pipelight-mcp"
+              "--bin"
+              "forge-pipelight-mcp"
+            ];
+            cargoInstallFlags = [
+              "-p"
+              "forge-pipelight-mcp"
+              "--bin"
+              "forge-pipelight-mcp"
+            ];
+            nativeBuildInputs = [ pkgs.pkg-config ];
+            doCheck = false;
+            meta = {
+              description = "MCP server wrapping pipelight CLI for build management";
+              license = lib.licenses.mit;
+              mainProgram = "forge-pipelight-mcp";
+              platforms = lib.platforms.unix;
+            };
+          };
         }
       );
 
@@ -134,6 +167,7 @@
                 pkgs.rustc
                 pkgs.rustfmt
                 pkgs.sqlite
+                pipelight.packages.${system}.default
               ]
               ++ lib.optionals pkgs.stdenv.isLinux [
                 pkgs.libxkbcommon
