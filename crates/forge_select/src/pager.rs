@@ -66,103 +66,103 @@ fn run_pager(
     let lines: Vec<&str> = panel.lines().collect();
     let total_lines = lines.len();
     let mut scroll_offset = 0usize;
-    let mut dirty = true;
     let mut content_height = 0usize;
 
     loop {
-        if dirty {
-            let (width, height) = terminal::size()?;
-            let footer_height = 2u16; // 2 rows for footer: separator bar + keybindings
-            content_height = height.saturating_sub(footer_height).max(1) as usize;
+        // ═══════════════════════════════════════════════════════════════
+        // Redraw on every cycle (no dirty flag) to handle interference
+        // from background threads (e.g. the spinner) that write to stderr
+        // while the pager is active.
+        // ═══════════════════════════════════════════════════════════════
+        let (width, height) = terminal::size()?;
+        let footer_height = 2u16; // 2 rows for footer: separator bar + keybindings
+        content_height = height.saturating_sub(footer_height).max(1) as usize;
 
-            // Clamp scroll offset
-            if total_lines > content_height {
-                let max_offset = total_lines - content_height;
-                if scroll_offset > max_offset {
-                    scroll_offset = max_offset;
-                }
-            } else {
-                scroll_offset = 0;
-                content_height = total_lines;
+        // Clamp scroll offset
+        if total_lines > content_height {
+            let max_offset = total_lines - content_height;
+            if scroll_offset > max_offset {
+                scroll_offset = max_offset;
             }
-
-            // Clear entire screen first to wipe any leftover content
-            // (status messages, tool output, etc.) that was written before the
-            // pager entered raw mode. Without this, old content persists and
-            // overlaps with the pager.
-            queue!(stderr, Clear(ClearType::All))?;
-
-            // Clear content area only (not footer)
-            for row in 0..content_height {
-                queue!(
-                    stderr,
-                    crossterm::cursor::MoveTo(0, row as u16),
-                    Clear(ClearType::CurrentLine)
-                )?;
-            }
-
-            // Draw content lines
-            let visible_end = cmp::min(scroll_offset + content_height, total_lines);
-            for (i, line_idx) in (scroll_offset..visible_end).enumerate() {
-                let line = lines[line_idx];
-                queue!(
-                    stderr,
-                    crossterm::cursor::MoveTo(0, i as u16),
-                    Print(truncate_line(line, width as usize))
-                )?;
-            }
-
-            // Scroll indicator in top-right (if scrolled)
-            if total_lines > content_height {
-                let indicator =
-                    format!("{}/{}", scroll_offset.saturating_add(1), total_lines);
-                if indicator.len() + 2 < width as usize {
-                    queue!(
-                        stderr,
-                        crossterm::cursor::MoveTo(
-                            width.saturating_sub(indicator.len() as u16 + 2),
-                            0,
-                        ),
-                        SetForegroundColor(Color::DarkYellow),
-                        Print(&indicator),
-                        ResetColor
-                    )?;
-                }
-            }
-
-            // Clear and redraw footer each time
-            let footer_y = height.saturating_sub(footer_height);
-            for row in footer_y..height {
-                queue!(
-                    stderr,
-                    crossterm::cursor::MoveTo(0, row),
-                    Clear(ClearType::CurrentLine)
-                )?;
-            }
-            // Separator line
-            let separator = "─".repeat(width as usize);
-            queue!(
-                stderr,
-                crossterm::cursor::MoveTo(0, footer_y),
-                SetForegroundColor(Color::DarkGrey),
-                Print(separator),
-                ResetColor
-            )?;
-            // Keybindings bar
-            let keybindings = format!(
-                " [Enter] Accept  [A] Accept & Remember  [R] Reject  ↑↓u/d PgUp/PgDn Scroll"
-            );
-            queue!(
-                stderr,
-                crossterm::cursor::MoveTo(0, footer_y + 1),
-                SetForegroundColor(Color::Cyan),
-                Print(truncate_line(&keybindings, width as usize)),
-                ResetColor
-            )?;
-
-            stderr.flush()?;
-            dirty = false;
+        } else {
+            scroll_offset = 0;
+            content_height = total_lines;
         }
+
+        // Clear entire screen first to wipe any leftover content
+        // (status messages, tool output, etc.) that was written before the
+        // pager entered raw mode.
+        queue!(stderr, Clear(ClearType::All))?;
+
+        // Clear content area only (not footer)
+        for row in 0..content_height {
+            queue!(
+                stderr,
+                crossterm::cursor::MoveTo(0, row as u16),
+                Clear(ClearType::CurrentLine)
+            )?;
+        }
+
+        // Draw content lines
+        let visible_end = cmp::min(scroll_offset + content_height, total_lines);
+        for (i, line_idx) in (scroll_offset..visible_end).enumerate() {
+            let line = lines[line_idx];
+            queue!(
+                stderr,
+                crossterm::cursor::MoveTo(0, i as u16),
+                Print(truncate_line(line, width as usize))
+            )?;
+        }
+
+        // Scroll indicator in top-right (if scrolled)
+        if total_lines > content_height {
+            let indicator =
+                format!("{}/{}", scroll_offset.saturating_add(1), total_lines);
+            if indicator.len() + 2 < width as usize {
+                queue!(
+                    stderr,
+                    crossterm::cursor::MoveTo(
+                        width.saturating_sub(indicator.len() as u16 + 2),
+                        0,
+                    ),
+                    SetForegroundColor(Color::DarkYellow),
+                    Print(&indicator),
+                    ResetColor
+                )?;
+            }
+        }
+
+        // Clear and redraw footer each time
+        let footer_y = height.saturating_sub(footer_height);
+        for row in footer_y..height {
+            queue!(
+                stderr,
+                crossterm::cursor::MoveTo(0, row),
+                Clear(ClearType::CurrentLine)
+            )?;
+        }
+        // Separator line
+        let separator = "─".repeat(width as usize);
+        queue!(
+            stderr,
+            crossterm::cursor::MoveTo(0, footer_y),
+            SetForegroundColor(Color::DarkGrey),
+            Print(separator),
+            ResetColor
+        )?;
+        // Keybindings bar
+        let keybindings = format!(
+            " [Enter] Accept  [A] Accept & Remember  [R] Reject  ↑↓u/d PgUp/PgDn Scroll"
+        );
+        queue!(
+            stderr,
+            crossterm::cursor::MoveTo(0, footer_y + 1),
+            SetForegroundColor(Color::Cyan),
+            Print(truncate_line(&keybindings, width as usize)),
+            ResetColor
+        )?;
+
+        stderr.flush()?;
 
         // Wait for event
         if event::poll(Duration::from_millis(250))? {
@@ -181,34 +181,29 @@ fn run_pager(
                         }
                         PagerAction::Reject => return Ok(PermissionPagerResult::Reject),
                         PagerAction::Continue => {
-                            if scroll_offset != old_offset {
-                                dirty = true;
-                            }
+                            // scroll_offset updates will be reflected on next draw
+                            let _ = old_offset;
                         }
                     }
                 }
                 Event::Mouse(mouse) => match mouse.kind {
                     MouseEventKind::ScrollUp => {
                         if total_lines > content_height {
-                            let old = scroll_offset;
                             scroll_offset = scroll_offset.saturating_sub(3);
-                            dirty = scroll_offset != old;
                         }
                     }
                     MouseEventKind::ScrollDown => {
                         if total_lines > content_height {
-                            let old = scroll_offset;
                             scroll_offset = cmp::min(
                                 scroll_offset.saturating_add(3),
                                 total_lines.saturating_sub(content_height),
                             );
-                            dirty = scroll_offset != old;
                         }
                     }
                     _ => {}
                 },
                 Event::Resize(_, _) => {
-                    dirty = true;
+                    // Handled naturally — we recalculate on every iteration
                 }
                 _ => {}
             }
