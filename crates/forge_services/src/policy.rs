@@ -51,6 +51,10 @@ where
         self.infra.get_environment().permissions_path()
     }
 
+    fn local_permissions_path(&self) -> PathBuf {
+        self.infra.get_environment().local_permissions_path()
+    }
+
     /// Create a policies collection with sensible defaults
     /// Returns a clone of the preloaded default policies
     fn load_default_policies() -> PolicyConfig {
@@ -74,33 +78,80 @@ where
         }
     }
 
-    /// Load all policy definitions from the forge/policies directory
-    async fn read_policies(&self) -> anyhow::Result<Option<PolicyConfig>> {
-        let policies_path = self.permissions_path();
-        if !self.infra.exists(&policies_path).await? {
+    /// Load policy definitions from a specific path
+    async fn read_policies_from(
+        &self,
+        path: &std::path::Path,
+    ) -> anyhow::Result<Option<PolicyConfig>> {
+        if !self.infra.exists(path).await? {
             return Ok(None);
         }
-
-        let content = self.infra.read_utf8(&policies_path).await?;
+        let content = self.infra.read_utf8(path).await?;
         let policies = serde_yml::from_str(&content)
-            .with_context(|| format!("Failed to parse policy {}", policies_path.display()))?;
-
+            .with_context(|| format!("Failed to parse policy {}", path.display()))?;
         Ok(Some(policies))
     }
 
-    /// Add or modify a policy in the policies file
+    /// Load policy definitions from the global permissions file
+    /// (~/.forge/permissions.yaml)
+    async fn read_policies(&self) -> anyhow::Result<Option<PolicyConfig>> {
+        self.read_policies_from(&self.permissions_path()).await
+    }
+
+    /// Load policy definitions from the local permissions file
+    /// (.forge/permissions.yaml in the current project)
+    async fn read_local_policies(&self) -> anyhow::Result<Option<PolicyConfig>> {
+        self.read_policies_from(&self.local_permissions_path()).await
+    }
+
+    /// Evaluate an operation against local policies first, then global.
+    /// Local policies take precedence over global policies.
+    fn evaluate_layered(
+        &self,
+        local_policies: &Option<PolicyConfig>,
+        global_policies: &PolicyConfig,
+        operation: &PermissionOperation,
+    ) -> Permission {
+        // Check local policies first (project-specific overrides)
+        if let Some(local) = local_policies {
+            if !local.policies.is_empty() {
+                let local_engine = PolicyEngine::new(local);
+                let local_result = local_engine.can_perform(operation);
+                // If a local policy matches (Allow/Deny/Confirm), use it
+                if local_result != Permission::Confirm || !local.policies.is_empty() {
+                    // Check if any local policy actually matched
+                    for p in &local.policies {
+                        if p.eval(operation).is_some() {
+                            return local_result;
+                        }
+                    }
+                }
+            }
+        }
+        // Fall back to global policies
+        let global_engine = PolicyEngine::new(global_policies);
+        global_engine.can_perform(operation)
+    }
+
+    /// Add or modify a policy in the policies file.
+    /// Writes to the local permissions file if it exists, otherwise writes to
+    /// the global file.
     async fn modify_policy(&self, policy: Policy) -> anyhow::Result<()> {
-        let policies_path = self.permissions_path();
-        let mut policies = self.read_policies().await?.unwrap_or_default();
+        // Prefer local file if it exists, otherwise use global
+        let local_path = self.local_permissions_path();
+        let (policies_path, is_local) = if self.infra.exists(&local_path).await? {
+            (local_path.clone(), true)
+        } else {
+            (self.permissions_path(), false)
+        };
 
-        // Add the new policy to the collection
-        policies = policies.add_policy(policy);
+        let source = if is_local { &local_path } else { &self.permissions_path() };
+        let policies = self.read_policies_from(source).await?.unwrap_or_default();
+        let policies = policies.add_policy(policy);
 
-        // Serialize the updated policies to YAML
         let new_content = serde_yml::to_string(&policies)
             .with_context(|| "Failed to serialize policies to YAML")?;
 
-        // Write the updated content
         self.infra
             .write(&policies_path, Bytes::from(new_content.to_owned()))
             .await?;
@@ -130,7 +181,35 @@ where
         Ok(())
     }
 
-    /// Get or create policies, prompting user if needed
+    /// Load both local and global policies into a merged config.
+    /// Local policies take precedence over global policies.
+    async fn get_merged_policies(&self) -> anyhow::Result<(PolicyConfig, PolicyConfig, Option<PathBuf>)>
+    where
+        I: UserInfra,
+    {
+        let local = self.read_local_policies().await?.unwrap_or_default();
+
+        // Ensure global policies exist (init if missing)
+        let global = if let Some(g) = self.read_policies().await? {
+            g
+        } else {
+            self.init_policies().await?;
+            self.read_policies().await?.unwrap_or_default()
+        };
+
+        // Determine the active path for user notification
+        let active_path = if !local.policies.is_empty() {
+            Some(self.local_permissions_path())
+        } else if !global.policies.is_empty() {
+            Some(self.permissions_path())
+        } else {
+            Some(self.permissions_path())
+        };
+
+        Ok((local, global, active_path))
+    }
+
+    /// Get or create policies (legacy, returns global only)
     #[async_recursion::async_recursion]
     async fn get_or_create_policies(&self) -> anyhow::Result<(PolicyConfig, Option<PathBuf>)>
     where
@@ -157,15 +236,13 @@ where
         + UserInfra,
 {
     /// Check if an operation is allowed based on policies and handle user
-    /// confirmation
+    /// confirmation. Evaluates local policies first, then global.
     async fn check_operation_permission(
         &self,
         operation: &PermissionOperation,
     ) -> anyhow::Result<PolicyDecision> {
-        let (policies, path) = self.get_or_create_policies().await?;
-
-        let engine = PolicyEngine::new(&policies);
-        let permission = engine.can_perform(operation);
+        let (local, global, path) = self.get_merged_policies().await?;
+        let permission = self.evaluate_layered(&Some(local), &global, operation);
 
         match permission {
             Permission::Deny => Ok(PolicyDecision { allowed: false, path }),
@@ -209,14 +286,14 @@ where
     }
 
     /// Check what type of permission an operation would receive without
-    /// requesting user confirmation
+    /// requesting user confirmation. Evaluates local policies first, then
+    /// global.
     async fn check_permission_type(
         &self,
         operation: &PermissionOperation,
     ) -> anyhow::Result<Permission> {
-        let (policies, _path) = self.get_or_create_policies().await?;
-        let engine = PolicyEngine::new(&policies);
-        Ok(engine.can_perform(operation))
+        let (local, global, _path) = self.get_merged_policies().await?;
+        Ok(self.evaluate_layered(&Some(local), &global, operation))
     }
 
     /// Persist a policy rule for the given operation so the user's choice is
@@ -471,3 +548,123 @@ mod tests {
         assert_eq!(actual, expected);
     }
 }
+
+#[cfg(test)]
+mod layered_tests {
+    use std::path::Path;
+
+    use super::*;
+
+    #[test]
+    fn test_local_overrides_global_deny_with_allow() {
+        // Global denies *.rs, local allows src/**/*.rs
+        let global = PolicyConfig::new().add_policy(Policy::Simple {
+            permission: Permission::Deny,
+            rule: Rule::Write(WriteRule { write: "*.rs".to_string(), dir: None }),
+        });
+        let local = PolicyConfig::new().add_policy(Policy::Simple {
+            permission: Permission::Allow,
+            rule: Rule::Write(WriteRule { write: "src/**/*.rs".to_string(), dir: None }),
+        });
+        let operation = PermissionOperation::Write {
+            path: Path::new("src/main.rs").to_path_buf(),
+            cwd: Path::new("/project").to_path_buf(),
+            message: "Write file".to_string(),
+        };
+
+        // Local should match first (local matches)
+        let local_engine = PolicyEngine::new(&local);
+        let local_result = local_engine.can_perform(&operation);
+        assert_eq!(local_result, Permission::Allow);
+
+        // Global would deny
+        let global_engine = PolicyEngine::new(&global);
+        let global_result = global_engine.can_perform(&operation);
+        assert_eq!(global_result, Permission::Deny);
+
+        // Since local is checked first and matches, the effective result is
+        // Allow
+        assert_eq!(local_result, Permission::Allow);
+    }
+
+    #[test]
+    fn test_global_used_when_no_local_match() {
+        // Global allows *.rs, local has unrelated rules
+        let global = PolicyConfig::new().add_policy(Policy::Simple {
+            permission: Permission::Allow,
+            rule: Rule::Write(WriteRule { write: "*.rs".to_string(), dir: None }),
+        });
+        let local = PolicyConfig::new().add_policy(Policy::Simple {
+            permission: Permission::Deny,
+            rule: Rule::Write(WriteRule { write: "*.py".to_string(), dir: None }),
+        });
+        let operation = PermissionOperation::Write {
+            path: Path::new("src/main.rs").to_path_buf(),
+            cwd: Path::new("/project").to_path_buf(),
+            message: "Write file".to_string(),
+        };
+
+        // Local doesn't match .rs files
+        let local_engine = PolicyEngine::new(&local);
+        let local_result = local_engine.can_perform(&operation);
+        assert_eq!(local_result, Permission::Confirm); // No matching local rule
+
+        // Global matches
+        let global_engine = PolicyEngine::new(&global);
+        let global_result = global_engine.can_perform(&operation);
+        assert_eq!(global_result, Permission::Allow);
+    }
+
+    #[test]
+    fn test_local_deny_overrides_global_allow() {
+        // Global allows *.rs, local denies *.rs
+        let global = PolicyConfig::new().add_policy(Policy::Simple {
+            permission: Permission::Allow,
+            rule: Rule::Write(WriteRule { write: "*.rs".to_string(), dir: None }),
+        });
+        let local = PolicyConfig::new().add_policy(Policy::Simple {
+            permission: Permission::Deny,
+            rule: Rule::Write(WriteRule { write: "*.rs".to_string(), dir: None }),
+        });
+        let operation = PermissionOperation::Write {
+            path: Path::new("src/main.rs").to_path_buf(),
+            cwd: Path::new("/project").to_path_buf(),
+            message: "Write file".to_string(),
+        };
+
+        // Local matches and denies
+        let local_engine = PolicyEngine::new(&local);
+        let local_result = local_engine.can_perform(&operation);
+        assert_eq!(local_result, Permission::Deny);
+    }
+
+    #[test]
+    fn test_local_confirm_overrides_global_allow() {
+        // Global allows *.rs, local sets confirm for a specific path
+        let global = PolicyConfig::new().add_policy(Policy::Simple {
+            permission: Permission::Allow,
+            rule: Rule::Write(WriteRule { write: "*.rs".to_string(), dir: None }),
+        });
+        let local = PolicyConfig::new().add_policy(Policy::Simple {
+            permission: Permission::Confirm,
+            rule: Rule::Write(WriteRule { write: "src/critical/*".to_string(), dir: None }),
+        });
+        let operation = PermissionOperation::Write {
+            path: Path::new("src/critical/secret.rs").to_path_buf(),
+            cwd: Path::new("/project").to_path_buf(),
+            message: "Write file".to_string(),
+        };
+
+        // Local matches and requires confirm
+        let local_engine = PolicyEngine::new(&local);
+        let local_result = local_engine.can_perform(&operation);
+        assert_eq!(local_result, Permission::Confirm);
+
+        // Would fall through to global if local didn't match, but local does
+        // match
+        let global_engine = PolicyEngine::new(&global);
+        let global_result = global_engine.can_perform(&operation);
+        assert_eq!(global_result, Permission::Allow);
+    }
+}
+

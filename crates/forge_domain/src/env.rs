@@ -93,6 +93,11 @@ impl Environment {
         self.base_path.join("permissions.yaml")
     }
 
+    /// Returns the project-local permissions file path (.forge/permissions.yaml)
+    pub fn local_permissions_path(&self) -> PathBuf {
+        self.cwd.join(".forge/permissions.yaml")
+    }
+
     pub fn mcp_local_config(&self) -> PathBuf {
         self.cwd.join(".mcp.json")
     }
