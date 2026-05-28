@@ -31,37 +31,33 @@
         let
           pkgs = import nixpkgs { inherit system; };
           lib = pkgs.lib;
+          sourceFilter = path: type:
+            let
+              base = baseNameOf path;
+            in !(
+              base == ".git" || base == ".."
+              || (type == "unknown" && base == "")
+              || (type == "symlink" && base == "result")
+              || (path == toString ./target || lib.hasPrefix (toString ./target + "/") path)
+              || (path == toString ./result || lib.hasPrefix (toString ./result + "/") path)
+            );
           src = lib.cleanSourceWith {
             src = ./.;
-            filter = path: type:
-              lib.cleanSourceFilter path type
-              && baseNameOf path != "target"
-              && baseNameOf path != "result";
+            filter = sourceFilter;
           };
-          forge = pkgs.rustPlatform.buildRustPackage {
+
+          vendorDir = builtins.path {
+            path = toString ./vendor;
+            name = "forge-vendor";
+          };
+          forge = pkgs.stdenv.mkDerivation {
             pname = "forge";
             version = "0.1.0-dev";
             inherit src;
 
-            cargoLock = {
-              lockFile = ./Cargo.lock;
-              allowBuiltinFetchGit = true;
-            };
-
-            cargoBuildFlags = [
-              "-p"
-              "forge_main"
-              "--bin"
-              "forge"
-            ];
-            cargoInstallFlags = [
-              "-p"
-              "forge_main"
-              "--bin"
-              "forge"
-            ];
-
             nativeBuildInputs = [
+              pkgs.cargo
+              pkgs.rustc
               pkgs.cmake
               pkgs.nasm
               pkgs.perl
@@ -88,6 +84,21 @@
             PROTOC_INCLUDE = "${pkgs.protobuf}/include";
             APP_VERSION = "0.1.0-dev";
 
+            dontConfigure = true;
+            dontUseCmakeConfigure = true;
+            dontUpdateAutotoolsGnuConfigScripts = true;
+
+            buildPhase = ''
+              cp -r ${vendorDir} vendor
+              chmod -R +w vendor
+              cargo build --release --frozen -p forge_main --bin forge
+            '';
+
+            installPhase = ''
+              mkdir -p $out/bin
+              cp target/release/forge $out/bin/
+            '';
+
             doCheck = false;
 
             meta = {
@@ -102,27 +113,28 @@
         {
           default = forge;
           forge = forge;
-          forge-pipelight-mcp = pkgs.rustPlatform.buildRustPackage {
+          forge-pipelight-mcp = pkgs.stdenv.mkDerivation {
             pname = "forge-pipelight-mcp";
             version = "0.1.0-dev";
             inherit src;
-            cargoLock = {
-              lockFile = ./Cargo.lock;
-              allowBuiltinFetchGit = true;
-            };
-            cargoBuildFlags = [
-              "-p"
-              "forge-pipelight-mcp"
-              "--bin"
-              "forge-pipelight-mcp"
+            nativeBuildInputs = [
+              pkgs.cargo
+              pkgs.rustc
+              pkgs.pkg-config
             ];
-            cargoInstallFlags = [
-              "-p"
-              "forge-pipelight-mcp"
-              "--bin"
-              "forge-pipelight-mcp"
-            ];
-            nativeBuildInputs = [ pkgs.pkg-config ];
+            dontConfigure = true;
+            dontUseCmakeConfigure = true;
+            dontUpdateAutotoolsGnuConfigScripts = true;
+
+            buildPhase = ''
+              cp -r ${vendorDir} vendor
+              chmod -R +w vendor
+              cargo build --release --frozen -p forge-pipelight-mcp --bin forge-pipelight-mcp
+            '';
+            installPhase = ''
+              mkdir -p $out/bin
+              cp target/release/forge-pipelight-mcp $out/bin/
+            '';
             doCheck = false;
             meta = {
               description = "MCP server wrapping pipelight CLI for build management";
