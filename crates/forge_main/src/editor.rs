@@ -46,6 +46,13 @@ impl ForgeEditor {
         );
 
         // on CTRL + k press clears the screen
+        // Remove the default emacs kill-line binding first so the override
+        // is unambiguous (prevents emacs edit-mode from dispatching the old
+        // binding under certain modifier bitmask configurations)
+        keybindings.remove_binding(
+            KeyModifiers::CONTROL,
+            KeyCode::Char('k'),
+        );
         keybindings.add_binding(
             KeyModifiers::CONTROL,
             KeyCode::Char('k'),
