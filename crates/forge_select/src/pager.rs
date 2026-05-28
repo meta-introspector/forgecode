@@ -440,6 +440,7 @@ fn run_reasoning_pager(
     let total_chars: usize = sections.iter().map(|s| s.char_len).sum();
 
     let mut scroll_offset = 0usize;
+    let mut notification: Option<String> = None;
 
     loop {
         let (width, height) = terminal::size()?;
@@ -627,7 +628,7 @@ fn run_reasoning_pager(
         )?;
 
         // Keybindings
-        let kb = "[Esc/q] Close  [1-9] Jump to section  ↑↓→← PageUp/Dn Scroll";
+        let kb = "[Esc/q] Close  [s] Save  [p] Pastebin  [1-9] Jump to section  ↑↓→← PageUp/Dn Scroll";
         queue!(
             stderr,
             crossterm::cursor::MoveTo(0, footer_y),
@@ -635,6 +636,17 @@ fn run_reasoning_pager(
             Print(truncate_line(kb, width as usize)),
             ResetColor
         )?;
+
+        // ── Notification bar (below keybindings) ───────────────────────
+        if let Some(msg) = &notification {
+            queue!(
+                stderr,
+                crossterm::cursor::MoveTo(0, footer_y + 1),
+                SetForegroundColor(Color::Green),
+                Print(truncate_line(msg, width as usize)),
+                ResetColor
+            )?;
+        }
 
         stderr.flush()?;
 
@@ -651,6 +663,26 @@ fn run_reasoning_pager(
                         &sections,
                     ) {
                         ReasoningAction::Close => break,
+                        ReasoningAction::Save => {
+                            match save_reasoning_to_file(reasoning) {
+                                Ok(path) => {
+                                    notification = Some(format!(" Saved to {path}"));
+                                }
+                                Err(e) => {
+                                    notification = Some(format!(" Error saving: {e}"));
+                                }
+                            }
+                        }
+                        ReasoningAction::Pastebin => {
+                            match pastebin_reasoning(reasoning) {
+                                Ok(url) => {
+                                    notification = Some(format!(" Pasted: {url}"));
+                                }
+                                Err(e) => {
+                                    notification = Some(format!(" Pastebin error: {e}"));
+                                }
+                            }
+                        }
                         ReasoningAction::Continue => {
                             let _ = old;
                         }
@@ -681,10 +713,51 @@ fn run_reasoning_pager(
     Ok(())
 }
 
+/// Save reasoning text to a timestamped file in /tmp/.
+fn save_reasoning_to_file(reasoning: &str) -> anyhow::Result<String> {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let secs = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    let filename = format!("/tmp/forge-thoughts-{secs}.txt");
+    std::fs::write(&filename, reasoning)?;
+    Ok(filename)
+}
+
+/// Pipe reasoning text through pastebinit and return its URL.
+fn pastebin_reasoning(reasoning: &str) -> anyhow::Result<String> {
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+
+    let mut child = Command::new("pastebinit")
+        .arg("-u")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| anyhow::anyhow!("Failed to spawn pastebinit: {e}"))?;
+
+    if let Some(stdin) = child.stdin.as_mut() {
+        stdin.write_all(reasoning.as_bytes())?;
+    }
+
+    let output = child.wait_with_output()?;
+    if output.status.success() {
+        let url = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        Ok(url)
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(anyhow::anyhow!("pastebinit failed: {stderr}"))
+    }
+}
+
 /// Actions from reasoning pager key events.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ReasoningAction {
     Close,
+    Save,
+    Pastebin,
     Continue,
 }
 
@@ -700,6 +773,12 @@ fn handle_reasoning_key(
         KeyEvent { code: KeyCode::Esc, .. } => ReasoningAction::Close,
         KeyEvent { code: KeyCode::Char('q'), .. } => ReasoningAction::Close,
         KeyEvent { code: KeyCode::Char('Q'), .. } => ReasoningAction::Close,
+        // Save to file
+        KeyEvent { code: KeyCode::Char('s'), .. } => ReasoningAction::Save,
+        KeyEvent { code: KeyCode::Char('S'), .. } => ReasoningAction::Save,
+        // Pastebin
+        KeyEvent { code: KeyCode::Char('p'), .. } => ReasoningAction::Pastebin,
+        KeyEvent { code: KeyCode::Char('P'), .. } => ReasoningAction::Pastebin,
         KeyEvent {
             code: KeyCode::Char('c'),
             modifiers: KeyModifiers::CONTROL,
