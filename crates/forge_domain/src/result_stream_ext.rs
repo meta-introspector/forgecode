@@ -903,9 +903,11 @@ mod tests {
 {"name": "test_tool", "arguments": {"arg": "value"}}
 </forge_tool_call>"#;
 
+        let first: String = xml_content.chars().take(30).collect();
+        let rest: String = xml_content.chars().skip(30).collect();
         let messages = vec![
-            Ok(ChatCompletionMessage::default().content(Content::part(&xml_content[0..30]))),
-            Ok(ChatCompletionMessage::default().content(Content::part(&xml_content[30..]))),
+            Ok(ChatCompletionMessage::default().content(Content::part(first))),
+            Ok(ChatCompletionMessage::default().content(Content::part(rest))),
             // These messages come after tool interruption but contain usage updates
             Ok(ChatCompletionMessage::default().content(Content::part(" ignored content"))),
             // Final message with the actual usage - this is always sent last

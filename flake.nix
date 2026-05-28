@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     pipelight = {
-      url = "github:pipelight/pipelight";
+      url = "path:/mnt/data1/nix-controller/he-lattice/pipelight";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

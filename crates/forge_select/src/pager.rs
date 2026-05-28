@@ -375,8 +375,8 @@ fn build_section_metadata(lines: &[&str]) -> Vec<ReasoningSection> {
         if line.trim().is_empty() && current_char_len > 0 {
             // End of a section
             let label_raw = lines[current_start].trim();
-            let label = if label_raw.len() > 25 {
-                format!("{}...", &label_raw[..22])
+            let label = if label_raw.chars().count() > 25 {
+                format!("{}...", label_raw.chars().take(22).collect::<String>())
             } else {
                 label_raw.to_string()
             };
@@ -397,8 +397,8 @@ fn build_section_metadata(lines: &[&str]) -> Vec<ReasoningSection> {
     // Don't forget the last section if there's trailing content
     if current_char_len > 0 && current_start < lines.len() {
         let label_raw = lines[current_start].trim();
-        let label = if label_raw.len() > 25 {
-            format!("{}...", &label_raw[..22])
+        let label = if label_raw.chars().count() > 25 {
+            format!("{}...", label_raw.chars().take(22).collect::<String>())
         } else {
             label_raw.to_string()
         };
