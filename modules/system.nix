@@ -29,6 +29,8 @@ in
 
   environment.systemPackages = with pkgs; [
     github-mcp-server
+    # forgejo-mcp     # uncomment once packaged in nixpkgs or added as flake input
+    # dbhub           # uncomment once packaged
   ];
 
   # ── github-mcp-server (HTTP/SSE on port 8082) ─────────────────────────────
@@ -52,3 +54,68 @@ in
     };
   };
 }
+
+# ── Forgejo MCP (disabled, needs nixpkgs package or flake input) ──────
+# systemd.services.forgejo-mcp = {
+#   enable = false;
+#   description = "Forgejo MCP Server";
+#   documentation = [ "https://github.com/raohwork/forgejo-mcp" ];
+#   after = [ "network.target" ];
+#   wantedBy = [ "multi-user.target" ];
+#   serviceConfig = {
+#     Type = "simple";
+#     ExecStart = "...";  # TODO: add forgejo-mcp binary path
+#     Restart = "always";
+#     RestartSec = "5s";
+#     User = "mdupont";
+#     MemoryMax = "256M";
+#   };
+# };
+
+# ── PostgreSQL MCP (disabled, needs nixpkgs package) ──────────────────
+# systemd.services.postgres-mcp = {
+#   enable = false;
+#   description = "PostgreSQL MCP Server";
+#   documentation = [ "https://github.com/bytebase/dbhub" ];
+#   after = [ "network.target" ];
+#   wantedBy = [ "multi-user.target" ];
+#   serviceConfig = {
+#     Type = "simple";
+#     ExecStart = "...";  # TODO: add dbhub binary path
+#     Restart = "always";
+#     RestartSec = "5s";
+#     User = "mdupont";
+#     MemoryMax = "512M";
+#   };
+# };
+
+# ── Parquet MCP (disabled, needs Rust build) ─────────────────────────
+# systemd.services.parquet-mcp = {
+#   enable = false;
+#   description = "Parquet MCP Server";
+#   documentation = [ "https://github.com/unravel-team/mcp-analyst" ];
+#   after = [ "network.target" ];
+#   wantedBy = [ "multi-user.target" ];
+#   serviceConfig = {
+#     Type = "simple";
+#     ExecStart = "...";  # TODO: add parquet-mcp binary path
+#     Restart = "always";
+#     RestartSec = "5s";
+#     MemoryMax = "512M";
+#   };
+# };
+
+# ── DAG-CBOR MCP (disabled, needs Rust build) ───────────────────────
+# systemd.services.dag-cbor-mcp = {
+#   enable = false;
+#   description = "DAG-CBOR MCP Server";
+#   after = [ "network.target" ];
+#   wantedBy = [ "multi-user.target" ];
+#   serviceConfig = {
+#     Type = "simple";
+#     ExecStart = "...";  # TODO: add dag-cbor-mcp binary path
+#     Restart = "always";
+#     RestartSec = "5s";
+#     MemoryMax = "256M";
+#   };
+# };
