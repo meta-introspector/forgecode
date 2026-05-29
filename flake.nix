@@ -11,6 +11,14 @@
       url = "github:numtide/system-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    cargo-vendormod = {
+      url = "git+file:///mnt/data1/git/solana.solfunmeme.com/cargo-vendormod?ref=organize-submodules";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    deep-scanner = {
+      url = "git+file:///mnt/data1/git/solana.solfunmeme.com/deep_scanner?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, pipelight, ... }:
@@ -118,6 +126,8 @@
           default = forge;
           forge = forge;
           github-mcp-server = pkgs.github-mcp-server;
+          cargo-vendormod = inputs.cargo-vendormod.packages.${system}.default;
+          deep-scanner = inputs.deep-scanner.packages.${system}.default;
           forge-pipelight-mcp = pkgs.stdenv.mkDerivation {
             pname = "forge-pipelight-mcp";
             version = "0.1.0-dev";
@@ -148,6 +158,36 @@
               platforms = lib.platforms.unix;
             };
           };
+          forge-nora-mcp = pkgs.stdenv.mkDerivation {
+            pname = "forge-nora-mcp";
+            version = "0.1.0-dev";
+            inherit src;
+            nativeBuildInputs = [
+              pkgs.cargo
+              pkgs.rustc
+              pkgs.pkg-config
+            ];
+            dontConfigure = true;
+            dontUseCmakeConfigure = true;
+            dontUpdateAutotoolsGnuConfigScripts = true;
+
+            buildPhase = ''
+              cp -r ${vendorDir} vendor
+              chmod -R +w vendor
+              cargo build --release --frozen -p forge-nora-mcp --bin forge-nora-mcp
+            '';
+            installPhase = ''
+              mkdir -p $out/bin
+              cp target/release/forge-nora-mcp $out/bin/
+            '';
+            doCheck = false;
+            meta = {
+              description = "MCP server wrapping Nora registry HTTP API";
+              license = lib.licenses.mit;
+              mainProgram = "forge-nora-mcp";
+              platforms = lib.platforms.unix;
+            };
+          };
         }
       );
 
@@ -163,6 +203,18 @@
         github-mcp-server = {
           type = "app";
           program = "${self.packages.${system}.github-mcp-server}/bin/github-mcp-server";
+        };
+        cargo-vendormod = {
+          type = "app";
+          program = "${self.packages.${system}.cargo-vendormod}/bin/cargo-vendormod";
+        };
+        deep-scanner = {
+          type = "app";
+          program = "${self.packages.${system}.deep-scanner}/bin/deep_scanner";
+        };
+        forge-nora-mcp = {
+          type = "app";
+          program = "${self.packages.${system}.forge-nora-mcp}/bin/forge-nora-mcp";
         };
       });
 
@@ -190,6 +242,9 @@
                 pkgs.sqlite
                 pipelight.packages.${system}.default
                 pkgs.github-mcp-server
+                inputs.cargo-vendormod.packages.${system}.default
+                inputs.deep-scanner.packages.${system}.default
+                self.packages.${system}.forge-nora-mcp
               ]
               ++ lib.optionals pkgs.stdenv.isLinux [
                 pkgs.libxkbcommon

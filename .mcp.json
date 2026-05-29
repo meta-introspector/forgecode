@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "github": {
+      "url": "http://127.0.0.1:8082/"
+    },
+    "pipelight": {
+      "command": "forge-pipelight-mcp"
+    },
+    "nora": {
+      "command": "forge-nora-mcp"
+    }
+  }
+}
