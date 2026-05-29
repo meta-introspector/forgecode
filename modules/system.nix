@@ -24,6 +24,9 @@ let
   '';
 in
 {
+  # Required by system-manager when pkgs is passed manually
+  nixpkgs.hostPlatform = "x86_64-linux";
+
   environment.systemPackages = with pkgs; [
     github-mcp-server
   ];
