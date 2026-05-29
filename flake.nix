@@ -7,9 +7,13 @@
       url = "path:/mnt/data1/nix-controller/he-lattice/pipelight";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    system-manager = {
+      url = "github:numtide/system-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, pipelight }:
+  outputs = inputs@{ self, nixpkgs, pipelight, ... }:
     let
       systems = [
         "x86_64-linux"
@@ -113,6 +117,7 @@
         {
           default = forge;
           forge = forge;
+          github-mcp-server = pkgs.github-mcp-server;
           forge-pipelight-mcp = pkgs.stdenv.mkDerivation {
             pname = "forge-pipelight-mcp";
             version = "0.1.0-dev";
@@ -155,6 +160,10 @@
           type = "app";
           program = "${self.packages.${system}.forge}/bin/forge";
         };
+        github-mcp-server = {
+          type = "app";
+          program = "${self.packages.${system}.github-mcp-server}/bin/github-mcp-server";
+        };
       });
 
       devShells = forAllSystems (system:
@@ -180,6 +189,7 @@
                 pkgs.rustfmt
                 pkgs.sqlite
                 pipelight.packages.${system}.default
+                pkgs.github-mcp-server
               ]
               ++ lib.optionals pkgs.stdenv.isLinux [
                 pkgs.libxkbcommon
@@ -201,5 +211,12 @@
             APP_VERSION = "0.1.0-dev";
           };
         });
+
+      # ── system-manager configuration ──────────────────────────────────────
+      systemConfigs.default = inputs."system-manager".lib.makeSystemConfig {
+        modules = [
+          ./modules/system.nix
+        ];
+      };
     };
 }
