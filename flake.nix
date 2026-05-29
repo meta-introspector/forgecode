@@ -19,9 +19,13 @@
       url = "git+file:///mnt/data1/git/solana.solfunmeme.com/deep_scanner?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    pipelight-schema-generator = {
+      url = "git+file:///mnt/data1/git/solana.solfunmeme.com/moltis.git?ref=feat/nix-build-fix&dir=pipelight-schema-generator";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, pipelight, ... }:
+  outputs = inputs@{ self, nixpkgs, pipelight, pipelight-schema-generator, ... }:
     let
       systems = [
         "x86_64-linux"
@@ -128,6 +132,7 @@
           github-mcp-server = pkgs.github-mcp-server;
           cargo-vendormod = inputs.cargo-vendormod.packages.${system}.default;
           deep-scanner = inputs.deep-scanner.packages.${system}.default;
+          pipelight-schema-generator = inputs.pipelight-schema-generator.packages.${system}.default;
           forge-pipelight-mcp = pkgs.stdenv.mkDerivation {
             pname = "forge-pipelight-mcp";
             version = "0.1.0-dev";
@@ -216,6 +221,10 @@
           type = "app";
           program = "${self.packages.${system}.forge-nora-mcp}/bin/forge-nora-mcp";
         };
+        pipelight-schema-generator = {
+          type = "app";
+          program = "${self.packages.${system}.pipelight-schema-generator}/bin/pipelight-schema-generator";
+        };
       });
 
       devShells = forAllSystems (system:
@@ -245,6 +254,7 @@
                 inputs.cargo-vendormod.packages.${system}.default
                 inputs.deep-scanner.packages.${system}.default
                 self.packages.${system}.forge-nora-mcp
+                self.packages.${system}.pipelight-schema-generator
               ]
               ++ lib.optionals pkgs.stdenv.isLinux [
                 pkgs.libxkbcommon
