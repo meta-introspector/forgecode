@@ -8,6 +8,9 @@
     },
     "nora": {
       "command": "forge-nora-mcp"
+    },
+    "parquet": {
+      "command": "forge-parquet-mcp"
     }
   }
 }

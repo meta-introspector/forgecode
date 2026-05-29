@@ -193,6 +193,36 @@
               platforms = lib.platforms.unix;
             };
           };
+          forge-parquet-mcp = pkgs.stdenv.mkDerivation {
+            pname = "forge-parquet-mcp";
+            version = "0.1.0-dev";
+            inherit src;
+            nativeBuildInputs = [
+              pkgs.cargo
+              pkgs.rustc
+              pkgs.pkg-config
+            ];
+            dontConfigure = true;
+            dontUseCmakeConfigure = true;
+            dontUpdateAutotoolsGnuConfigScripts = true;
+
+            buildPhase = ''
+              cp -r ${vendorDir} vendor
+              chmod -R +w vendor
+              cargo build --release --frozen -p forge-parquet-mcp --bin forge-parquet-mcp
+            '';
+            installPhase = ''
+              mkdir -p $out/bin
+              cp target/release/forge-parquet-mcp $out/bin/
+            '';
+            doCheck = false;
+            meta = {
+              description = "MCP server for git inode scanning and parquet file operations";
+              license = lib.licenses.mit;
+              mainProgram = "forge-parquet-mcp";
+              platforms = lib.platforms.unix;
+            };
+          };
         }
       );
 
@@ -220,6 +250,10 @@
         forge-nora-mcp = {
           type = "app";
           program = "${self.packages.${system}.forge-nora-mcp}/bin/forge-nora-mcp";
+        };
+        forge-parquet-mcp = {
+          type = "app";
+          program = "${self.packages.${system}.forge-parquet-mcp}/bin/forge-parquet-mcp";
         };
         pipelight-schema-generator = {
           type = "app";
@@ -255,6 +289,7 @@
                 inputs.deep-scanner.packages.${system}.default
                 self.packages.${system}.forge-nora-mcp
                 self.packages.${system}.pipelight-schema-generator
+                self.packages.${system}.forge-parquet-mcp
               ]
               ++ lib.optionals pkgs.stdenv.isLinux [
                 pkgs.libxkbcommon
