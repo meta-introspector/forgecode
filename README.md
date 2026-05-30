@@ -1284,3 +1284,32 @@ Your support drives Forge's continued evolution! By starring our GitHub reposito
 - Motivate our development team 💪
 - Enable us to prioritize new features 🛠️
 - Strengthen our open-source community 🌱
+
+---
+
+## Development
+
+### Running Clippy
+
+Forge uses `clippy::string_slice` at the `deny` level to prevent UTF-8 char-boundary panics from byte-level `&str[..n]` indexing. Run clippy from the Nix dev shell:
+
+```bash
+nix develop
+cargo clippy --workspace -- -D clippy::string_slice
+```
+
+To fix all `string_slice` violations automatically, run:
+
+```bash
+# Note: clippy --fix can't auto-fix string_slice (it requires semantic understanding),
+# but it will report every location. Manually replace &s[..n] with .get(..n).unwrap_or(s).
+cargo clippy --workspace --fix -- -D clippy::string_slice
+```
+
+Run all clippy lints (not just `string_slice`):
+
+```bash
+cargo clippy --workspace
+```
+
+The clippy lint configuration lives in `Cargo.toml` under `[workspace.lints.clippy]`. All 29 crate `Cargo.toml` files reference it via `lints.workspace = true`.
