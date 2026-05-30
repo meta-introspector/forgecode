@@ -11,6 +11,9 @@
       url = "github:numtide/system-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+    };
     cargo-vendormod = {
       url = "git+file:///mnt/data1/git/solana.solfunmeme.com/cargo-vendormod?ref=organize-submodules";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -23,9 +26,14 @@
       url = "git+file:///mnt/data1/git/solana.solfunmeme.com/moltis.git?ref=feat/nix-build-fix&dir=pipelight-schema-generator";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    tmux-mcp = {
+      url = "git+file:///home/mdupont/git/github.com/bnomei/tmux-mcp?ref=forge-integration";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, pipelight, cargo-vendormod, deep-scanner, pipelight-schema-generator, system-manager, ... }:
+  outputs = inputs@{ self, nixpkgs, pipelight, cargo-vendormod, deep-scanner, pipelight-schema-generator, system-manager, flake-utils, tmux-mcp, ... }:
     let
       systems = [
         "x86_64-linux"
@@ -133,6 +141,7 @@
           cargo-vendormod = inputs.cargo-vendormod.packages.${system}.default;
           deep-scanner = inputs.deep-scanner.packages.${system}.default;
           pipelight-schema-generator = inputs.pipelight-schema-generator.packages.${system}.default;
+          tmux-mcp-rs = inputs.tmux-mcp.packages.${system}.default;
           forge-pipelight-mcp = pkgs.stdenv.mkDerivation {
             pname = "forge-pipelight-mcp";
             version = "0.1.0-dev";
@@ -255,6 +264,10 @@
           type = "app";
           program = "${self.packages.${system}.forge-parquet-mcp}/bin/forge-parquet-mcp";
         };
+        tmux-mcp-rs = {
+          type = "app";
+          program = "${self.packages.${system}.tmux-mcp-rs}/bin/tmux-mcp-rs";
+        };
         pipelight-schema-generator = {
           type = "app";
           program = "${self.packages.${system}.pipelight-schema-generator}/bin/pipelight-schema-generator";
@@ -290,6 +303,7 @@
                 self.packages.${system}.forge-nora-mcp
                 self.packages.${system}.pipelight-schema-generator
                 self.packages.${system}.forge-parquet-mcp
+                inputs.tmux-mcp.packages.${system}.default
               ]
               ++ lib.optionals pkgs.stdenv.isLinux [
                 pkgs.libxkbcommon

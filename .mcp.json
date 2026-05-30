@@ -11,6 +11,9 @@
     },
     "parquet": {
       "command": "forge-parquet-mcp"
+    },
+    "tmux": {
+      "command": "tmux-mcp-rs"
     }
   }
 }
