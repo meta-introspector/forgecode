@@ -3,6 +3,7 @@ name = "forge-parquet-mcp"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+lints.workspace = true
 description = "MCP server for git inode scanning and parquet file operations"
 
 [[bin]]

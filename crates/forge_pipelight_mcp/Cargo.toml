@@ -3,6 +3,7 @@ name = "forge-pipelight-mcp"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+lints.workspace = true
 description = "MCP server wrapping pipelight CLI for build management"
 
 [[bin]]

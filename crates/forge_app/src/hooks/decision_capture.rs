@@ -38,7 +38,7 @@ impl DecisionCaptureHandler {
 
         // Pattern 1: "I need to either X or Y" — explicit alternative
         if let Some(start) = content.find("I need to either") {
-            let snippet = &content[start..];
+            let snippet = content.get(start..).unwrap_or("");
             // Take up to 120 chars after the marker
             let end = snippet.char_indices()
                 .take(120)
@@ -46,7 +46,7 @@ impl DecisionCaptureHandler {
                 .last()
                 .unwrap_or(snippet.len())
                 .min(snippet.len());
-            let context = &snippet[..end];
+            let context = snippet.get(..end).unwrap_or(snippet);
             points.push(DecisionPoint {
                 question: format!(
                     "It looks like you need to decide between options. \
@@ -59,15 +59,16 @@ impl DecisionCaptureHandler {
 
         // Pattern 2: "either ... or ..." — alternative framing
         if let Some(start) = content.find("either ") {
-            if content[start..].contains(" or ") {
-                let end = content[start..]
+            let rest = content.get(start..).unwrap_or("");
+            if rest.contains(" or ") {
+                let end = rest
                     .char_indices()
                     .take(150)
                     .map(|(i, _)| i)
                     .last()
                     .unwrap_or(150)
-                    .min(content[start..].len());
-                let snippet = content[start..start + end].trim().to_string();
+                    .min(rest.len());
+                let snippet = rest.get(..end).unwrap_or(rest).trim().to_string();
                 if snippet.len() > 10 {
                     points.push(DecisionPoint {
                         question: format!(
@@ -83,14 +84,15 @@ impl DecisionCaptureHandler {
         // Pattern 3: "I'm not sure" / "I'm uncertain" / "I'm not certain"
         for marker in &["I'm not sure", "I'm uncertain", "I'm not certain", "I am not sure"] {
             if let Some(start) = content.find(marker) {
-                let end = content[start..]
+                let rest = content.get(start..).unwrap_or("");
+                let end = rest
                     .char_indices()
                     .take(100)
                     .map(|(i, _)| i)
                     .last()
                     .unwrap_or(100)
-                    .min(content[start..].len());
-                let snippet = content[start..start + end].trim().to_string();
+                    .min(rest.len());
+                let snippet = rest.get(..end).unwrap_or(rest).trim().to_string();
                 if snippet.len() > 10 {
                     points.push(DecisionPoint {
                         question: format!(
@@ -108,14 +110,15 @@ impl DecisionCaptureHandler {
         let lower = content.to_lowercase();
         if lower.contains("maybe") && (lower.contains("or maybe") || lower.contains("or perhaps")) {
             let start = lower.find("maybe").unwrap_or(0);
-            let end = content[start..]
+            let rest = content.get(start..).unwrap_or("");
+            let end = rest
                 .char_indices()
                 .take(120)
                 .map(|(i, _)| i)
                 .last()
                 .unwrap_or(120)
-                .min(content[start..].len());
-            let snippet = content[start..start + end].trim().to_string();
+                .min(rest.len());
+            let snippet = rest.get(..end).unwrap_or(rest).trim().to_string();
             if snippet.len() > 10 {
                 points.push(DecisionPoint {
                     question: format!(
@@ -131,15 +134,17 @@ impl DecisionCaptureHandler {
         // Pattern 5: "I think ... but I'm not sure" — hedged opinion
         let lower = content.to_lowercase();
         if let Some(start) = lower.find("i think") {
-            if lower[start..].contains("but") && lower[start..].contains("not sure") {
-                let end = content[start..]
+            let lower_rest = lower.get(start..).unwrap_or("");
+            if lower_rest.contains("but") && lower_rest.contains("not sure") {
+                let rest = content.get(start..).unwrap_or("");
+                let end = rest
                     .char_indices()
                     .take(120)
                     .map(|(i, _)| i)
                     .last()
                     .unwrap_or(120)
-                    .min(content[start..].len());
-                let snippet = content[start..start + end].trim().to_string();
+                    .min(rest.len());
+                let snippet = rest.get(..end).unwrap_or(rest).trim().to_string();
                 if snippet.len() > 10 {
                     points.push(DecisionPoint {
                         question: format!(
@@ -157,14 +162,15 @@ impl DecisionCaptureHandler {
         let lower = content.to_lowercase();
         if lower.contains("one option") && lower.contains("another option") {
             let start = lower.find("one option").unwrap_or(0);
-            let end = content[start..]
+            let rest = content.get(start..).unwrap_or("");
+            let end = rest
                 .char_indices()
                 .take(150)
                 .map(|(i, _)| i)
                 .last()
                 .unwrap_or(150)
-                .min(content[start..].len());
-            let snippet = content[start..start + end].trim().to_string();
+                .min(rest.len());
+            let snippet = rest.get(..end).unwrap_or(rest).trim().to_string();
             if snippet.len() > 10 {
                 points.push(DecisionPoint {
                     question: format!(

@@ -3,6 +3,7 @@ name = "forge-tmux-agent-orchestrator-mcp"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+lints.workspace = true
 description = "MCP server that orchestrates other agents in tmux sessions — spawn, monitor, communicate with agents"
 
 [[bin]]

@@ -32,8 +32,15 @@ use crate::{
 
 /// Truncate text to a maximum length, appending "…" if truncated.
 fn truncate_text(text: &str, max_len: usize) -> String {
+    // Use char_indices to find the last safe char boundary at or before max_len bytes
     if text.len() > max_len {
-        format!("{}…", &text[..max_len])
+        let end = text
+            .char_indices()
+            .take_while(|(i, _)| *i < max_len)
+            .last()
+            .map(|(i, c)| i + c.len_utf8())
+            .unwrap_or(0);
+        format!("{}…", text.get(..end).unwrap_or(text))
     } else {
         text.to_string()
     }

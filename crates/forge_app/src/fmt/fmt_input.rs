@@ -109,8 +109,8 @@ impl FormatContent for ToolCatalog {
                     .map(|e| {
                         format!(
                             "- Replace \"{}…\" → \"{}…\"{}",
-                            &e.old_string[..e.old_string.len().min(60)],
-                            &e.new_string[..e.new_string.len().min(60)],
+                            e.old_string.chars().take(60).collect::<String>(),
+                            e.new_string.chars().take(60).collect::<String>(),
                             if e.replace_all { " (all occurrences)" } else { "" }
                         )
                     })

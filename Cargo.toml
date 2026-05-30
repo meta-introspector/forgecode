@@ -8,6 +8,9 @@ version = "0.1.0"
 rust-version = "1.94"
 edition = "2024"
 
+[workspace.lints.clippy]
+string_slice = "deny"
+
 [profile.release]
 lto = true
 codegen-units = 1
