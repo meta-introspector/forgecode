@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     pipelight = {
-      url = "path:/mnt/data1/nix-controller/he-lattice/pipelight";
+      url = "git+file:///home/mdupont/git/github.com/crocuda/pipelight?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     system-manager = {
@@ -25,7 +25,7 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, pipelight, pipelight-schema-generator, ... }:
+  outputs = inputs@{ self, nixpkgs, pipelight, cargo-vendormod, deep-scanner, pipelight-schema-generator, system-manager, ... }:
     let
       systems = [
         "x86_64-linux"

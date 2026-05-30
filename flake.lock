@@ -137,11 +137,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1780056716,
-        "narHash": "sha256-2129xVaUO7mLptEou605FAxhTII0zf+3XIOaChRsp30=",
+        "lastModified": 1780143453,
+        "narHash": "sha256-UUglCXQaZEZwvRsXvf9wFMiEWmMmE0IyvW40FslkPeM=",
         "ref": "main",
-        "rev": "c8d8ac61db71974340fd70d7b45ec167600a7d14",
-        "revCount": 3,
+        "rev": "d2f575ad53d376c1cf633df1e31b19a7156c73bc",
+        "revCount": 5,
         "type": "git",
         "url": "file:///mnt/data1/git/solana.solfunmeme.com/deep_scanner"
       },
@@ -722,14 +722,18 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1779916540,
-        "narHash": "sha256-dCQZ5EOHTNVcRj2Q3ANDM0BKb1bmnYgIaIY54oAWMaM=",
-        "path": "/mnt/data1/nix-controller/he-lattice/pipelight",
-        "type": "path"
+        "lastModified": 1769157474,
+        "narHash": "sha256-CZRypF3gr/u6kq/DFFuP6DmXP5PKnlzBTGVXB98kfY8=",
+        "ref": "master",
+        "rev": "478d67baa8d1db9d4620528d2e05d6d88a51c004",
+        "revCount": 767,
+        "type": "git",
+        "url": "file:///home/mdupont/git/github.com/crocuda/pipelight"
       },
       "original": {
-        "path": "/mnt/data1/nix-controller/he-lattice/pipelight",
-        "type": "path"
+        "ref": "master",
+        "type": "git",
+        "url": "file:///home/mdupont/git/github.com/crocuda/pipelight"
       }
     },
     "pipelight-schema-generator": {
