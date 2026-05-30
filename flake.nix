@@ -232,6 +232,36 @@
               platforms = lib.platforms.unix;
             };
           };
+          forge-tmux-agent-orchestrator-mcp = pkgs.stdenv.mkDerivation {
+            pname = "forge-tmux-agent-orchestrator-mcp";
+            version = "0.1.0-dev";
+            inherit src;
+            nativeBuildInputs = [
+              pkgs.cargo
+              pkgs.rustc
+              pkgs.pkg-config
+            ];
+            dontConfigure = true;
+            dontUseCmakeConfigure = true;
+            dontUpdateAutotoolsGnuConfigScripts = true;
+
+            buildPhase = ''
+              cp -r ${vendorDir} vendor
+              chmod -R +w vendor
+              cargo build --release --frozen -p forge-tmux-agent-orchestrator-mcp --bin forge-tmux-agent-orchestrator-mcp
+            '';
+            installPhase = ''
+              mkdir -p $out/bin
+              cp target/release/forge-tmux-agent-orchestrator-mcp $out/bin/
+            '';
+            doCheck = false;
+            meta = {
+              description = "MCP server that orchestrates other agents in tmux sessions — spawn, monitor, communicate with agents";
+              license = lib.licenses.mit;
+              mainProgram = "forge-tmux-agent-orchestrator-mcp";
+              platforms = lib.platforms.unix;
+            };
+          };
         }
       );
 
@@ -263,6 +293,10 @@
         forge-parquet-mcp = {
           type = "app";
           program = "${self.packages.${system}.forge-parquet-mcp}/bin/forge-parquet-mcp";
+        };
+        forge-tmux-agent-orchestrator-mcp = {
+          type = "app";
+          program = "${self.packages.${system}.forge-tmux-agent-orchestrator-mcp}/bin/forge-tmux-agent-orchestrator-mcp";
         };
         tmux-mcp-rs = {
           type = "app";
@@ -303,6 +337,7 @@
                 self.packages.${system}.forge-nora-mcp
                 self.packages.${system}.pipelight-schema-generator
                 self.packages.${system}.forge-parquet-mcp
+                self.packages.${system}.forge-tmux-agent-orchestrator-mcp
                 inputs.tmux-mcp.packages.${system}.default
               ]
               ++ lib.optionals pkgs.stdenv.isLinux [

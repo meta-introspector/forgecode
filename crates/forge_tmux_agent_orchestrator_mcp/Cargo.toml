@@ -1,0 +1,22 @@
+[package]
+name = "forge-tmux-agent-orchestrator-mcp"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "MCP server that orchestrates other agents in tmux sessions — spawn, monitor, communicate with agents"
+
+[[bin]]
+name = "forge-tmux-agent-orchestrator-mcp"
+path = "src/main.rs"
+
+[dependencies]
+rmcp.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+futures.workspace = true
+chrono.workspace = true
+uuid.workspace = true

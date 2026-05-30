@@ -2164,6 +2164,37 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
+name = "forge-nora-mcp"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "futures",
+ "reqwest 0.12.28",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "forge-parquet-mcp"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "futures",
+ "hex",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "walkdir",
+]
+
+[[package]]
 name = "forge-pipelight-mcp"
 version = "0.1.0"
 dependencies = [
@@ -2175,6 +2206,22 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "forge-tmux-agent-orchestrator-mcp"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "futures",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]

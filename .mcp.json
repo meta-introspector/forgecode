@@ -14,6 +14,9 @@
     },
     "tmux": {
       "command": "tmux-mcp-rs"
+    },
+    "tmux-agent-orchestrator": {
+      "command": "forge-tmux-agent-orchestrator-mcp"
     }
   }
 }

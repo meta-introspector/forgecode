@@ -172,3 +172,4 @@ forge_eventsource = { path = "crates/forge_eventsource" }
 forge_eventsource_stream = { path = "crates/forge_eventsource_stream" }
 forge_nora_mcp = { path = "crates/forge_nora_mcp" }
 forge_parquet_mcp = { path = "crates/forge_parquet_mcp" }
+forge_tmux_agent_orchestrator_mcp = { path = "crates/forge_tmux_agent_orchestrator_mcp" }
