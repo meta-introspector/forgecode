@@ -533,9 +533,12 @@ async fn main() -> anyhow::Result<()> {
         .with_tool(list_tools_tool);
 
     // Serve over stdio
-    router
+    let running = router
         .serve((tokio::io::stdin(), tokio::io::stdout()))
         .await?;
+
+    // Keep the event loop alive until stdin closes
+    running.waiting().await?;
 
     tracing::info!("server stopped");
     Ok(())

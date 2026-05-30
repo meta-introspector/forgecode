@@ -239,9 +239,12 @@ async fn main() -> anyhow::Result<()> {
         .with_tool(pipelight_run);
 
     // Serve over stdio (the standard MCP transport for subprocess servers)
-    router
+    let running = router
         .serve((tokio::io::stdin(), tokio::io::stdout()))
         .await?;
+
+    // Keep the event loop alive until stdin closes
+    running.waiting().await?;
 
     tracing::info!("server stopped");
     Ok(())
