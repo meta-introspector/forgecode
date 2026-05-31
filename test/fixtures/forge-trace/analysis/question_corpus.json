@@ -1,0 +1,62 @@
+[
+  {
+    "context": "Explore the ~/2026 directory (which should be at /home/mdupont/2026). First check if this directory exists by listing its",
+    "pattern": "what_which",
+    "conversation": "Explore the ~/2026 directory (which should be at /home/mdupont/2026). First check if this directory exists by listing its contents. Then document:\n1. The full directory tree structure (depth and organization)\n2. Count and list all .org files\n3. Read a sample .org file to understand content format\n4. Check for any index files, metadata files, or structured data\n5. Look for date-based patterns, title patterns, or tag patterns in filenames and content\n\nFocus on understanding the structure and content format of this time/repo/journal directory."
+  },
+  {
+    "context": "<feedback>what are you removing casepath?</feedback>\n<system_date>2026-05-26</system_date>",
+    "pattern": "what_which",
+    "conversation": "(untitled)"
+  },
+  {
+    "context": "<feedback>ok can we get it running</feedback>\n<system_date>2026-05-13</system_date>",
+    "pattern": "can_could",
+    "conversation": "Perf and QA Unified Test Tool Review"
+  },
+  {
+    "context": "1. Assistant\n\n````\nHello! How can I help you today? I'm rea",
+    "pattern": "can_could",
+    "conversation": "Basic User Greeting"
+  },
+  {
+    "context": "### 1. Assistant\n\n````\nHello! How can I help you today? I'm rea",
+    "pattern": "how_to",
+    "conversation": "Basic User Greeting"
+  },
+  {
+    "context": "Assistant\n\n````\n\n\nThe problem is that FuzzTest uses Fetc",
+    "pattern": "is_it",
+    "conversation": "Basic User Greeting"
+  },
+  {
+    "context": "ootstrap`. I need to know:\n1. What is the order of executables run (temacs, bootstrap-emacs, etc.)?\n2. How is temacs",
+    "pattern": "what_which",
+    "conversation": "Investigate the emacs-ng build chain by reading the Makefile.in and src/Makefile.in to understand what programs are invoked during `make bootstrap`. I need to know:\n1. What is the order of executables run (temacs, bootstrap-emacs, etc.)?\n2. How is temacs built, then how is it invoked to produce the pdump file?\n3. How is bootstrap-emacs invoked and what does it do (native compilation)?\n4. What specific make targets/recipes invoke each binary?\n\nLook at GNUmakefile, Makefile.in, and src/Makefile.in for this. Output a clear map of the build chain with command lines and arguments."
+  },
+  {
+    "context": "How is temacs built, then how is it invoked to produc",
+    "pattern": "is_it",
+    "conversation": "Investigate the emacs-ng build chain by reading the Makefile.in and src/Makefile.in to understand what programs are invoked during `make bootstrap`. I need to know:\n1. What is the order of executables run (temacs, bootstrap-emacs, etc.)?\n2. How is temacs built, then how is it invoked to produce the pdump file?\n3. How is bootstrap-emacs invoked and what does it do (native compilation)?\n4. What specific make targets/recipes invoke each binary?\n\nLook at GNUmakefile, Makefile.in, and src/Makefile.in for this. Output a clear map of the build chain with command lines and arguments."
+  },
+  {
+    "context": "1. Assistant\n\n````\nHello! How can I help you today? I'm rea",
+    "pattern": "can_could",
+    "conversation": "General User Greeting"
+  },
+  {
+    "context": "### 1. Assistant\n\n````\nHello! How can I help you today? I'm rea",
+    "pattern": "how_to",
+    "conversation": "General User Greeting"
+  },
+  {
+    "context": "<feedback>what is the problem?</feedback>\n<system_date>2026-05-18</system_date>",
+    "pattern": "what_which",
+    "conversation": "General User Greeting"
+  },
+  {
+    "context": "<feedback>now can i reproduce the problem? make a shell script for me to run</feedback>\n<system_dat",
+    "pattern": "can_could",
+    "conversation": "General User Greeting"
+  }
+]

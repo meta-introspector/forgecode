@@ -1,0 +1,523 @@
+{
+  "stats": {
+    "conversations_scanned": 109,
+    "with_uncertainty": 6,
+    "with_questions": 21,
+    "with_decisions": 0,
+    "with_feedback_uncertainty": 0,
+    "total_uncertainty_hits": 18,
+    "total_question_hits": 42,
+    "total_decision_hits": 0,
+    "uncertainty_by_pattern": {
+      "option_alternative": 4,
+      "not_sure": 3,
+      "evasion": 3,
+      "depends": 2,
+      "i_am_uncertain": 2,
+      "tentative": 2,
+      "seems_like": 1,
+      "hedged_think_but": 1
+    },
+    "questions_by_pattern": {
+      "what_which": 13,
+      "can_could": 10,
+      "is_it": 9,
+      "let_me_know": 4,
+      "how_to": 4,
+      "question_mark_end": 2
+    },
+    "decisions_by_pattern": {},
+    "hits_by_role": {
+      "question::Assistant": 30,
+      "uncertainty::Assistant": 18,
+      "question::User": 12
+    },
+    "avg_uncertainty_per_conv": 0.17,
+    "avg_questions_per_conv": 0.39
+  },
+  "uncertainty_examples": [
+    {
+      "conversation_id": "375129ec-3845-424c-bae5-b795f9c03c02",
+      "title": "(untitled)",
+      "pattern": "seems_like",
+      "match": "seems like",
+      "context": "ent. Looking at the remaining items, it seems like natural next steps. Would you like me to tackle any of these next?\n\nFrom what I've seen in the code",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "68565cdb-713c-4390-b9ab-76b8400e199e",
+      "title": "(untitled)",
+      "pattern": "option_alternative",
+      "match": "Option",
+      "context": "e handoff saying otherwise):**\n- `root: Option<String>` field already exists in `PasteIndex` (model.rs:41)\n- `[[bin]]` for `multi-reindex` already",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "68565cdb-713c-4390-b9ab-76b8400e199e",
+      "title": "(untitled)",
+      "pattern": "option_alternative",
+      "match": "Option",
+      "context": "type error in `multi_reindex.rs` where `Option<String>` wrapping is used for a `String` field:",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "68565cdb-713c-4390-b9ab-76b8400e199e",
+      "title": "(untitled)",
+      "pattern": "option_alternative",
+      "match": "Option",
+      "context": "(contrary to handoff claims)\n- **`root: Option<String>`** field already existed in `PasteIndex`",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "81aec2a5-ad31-4b28-9f64-9602cf4a753b",
+      "title": "Workbook",
+      "pattern": "depends",
+      "match": "depends on",
+      "context": "he Makefile, which the bootstrap target depends on.\n\nThis contradicts the previous Makefile content I saw where there was a build target defined.\n\nI s",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "81aec2a5-ad31-4b28-9f64-9602cf4a753b",
+      "title": "Workbook",
+      "pattern": "depends",
+      "match": "depends on",
+      "context": "correctly.\n\nThe new `bootstrap` target depends on the `build` target, creates the vendor directory, and runs cargo-vendormod vendoring on itself usin",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "875daf30-a2d8-46ab-97b6-3b450bc8ea34",
+      "title": "(untitled)",
+      "pattern": "option_alternative",
+      "match": "option",
+      "context": "also need to fix the `content.find(\"one option\")` in pattern 6 \u2014 it's still case-sensitive:",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "875daf30-a2d8-46ab-97b6-3b450bc8ea34",
+      "title": "(untitled)",
+      "pattern": "not_sure",
+      "match": "not sure",
+      "context": "The content \"I think... but I'm not sure\" matches both Pattern3 (\"I'm not sure\") and Pattern5 (\"I think... but... not sure\"). Pattern3 is pu",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "875daf30-a2d8-46ab-97b6-3b450bc8ea34",
+      "title": "(untitled)",
+      "pattern": "not_sure",
+      "match": "not sure",
+      "context": "m not sure\" matches both Pattern3 (\"I'm not sure\") and Pattern5 (\"I think... but... not sure\"). Pattern3 is pushed first and selected. Let me update",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "875daf30-a2d8-46ab-97b6-3b450bc8ea34",
+      "title": "(untitled)",
+      "pattern": "not_sure",
+      "match": "not sure",
+      "context": "sure\") and Pattern5 (\"I think... but... not sure\"). Pattern3 is pushed first and selected. Let me update the test to match actual behavior:",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "875daf30-a2d8-46ab-97b6-3b450bc8ea34",
+      "title": "(untitled)",
+      "pattern": "i_am_uncertain",
+      "match": "I'm not sure",
+      "context": "The content \"I think... but I'm not sure\" matches both Pattern3 (\"I'm not sure\") and Pattern5 (\"I think... but... not sure\"). Pattern3 is pu",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "875daf30-a2d8-46ab-97b6-3b450bc8ea34",
+      "title": "(untitled)",
+      "pattern": "i_am_uncertain",
+      "match": "I'm not sure",
+      "context": "t I'm not sure\" matches both Pattern3 (\"I'm not sure\") and Pattern5 (\"I think... but... not sure\"). Pattern3 is pushed first and selected. Let me update",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "875daf30-a2d8-46ab-97b6-3b450bc8ea34",
+      "title": "(untitled)",
+      "pattern": "hedged_think_but",
+      "match": "I think... but I'm not sure\" matches both Pattern3 (\"I'm not sure\") and Pattern5 (\"I think... but",
+      "context": "The content \"I think... but I'm not sure\" matches both Pattern3 (\"I'm not sure\") and Pattern5 (\"I think... but... not sure\"). Pattern3 is pushed first and selected. Let me update the test to match actual behavi",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "875daf30-a2d8-46ab-97b6-3b450bc8ea34",
+      "title": "(untitled)",
+      "pattern": "evasion",
+      "match": "not sure",
+      "context": "The content \"I think... but I'm not sure\" matches both Pattern3 (\"I'm not sure\") and Pattern5 (\"I think... but... not sure\"). Pattern3 is pu",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "875daf30-a2d8-46ab-97b6-3b450bc8ea34",
+      "title": "(untitled)",
+      "pattern": "evasion",
+      "match": "not sure",
+      "context": "m not sure\" matches both Pattern3 (\"I'm not sure\") and Pattern5 (\"I think... but... not sure\"). Pattern3 is pushed first and selected. Let me update",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "875daf30-a2d8-46ab-97b6-3b450bc8ea34",
+      "title": "(untitled)",
+      "pattern": "evasion",
+      "match": "not sure",
+      "context": "sure\") and Pattern5 (\"I think... but... not sure\"). Pattern3 is pushed first and selected. Let me update the test to match actual behavior:",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "95aac539-f2ce-4c4a-8577-993f0e052b2b",
+      "title": "Scan ALL .rs files in decl_lattice/crates/*/src/lib.rs for syscall-related patterns. Search for: std::process::Command, std::process::Stdio, std::fs operations (read_dir, create_dir, remove_dir, rename, copy, write, read_to_string, metadata, symlink), std::net operations (TcpStream, TcpListener, UdpSocket), std::os operations, std::io operations, nix:: or libc:: direct syscall wrappers, ptrace, mmap, sched, fork, exec, signal, ioctl, syscall. For each file found, output the decl name and the matching line(s). Group results_by_category: process_spawning,_filesystem_IO,_network_IO,_direct_syscalls,_signal_handling.",
+      "pattern": "tentative",
+      "match": "might be",
+      "context": "den the searches to catch patterns that might be used after imports.",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "bb669782-396e-4b4d-91ae-db5e70837dc3",
+      "title": "Comparison of Azure LLM Models",
+      "pattern": "tentative",
+      "match": "might be",
+      "context": "to locate where constants or invariants might be declared or use",
+      "role": "Assistant"
+    }
+  ],
+  "question_examples": [
+    {
+      "conversation_id": "19704775-f875-4817-b961-f2908781744e",
+      "title": "Read and Analyze Notes File",
+      "pattern": "what_which",
+      "match": "which is",
+      "context": "`Result<BoxStream<A, E>, E>`, which is a `futures::stream::BoxStream`. I can use `.next()` on it to get the first mess",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "19704775-f875-4817-b961-f2908781744e",
+      "title": "Read and Analyze Notes File",
+      "pattern": "what_which",
+      "match": "which is",
+      "context": "of the struct literal I had, which is cleaner. Also the `spinner.stop(None)` call was updated (line 3586) and the `st",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "2360b070-1a08-400d-92f3-b4237b9a25f8",
+      "title": "agent_id",
+      "pattern": "can_could",
+      "match": "would you",
+      "context": "**Agent type** \u2014 Which agent would you like to use?\n   - `forge` \u2014 Hands-on implementation agent (builds features, fix",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "2efb622c-1027-45fc-a43b-09e5671dcb21",
+      "title": "(untitled)",
+      "pattern": "is_it",
+      "match": "is that",
+      "context": "The issue is that `system-manager` needs root for `/var/lib/system-manager/`. Let me check how th",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "31dd60fe-7140-4fc9-a6e8-8748a9911be3",
+      "title": "Explore the ~/2026 directory (which should be at /home/mdupont/2026). First check if this directory exists by listing its contents. Then document:\n1. The full directory tree structure (depth and organization)\n2. Count and list all .org files\n3. Read a sample .org file to understand content format\n4. Check for any index files, metadata files, or structured data\n5. Look for date-based patterns, title patterns, or tag patterns in filenames and content\n\nFocus on understanding the structure and content format of this time/repo/journal directory.",
+      "pattern": "what_which",
+      "match": "which should",
+      "context": "Explore the ~/2026 directory (which should be at /home/mdupont/2026). First check if this directory exists by listing its",
+      "role": "User"
+    },
+    {
+      "conversation_id": "35ecf936-707b-4462-8f5f-96daab73ffc9",
+      "title": "(untitled)",
+      "pattern": "let_me_know",
+      "match": "let me know",
+      "context": "exploring the codebase. Just let me know what you'd like to work on.",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "375129ec-3845-424c-bae5-b795f9c03c02",
+      "title": "(untitled)",
+      "pattern": "what_which",
+      "match": "what are",
+      "context": "<feedback>what are you removing casepath?</feedback>\n<system_date>2026-05-26</system_date>",
+      "role": "User"
+    },
+    {
+      "conversation_id": "375129ec-3845-424c-bae5-b795f9c03c02",
+      "title": "(untitled)",
+      "pattern": "can_could",
+      "match": "Would you",
+      "context": "eems like natural next steps. Would you like me to tackle any of these next?\n\nFrom what I've seen in the code:\n\n1. **pu",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "40f91c65-4c40-4863-b18b-0c95b9f5f57f",
+      "title": "Perf and QA Unified Test Tool Review",
+      "pattern": "what_which",
+      "match": "which is",
+      "context": "nce the actual library paths (which is correct \u2014 they test the real upstream test suites, not the unified test runner)",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "40f91c65-4c40-4863-b18b-0c95b9f5f57f",
+      "title": "Perf and QA Unified Test Tool Review",
+      "pattern": "what_which",
+      "match": "which is",
+      "context": "sed `Expected` struct fields, which is fine). Let me also do a quick Python syntax check:",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "40f91c65-4c40-4863-b18b-0c95b9f5f57f",
+      "title": "Perf and QA Unified Test Tool Review",
+      "pattern": "can_could",
+      "match": "can we",
+      "context": "<feedback>ok can we get it running</feedback>\n<system_date>2026-05-13</system_date>",
+      "role": "User"
+    },
+    {
+      "conversation_id": "6754edcf-d760-44a6-ad08-9632b0affd76",
+      "title": "(untitled)",
+      "pattern": "what_which",
+      "match": "which are",
+      "context": "correctly merged `everparse` (which are separate forks). Let me tighten the dedup heuristic to only merge repos where o",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "7bcf0d2f-b2a2-420f-9031-dc2e4ca4646b",
+      "title": "Basic User Greeting",
+      "pattern": "can_could",
+      "match": "can I",
+      "context": "1. Assistant\n\n````\nHello! How can I help you today? I'm rea",
+      "role": "User"
+    },
+    {
+      "conversation_id": "7bcf0d2f-b2a2-420f-9031-dc2e4ca4646b",
+      "title": "Basic User Greeting",
+      "pattern": "how_to",
+      "match": "How can",
+      "context": "### 1. Assistant\n\n````\nHello! How can I help you today? I'm rea",
+      "role": "User"
+    },
+    {
+      "conversation_id": "7bcf0d2f-b2a2-420f-9031-dc2e4ca4646b",
+      "title": "Basic User Greeting",
+      "pattern": "is_it",
+      "match": "is that",
+      "context": "Assistant\n\n````\n\n\nThe problem is that FuzzTest uses Fetc",
+      "role": "User"
+    },
+    {
+      "conversation_id": "7bcf0d2f-b2a2-420f-9031-dc2e4ca4646b",
+      "title": "Basic User Greeting",
+      "pattern": "let_me_know",
+      "match": "Let me know",
+      "context": "the file using this checksum. Let me know if y",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "7c89c070-0a95-4ddd-8d70-b697546d74ad",
+      "title": "Explore /mnt/data1/time-2026/05-may/15/forgecode-decl-splitter/ comprehensively. List all files (especially in tools/, scripts/, and commands/ dirs). Read all README files, Cargo.toml, and key source files. Give me a full summary of: 1) what splitting/analysis tools it provides, 2) how they work, 3) how they could help split the pastebin workspace (located at /mnt/data1/kant/pastebin).",
+      "pattern": "is_it",
+      "match": "Is\n\nThis",
+      "context": "### 1. What This Repository Is\n\nThis is a full checkout of **[Forge](https://github.com/tailcallhq/forgecode)** (not",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "80d11ee5-f9eb-4a2a-8c1a-ea406465be31",
+      "title": "forge",
+      "pattern": "can_could",
+      "match": "can I",
+      "context": "h a substantial codebase. How can I assist you today? Feel free to ask me to:\n\n- Explore",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "80d11ee5-f9eb-4a2a-8c1a-ea406465be31",
+      "title": "forge",
+      "pattern": "how_to",
+      "match": "How can",
+      "context": "with a substantial codebase. How can I assist you today? Feel free to ask me to:\n\n- Explore",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "84a7a2e6-0976-410f-8016-48df6f514d35",
+      "title": "Investigate the emacs-ng build chain by reading the Makefile.in and src/Makefile.in to understand what programs are invoked during `make bootstrap`. I need to know:\n1. What is the order of executables run (temacs, bootstrap-emacs, etc.)?\n2. How is temacs built, then how is it invoked to produce the pdump file?\n3. How is bootstrap-emacs invoked and what does it do (native compilation)?\n4. What specific make targets/recipes invoke each binary?\n\nLook at GNUmakefile, Makefile.in, and src/Makefile.in for this. Output a clear map of the build chain with command lines and arguments.",
+      "pattern": "what_which",
+      "match": "What is",
+      "context": "ootstrap`. I need to know:\n1. What is the order of executables run (temacs, bootstrap-emacs, etc.)?\n2. How is temacs",
+      "role": "User"
+    },
+    {
+      "conversation_id": "84a7a2e6-0976-410f-8016-48df6f514d35",
+      "title": "Investigate the emacs-ng build chain by reading the Makefile.in and src/Makefile.in to understand what programs are invoked during `make bootstrap`. I need to know:\n1. What is the order of executables run (temacs, bootstrap-emacs, etc.)?\n2. How is temacs built, then how is it invoked to produce the pdump file?\n3. How is bootstrap-emacs invoked and what does it do (native compilation)?\n4. What specific make targets/recipes invoke each binary?\n\nLook at GNUmakefile, Makefile.in, and src/Makefile.in for this. Output a clear map of the build chain with command lines and arguments.",
+      "pattern": "is_it",
+      "match": "is it",
+      "context": "How is temacs built, then how is it invoked to produc",
+      "role": "User"
+    },
+    {
+      "conversation_id": "84a7a2e6-0976-410f-8016-48df6f514d35",
+      "title": "Investigate the emacs-ng build chain by reading the Makefile.in and src/Makefile.in to understand what programs are invoked during `make bootstrap`. I need to know:\n1. What is the order of executables run (temacs, bootstrap-emacs, etc.)?\n2. How is temacs built, then how is it invoked to produce the pdump file?\n3. How is bootstrap-emacs invoked and what does it do (native compilation)?\n4. What specific make targets/recipes invoke each binary?\n\nLook at GNUmakefile, Makefile.in, and src/Makefile.in for this. Output a clear map of the build chain with command lines and arguments.",
+      "pattern": "what_which",
+      "match": "which is",
+      "context": "guration (`DUMPING=pdumper`), which is the default for emacs-ng.\n\n---\n\n## Phase 0: Top-Level Orchestration\n\n```\nGNUmak",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "9ee44bb9-ccc8-4b46-aa3a-0b5746a3d878",
+      "title": "(untitled)",
+      "pattern": "is_it",
+      "match": "is that",
+      "context": "The issue is that the flake-compat expression doesn't return a function directly. Let me check th",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "b6bb6f20-5db0-4e09-abfb-c28bd2db191b",
+      "title": ":",
+      "pattern": "what_which",
+      "match": "What would",
+      "context": "I'm ready to help. What would you like to work on?",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "b6bb6f20-5db0-4e09-abfb-c28bd2db191b",
+      "title": ":",
+      "pattern": "can_could",
+      "match": "would you",
+      "context": "I'm ready to help. What would you like to work on?",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "b6bb6f20-5db0-4e09-abfb-c28bd2db191b",
+      "title": ":",
+      "pattern": "question_mark_end",
+      "match": "?",
+      "context": "What would you like to work on?",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "bb669782-396e-4b4d-91ae-db5e70837dc3",
+      "title": "Comparison of Azure LLM Models",
+      "pattern": "can_could",
+      "match": "Would you",
+      "context": "n the code knowledge graph. \n\nWould you like me to search more generally for \"Azure LLM\" or \"Azure large language model",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "bb669782-396e-4b4d-91ae-db5e70837dc3",
+      "title": "Comparison of Azure LLM Models",
+      "pattern": "let_me_know",
+      "match": "let me know",
+      "context": "with something specific, just let me know. I'm here to assist you.",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "bb669782-396e-4b4d-91ae-db5e70837dc3",
+      "title": "Comparison of Azure LLM Models",
+      "pattern": "what_which",
+      "match": "which is",
+      "context": "`mut` warning was on line 601 which is in `analyze_binary_file`. The one in `analyze_text_file` actually uses the mut.",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "c83ed46b-9646-44d0-b0f3-ae9acf2ec418",
+      "title": "General User Greeting",
+      "pattern": "can_could",
+      "match": "can I",
+      "context": "1. Assistant\n\n````\nHello! How can I help you today? I'm rea",
+      "role": "User"
+    },
+    {
+      "conversation_id": "c83ed46b-9646-44d0-b0f3-ae9acf2ec418",
+      "title": "General User Greeting",
+      "pattern": "how_to",
+      "match": "How can",
+      "context": "### 1. Assistant\n\n````\nHello! How can I help you today? I'm rea",
+      "role": "User"
+    },
+    {
+      "conversation_id": "c83ed46b-9646-44d0-b0f3-ae9acf2ec418",
+      "title": "General User Greeting",
+      "pattern": "can_could",
+      "match": "can I",
+      "context": "Thank you! How can I assist you today?",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "c83ed46b-9646-44d0-b0f3-ae9acf2ec418",
+      "title": "General User Greeting",
+      "pattern": "how_to",
+      "match": "How can",
+      "context": "Thank you! How can I assist you today?",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "c83ed46b-9646-44d0-b0f3-ae9acf2ec418",
+      "title": "General User Greeting",
+      "pattern": "question_mark_end",
+      "match": "?",
+      "context": "ou! How can I assist you today?",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "c83ed46b-9646-44d0-b0f3-ae9acf2ec418",
+      "title": "General User Greeting",
+      "pattern": "is_it",
+      "match": "is that",
+      "context": "the type mismatch. The issue is that `window_values` is a `Vec<String>` but the code expects `Vec<u8>`. Let me fix t",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "c83ed46b-9646-44d0-b0f3-ae9acf2ec418",
+      "title": "General User Greeting",
+      "pattern": "what_which",
+      "match": "what is",
+      "context": "<feedback>what is the problem?</feedback>\n<system_date>2026-05-18</system_date>",
+      "role": "User"
+    },
+    {
+      "conversation_id": "c83ed46b-9646-44d0-b0f3-ae9acf2ec418",
+      "title": "General User Greeting",
+      "pattern": "can_could",
+      "match": "can i",
+      "context": "<feedback>now can i reproduce the problem? make a shell script for me to run</feedback>\n<system_dat",
+      "role": "User"
+    },
+    {
+      "conversation_id": "c8f7e7ad-3a31-45dc-a792-94e7cff26981",
+      "title": "(untitled)",
+      "pattern": "let_me_know",
+      "match": "Let me know",
+      "context": "a patch tool: 2026-05-25\n```\n\nLet me know what file",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "dbc68fdf-7e9d-4326-9a2d-92bfc4c441c6",
+      "title": "Explore the ~/2026 directory structure to understand the time repo. Run:\n1. ls -la ~/2026 to see the top-level structure\n2. Check if readlink -f ~/2026 resolves to something\n3. Find all .org files: find ~/2026 -name '*.org' | head -50\n4. Read a sample org file to understand the format\n5. Check for any existing index, metadata, or structure\n\nSummarize:\n- Number of .org files\n- Structure/depth of the repo\n- Content format of org files\n- Any patterns like dates, titles, tags",
+      "pattern": "what_which",
+      "match": "which is",
+      "context": "ry listing and finding files, which is more appropriate here.",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "de30c1c4-7f6b-452e-b5a6-df3489442332",
+      "title": "(untitled)",
+      "pattern": "is_it",
+      "match": "is that",
+      "context": "specific revisions. The issue is that many of the bare repos we cloned may not have a `flake.nix` at their root. Let",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "e7c73b58-b95d-4142-9ea8-1196bed57afb",
+      "title": "Explore /mnt/data1/time-2026/05-may/15/forgecode-decl-splitter/ \u2014 focus on the `tools/`, `scripts/`, and `commands/` directories. Read any README, Cargo.toml, and key source files to understand: 1) what splitting/analysis tools it provides, 2) how they work, 3) how they could help split the pastebin workspace. Summary only.",
+      "pattern": "is_it",
+      "match": "Is\n\nThis",
+      "context": "e-decl-splitter`\n\n### What It Is\n\nThis is a full checkout of the **Forge** open-source AI-enhanced terminal developmen",
+      "role": "Assistant"
+    },
+    {
+      "conversation_id": "edc037c6-0841-45e9-a046-7cb68d4a20bc",
+      "title": "AFL Fuzzing with Rust IPLD",
+      "pattern": "is_it",
+      "match": "is that",
+      "context": "AR file creation. The problem is that the header contains bytes objects which can't be serialized to JSON.",
+      "role": "Assistant"
+    }
+  ],
+  "decision_examples": []
+}

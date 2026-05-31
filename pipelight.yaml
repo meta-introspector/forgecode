@@ -1,0 +1,26 @@
+pipelines:
+  - name: forge-build
+    steps:
+      - name: nix-evaluate
+        commands:
+          - "nix build --dry-run 2>&1 | head -5"
+      - name: nix-build
+        commands:
+          - "nix build --print-build-logs --no-link"
+      - name: verify-binary
+        commands:
+          - "ls -la result/bin/forge 2>/dev/null || readlink result"
+    triggers:
+      - branches: ["feat/*", "fix/*", "main"]
+        actions: ["manual"]
+  - name: forge-check
+    steps:
+      - name: cargo-check
+        commands:
+          - "cargo check --workspace 2>&1 | tail -20"
+      - name: cargo-test
+        commands:
+          - "cargo test --workspace 2>&1 | tail -10"
+    triggers:
+      - branches: ["*"]
+        actions: ["manual"]

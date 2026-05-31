@@ -1,0 +1,284 @@
+{
+  "rowid": 25,
+  "conversation_id": "08c426f9-472d-4709-9222-3526f7fb2a08",
+  "title": "Analyze pastebin build configuration and dependencies",
+  "workspace_id": -8049755754430017748,
+  "created_at": "2026-05-19 00:06:44.639804331",
+  "updated_at": "2026-05-19 00:08:14.285591656",
+  "messages": [
+    {
+      "role": "System",
+      "content_len": 10042,
+      "content_preview": "You are Forge, an expert software engineering assistant designed to help users with programming tasks, file operations, and software development processes. Your knowledge spans multiple programming languages, frameworks, design patterns, and best practices.\n\n## Core Principles:\n\n1. **Solution-Orient"
+    },
+    {
+      "role": "System",
+      "content_len": 6113,
+      "content_preview": "<system_information>\n<operating_system>linux</operating_system>\n<current_working_directory>/mnt/data1/nix/vendor/rust/cargo2nix/submodules/cargo-clean/tools/cargo-vendormod</current_working_directory>\n<default_shell>/bin/bash</default_shell>\n<home_directory>/home/mdupont</home_directory>\n<file_list>"
+    },
+    {
+      "role": "User",
+      "content_len": 105,
+      "content_preview": "<task>Analyze pastebin build configuration and dependencies</task>\n<system_date>2026-05-18</system_date>\n"
+    },
+    {
+      "role": "Assistant",
+      "content_len": 129,
+      "content_preview": "I'll analyze the pastebin build configuration and dependencies by examining the existing pastebin-related files in the codebase.\n",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 122
+        },
+        {
+          "name": "read",
+          "args_len": 130
+        },
+        {
+          "name": "read",
+          "args_len": 129
+        },
+        {
+          "name": "read",
+          "args_len": 133
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "ls",
+          "args_len": 118
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 198
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 144
+        },
+        {
+          "name": "read",
+          "args_len": 155
+        },
+        {
+          "name": "read",
+          "args_len": 144
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "fs_search",
+          "args_len": 157
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 185
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 109
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 202
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 154
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    }
+  ],
+  "msg_count": 26,
+  "role_counts": {
+    "System": 2,
+    "User": 1,
+    "Assistant": 9,
+    "unknown": 14
+  },
+  "tools_used": [
+    "shell",
+    "fs_search",
+    "ls",
+    "read"
+  ],
+  "files_touched": 9,
+  "file_operations": [
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "1da9e6783f9df7401698d92cff7f299e1c6b26e5c2f2232d46449a258fb1a3f7",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "4f52ed60ea18b6377782dc821c3f0c1f8c20885f90e459aa61d023251ad56acd",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "2ed956fabc5f584d6e6c26f786770901bf4bf40da71e52895a514c15b3aad048",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "9e6f571736356bb34861cccfd89249c65aa900b3a9fdd506832e57a6221fad38",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "5b44d4a4152cb13dc8b18ce0d2f795b353f31809c6cb19a568680b19f775adb3",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "c321fc72a4439a6087e0a423e5742e2f9c10e694595850ea3b83535d2b012829",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "38758172c87297fc3ca3fec7add3715dce5e499d48450d400dc032ab1fe9b081",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "160f7e6d0cc2cb0c20e21751d75f36e2c7d935ec11a92f66351f871b4788ff32",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "5a0a770cedcf3d5210941825b2e535ee30e7f8ae5c0548596f5bea0cb3dc65b6",
+      "tool": "read"
+    }
+  ]
+}

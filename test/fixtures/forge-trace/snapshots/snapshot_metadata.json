@@ -1,0 +1,356 @@
+{
+  "total_sessions": 444,
+  "total_snapshots": 1636,
+  "samples": [
+    {
+      "session_id": "10797a521b00f3c3",
+      "snap_file": "2026-05-20_18-42-27-897715404.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "1095155b83a46519",
+      "snap_file": "2026-05-16_16-15-47-726311326.snap",
+      "content_len": 2970,
+      "line_count": 73,
+      "preview": "# Implementation Plan for DASL Microservice Test Browser\n\n## Overview\n\nThis plan outlines the approach to build a plugin-based microservice test suite for various DASL dag-cbor parser implementations across languages.\n\nEach implementation exposes a systemd service with a nix flake and HTTP web service interface, returning test results including CAR files (CID, dag-cbor), timing, and perf data.\n\nThe goal is to create a unified test browser and control plane that can dynamically select any impleme"
+    },
+    {
+      "session_id": "1100739de398ab97",
+      "snap_file": "2026-05-16_02-44-14-410421487.snap",
+      "content_len": 522,
+      "line_count": 34,
+      "preview": "{ pkgs, fuzztest, tinycbor-src }:\n\npkgs.llvmPackages_19.stdenv.mkDerivation {\n  pname = \"tinycbor-fuzzer\";\n  version = \"0.1.0\";\n  src = ./.;\n\n  nativeBuildInputs = with pkgs; [\n    cmake\n    ninja\n    pkg-config\n    git\n    llvmPackages_19.bintools\n  ];\n\n  buildInputs = [\n    fuzztest\n  ];\n\n  TINYCBOR_SOURCE_DIR = tinycbor-src;\n\n  configurePhase = ''\n    cmake -S . -B build\n  '';\n\n  buildPhase = ''\n    cmake --build build\n  '';\n\n  installPhase = ''\n    mkdir -p $out/bin\n    cp build/tinycbor_fuz"
+    },
+    {
+      "session_id": "119596bad7a7b9e",
+      "snap_file": "2026-05-20_18-07-39-013462778.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "11a033551e13e54c",
+      "snap_file": "2026-05-24_15-05-31-444864363.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "136a37ab79d544c1",
+      "snap_file": "2026-05-24_19-46-51-985012566.snap",
+      "content_len": 7295,
+      "line_count": 209,
+      "preview": "#!/usr/bin/env python3\n\"\"\"\nConvert cargo metadata JSON to the graph JSON format used by cargo-vendormod graph binary.\nThis allows applying cargo-vendormod to itself.\n\"\"\"\n\nimport json\nimport sys\nfrom pathlib import Path\n\ndef convert(metadata_path: str, output_path: str) -> None:\n    with open(metadata_path) as f:\n        metadata = json.load(f)\n    \n    workspace_path = Path(metadata.get('workspace_root', '.'))\n    \n    # Build package index\n    packages = {p['name']: p for p in metadata['package"
+    },
+    {
+      "session_id": "13a80ba6c37c6dae",
+      "snap_file": "2026-05-13_19-19-20-955971388.snap",
+      "content_len": 3058,
+      "line_count": 128,
+      "preview": "{ pkgs ? import <nixpkgs> {} }:\n\nlet\n  # Monster number encoding DASL\n  monsterNumber = 243534541287849984;\n  \n  # Test runner with perf/strace\n  runTest = { name, testCmd, lang }:\n    pkgs.runCommand \"test-${name}\" {\n      buildInputs = [ pkgs.strace pkgs.linuxPackages.perf ];\n      preferLocalBuild = true;\n    } ''\n      mkdir -p $out\n      \n      # Run with strace\n      strace -c -o $out/strace.txt ${testCmd} 2>&1 > $out/test.log || true\n      \n      # Run with perf\n      perf stat -o $out/pe"
+    },
+    {
+      "session_id": "145be97d2fafe6cb",
+      "snap_file": "2026-05-24_12-20-53-672206264.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "14927ab3cc9b787c",
+      "snap_file": "2026-05-15_14-44-52-485387193.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "1509c29c6c9e0608",
+      "snap_file": "2026-05-25_21-28-53-318226600.snap",
+      "content_len": 7214,
+      "line_count": 204,
+      "preview": "use super::operation::PermissionOperation;\nuse super::policy::Policy;\nuse crate::PolicyConfig;\nuse crate::policies::Permission;\n\n/// High-level policy engine that provides convenient methods for checking\n/// policies\n///\n/// This wrapper around Workflow provides easy-to-use methods for services to\n/// check if operations are allowed without having to construct Operation enums\n/// manually.\npub struct PolicyEngine<'a> {\n    policies: &'a PolicyConfig,\n}\n\nimpl<'a> PolicyEngine<'a> {\n    /// Create"
+    },
+    {
+      "session_id": "1526d3ed9b4d7373",
+      "snap_file": "2026-05-13_20-08-25-155672341.snap",
+      "content_len": 2969,
+      "line_count": 110,
+      "preview": "#!/usr/bin/env bash\nset -euo pipefail\n\ncd \"$(dirname \"$0\")\"\n\necho \"\ud83e\uddea UNIFIED TEST RUNNER - Pure Nix\"\necho \"==================================\"\necho \"\"\n\n# Run all tests in Nix environment\nnix develop -c bash <<'EOF'\nset -euo pipefail\n\nSPEC=\"UNIFIED_TEST_SPEC.json\"\n\necho \"Building Rust runner...\"\ncargo build --release --manifest-path unified_test_runner/Cargo.toml 2>&1 | grep -E \"(Compiling|Finished)\" || true\necho \"\"\n\necho \"Running Rust tests...\"\n./unified_test_runner/target/release/rust_runner \"$"
+    },
+    {
+      "session_id": "15fb301f3fdc2a10",
+      "snap_file": "2026-05-27_11-35-09-729451181.snap",
+      "content_len": 1777,
+      "line_count": 55,
+      "preview": "{ pkgs, lib, rustPlatform, fetchFromGitHub, ... }:\n\nlet\n  # Pastebin source from github:meta-introspector/kant-zk-pastebin\n  pastebinSrc = fetchFromGitHub {\n    owner = \"meta-introspector\";\n    repo = \"kant-zk-pastebin\";\n    rev = \"86f2dcd0cd308f3c2f5d790f48caba68aeb82263\";\n    hash = \"sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\"; # FIXME: get real hash\n    fetchSubmodules = true; # fetches vendor/rust-ipfs\n  };\n\n  # erdfa-publish is a submodule with a local path URL, so fetch it separat"
+    },
+    {
+      "session_id": "162c1036a842c97d",
+      "snap_file": "2026-05-20_23-54-34-797351030.snap",
+      "content_len": 16341,
+      "line_count": 365,
+      "preview": "use std::collections::HashMap;\nuse std::fs;\nuse std::time::{SystemTime, UNIX_EPOCH};\n\n#[derive(Debug, Clone)]\nstruct Repository {\n    name: String,\n    path: String,\n    stars: usize,\n    forks: usize,\n    contributors: usize,\n    is_fork: bool,\n    language: String,\n    size_mb: usize,\n    last_commit_days: usize,\n    complexity_score: f64,\n    group_family: String,\n    group_order: String,\n    group_rank: usize,\n    simple_subgroups: Vec<String>,\n}\n\nimpl Repository {\n    fn new(name: String, p"
+    },
+    {
+      "session_id": "16496f5b64a7c56e",
+      "snap_file": "2026-05-26_15-37-31-765010604.snap",
+      "content_len": 211,
+      "line_count": 13,
+      "preview": "policies:\n  - permission: allow\n    rule:\n      read: \"**/*\"\n  - permission: allow\n    rule:\n      write: \"**/*\"\n  - permission: allow\n    rule:\n      command: \"*\"\n  - permission: allow\n    rule:\n      url: \"*\"\n"
+    },
+    {
+      "session_id": "165953ea45ef704c",
+      "snap_file": "2026-05-24_12-44-57-763028105.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "16c8e144f0e460a1",
+      "snap_file": "2026-05-24_14-44-58-651531972.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "16d1049cb00f4d25",
+      "snap_file": "2026-05-20_01-10-44-178145561.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "16f2b5b4fef48bf0",
+      "snap_file": "2026-05-18_23-46-49-081973131.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "17b305ef77b1c5f0",
+      "snap_file": "2026-05-15_17-57-04-154885661.snap",
+      "content_len": 11450,
+      "line_count": 274,
+      "preview": "/// DASL CBOR Testing Service - serde_ipld_dagcbor (Rust)\n///\n/// Exposes a uniform HTTP API for CBOR decode/encode/roundtrip operations.\n/// Port 8007\n///\n/// API:\n///   POST /decode     {\"hex\": \"...\"} -> {\"ok\": bool, \"error\": str|null, \"value\": repr|null}\n///   POST /roundtrip  {\"hex\": \"...\"} -> {\"ok\": bool, \"decode_error\": str|null, \"roundtrip_hex\": str|null, \"roundtrip_error\": str|null, \"panic\": bool}\n///   POST /batch      {\"inputs\": [...], \"mode\": \"roundtrip\"} -> {\"results\": [...], \"count\""
+    },
+    {
+      "session_id": "17daf152b9fe6657",
+      "snap_file": "2026-05-20_18-00-07-748615776.snap",
+      "content_len": 15897,
+      "line_count": 474,
+      "preview": "use crate::group_atlas::{FiniteSimpleGroup, GroupAtlas, GroupComposition, GroupFamily};\nuse std::collections::HashMap;\nuse serde::{Serialize, Deserialize};\n\n/// Tile representation for visualization\n#[derive(Debug, Clone, Serialize, Deserialize)]\npub struct GroupTile {\n    pub group: FiniteSimpleGroup,\n    pub position: (f64, f64),\n    pub size: (u32, u32),\n    pub color: String,\n    pub connections: Vec<String>,\n    pub level: u32,\n}\n\n/// Atlas visualization configuration\n#[derive(Debug, Clone,"
+    },
+    {
+      "session_id": "19caa8e78c72e936",
+      "snap_file": "2026-05-20_01-36-32-957690296.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "1a6da593bfaf7f2c",
+      "snap_file": "2026-05-22_10-45-05-868038800.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "1adf7a882a047212",
+      "snap_file": "2026-05-22_10-11-52-926980916.snap",
+      "content_len": 3280,
+      "line_count": 69,
+      "preview": "fn main() {\n    let output = r#\" .gitmodules                                        |  5787 ++\n 01-overview.org                                    |    78 +\n 02-fuzzing-plan.org                                |   128 +\n 03-constant-invariant-extraction.org               |   145 +\n 04-test-coverage.org                               |   124 +\n 05-infra-build.org                                 |   123 +\n 06-car-archive.org                                 |   150 +\n 07-perf-profiling.org           "
+    },
+    {
+      "session_id": "1c61f83635ef6d48",
+      "snap_file": "2026-05-24_22-12-28-306160721.snap",
+      "content_len": 7520,
+      "line_count": 322,
+      "preview": "# DASL CBOR Implementation Registry\n# Auto-generated from big_list_of_submodules.txt + known CBOR implementations\n#\n# Each entry has:\n#   name       \u2014 short display name\n#   language   \u2014 programming language\n#   version    \u2014 pinned version\n#   driver     \u2014 which driver binary to use (language/driver_file)\n#   lib_arg    \u2014 argument passed to driver's --lib flag\n#   tags       \u2014 classification tags\n#   git_ref    \u2014 optional git tag/commit\n#   repo       \u2014 optional upstream URL\n\n[[implementation]]\n"
+    },
+    {
+      "session_id": "1c9bf36ac508576",
+      "snap_file": "2026-05-27_00-21-49-015171734.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "1ccb892ea99a43b8",
+      "snap_file": "2026-05-16_03-10-39-038615578.snap",
+      "content_len": 672,
+      "line_count": 35,
+      "preview": "{ pkgs, fuzztest-pkg, fuzztest-src, libcbor-src }:\n\npkgs.llvmPackages_19.stdenv.mkDerivation {\n  pname = \"libcbor-fuzzer\";\n  version = \"0.1.0\";\n  src = ./.;\n\n  nativeBuildInputs = with pkgs; [\n    cmake\n    ninja\n    pkg-config\n    git\n    llvmPackages_19.bintools\n  ];\n\n  buildInputs = [\n    fuzztest-pkg # The built FuzzTest package\n  ];\n\n  LIBCBOR_SOURCE_DIR = libcbor-src;\n  FUZZTEST_SOURCE_DIR = fuzztest-src; # The FuzzTest source path\n\n  configurePhase = ''\n    cmake -S . -B build -DFETCHCONT"
+    },
+    {
+      "session_id": "1ced37494c4ec4fc",
+      "snap_file": "2026-05-23_19-16-26-151941495.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "1d2aa1209f8d69c0",
+      "snap_file": "2026-05-15_11-57-57-533434855.snap",
+      "content_len": 15904,
+      "line_count": 461,
+      "preview": "/// Mutation-based fuzzing for libipld\n///\n/// Works on stable Rust. Tests roundtrip, decode, and encode with\n/// randomly mutated inputs from the fixture corpus.\n/// Saves crash inputs to the crashes/ directory.\n///\n/// Usage:\n///   cargo run --bin fuzz [iterations] [corpus_dir] [crash_dir] [raw_corpus_dir]\n///   cargo run --bin fuzz 10000\n///   cargo run --bin fuzz 50000 ../../fixtures/cbor ./crashes ../../../fuzzing/corpus/raw\n///\n/// For proper OOM protection, use cargo-fuzz with -rss_limit_"
+    },
+    {
+      "session_id": "1d8c03b0d8d17cad",
+      "snap_file": "2026-05-16_00-57-42-108131569.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "1f032d39aafb5e6b",
+      "snap_file": "2026-05-25_13-40-16-575779802.snap",
+      "content_len": 918,
+      "line_count": 35,
+      "preview": "# Systemd service template for DASL implementation tiles.\n#\n# This is a template unit using systemd's template instantiation syntax.\n# Enable a specific version with:\n#   sudo systemctl enable --now dasl-testing-tile@python-cbor2@5.4.6.service\n#\n# The %i specifier is replaced with the instance name (e.g. \"python-cbor2@5.4.6\").\n#\n# To generate concrete .service files for all registered implementations:\n#   dasl-testing-tile systemd --user dasl --output-dir ./systemd\n\n[Unit]\nDescription=DASL Tile "
+    },
+    {
+      "session_id": "2047c1ebed83bf72",
+      "snap_file": "2026-05-25_14-43-01-029234550.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "213f8926e24235a4",
+      "snap_file": "2026-05-13_20-00-31-326517932.snap",
+      "content_len": 3687,
+      "line_count": 179,
+      "preview": "package main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n\t\"os\"\n\t\"time\"\n\n\t\"github.com/fxamacker/cbor/v2\"\n)\n\ntype TestSpec struct {\n\tTestCases []TestCase `json:\"test_cases\"`\n}\n\ntype TestCase struct {\n\tID           string    `json:\"id\"`\n\tName         string    `json:\"name\"`\n\tMonsterPrime uint64    `json:\"monster_prime\"`\n\tInput        TestInput `json:\"input\"`\n}\n\ntype TestInput struct {\n\tType      string                 `json:\"type\"`\n\tStructure string                 `json:\"structure\"`\n\tParams    map[string]in"
+    },
+    {
+      "session_id": "221a3ded80aab155",
+      "snap_file": "2026-05-18_14-42-37-266404320.snap",
+      "content_len": 15020,
+      "line_count": 484,
+      "preview": "use cargo_afl_common::{self as common, config};\nuse clap::{CommandFactory, FromArgMatches, Parser, crate_version};\nuse std::collections::HashMap;\nuse std::env;\nuse std::ffi::{OsStr, OsString};\nuse std::path::Path;\nuse std::process::{self, Command, Stdio};\n\nconst HELP: &str = \"In addition to the subcommands above, Cargo subcommands are also \\\nsupported (see `cargo help` for a list of all Cargo subcommands).\";\n\n#[derive(Parser)]\n#[clap(\n    display_name = \"cargo\",\n    subcommand_required = true,\n "
+    },
+    {
+      "session_id": "235028d8652c0a61",
+      "snap_file": "2026-05-25_10-43-49-311678221.snap",
+      "content_len": 3147,
+      "line_count": 103,
+      "preview": "{\n  description = \"Flamegraph tile server + enhanced pastebin media\";\n\n  inputs = {\n    nixpkgs.url = \"github:NixOS/nixpkgs/nixos-unstable\";\n    flake-utils.url = \"github:numtide/flake-utils\";\n    naersk = {\n      url = \"github:nix-community/naersk\";\n      inputs.nixpkgs.follows = \"nixpkgs\";\n    };\n  };\n\n  outputs = { self, nixpkgs, flake-utils, naersk }:\n    flake-utils.lib.eachDefaultSystem (system:\n      let\n        pkgs = import nixpkgs { inherit system; };\n        naersk-lib = naersk.lib.\"$"
+    },
+    {
+      "session_id": "2388408b42cc2c4d",
+      "snap_file": "2026-05-19_10-50-51-079598794.snap",
+      "content_len": 8870,
+      "line_count": 230,
+      "preview": "<!doctype html>\n<html lang=\"en\" data-theme=\"dark\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>DASL Testing</title>\n    <link\n      rel=\"stylesheet\"\n      href=\"https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css\"\n    />\n    <link\n      rel=\"stylesheet\"\n      href=\"https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.colors.min.css\"\n    />\n    <script\n      src=\"https://cdn.jsdelivr.net/npm/echarts@5.6.0/d"
+    },
+    {
+      "session_id": "2409197382cd7915",
+      "snap_file": "2026-05-22_03-02-35-702510763.snap",
+      "content_len": 381,
+      "line_count": 15,
+      "preview": "[package]\nname = \"ipld-core-perf-test\"\nversion = \"0.1.0\"\nedition = \"2021\"\ndescription = \"Performance test for ipld-core\"\nauthors = [\"IPLD Core Team\"]\n\n[dependencies]\nipld-core = { path = \".\", features = [\"serde\", \"codec\"] }\nserde_ipld_dagcbor = \"0.6.0\"\nserde_ipld_dagjson = \"0.2.0\"\nserde = { version = \"1.0\", features = [\"derive\"] }\n\n[[bin]]\nname = \"perf_test\"\npath = \"src/main.rs\""
+    },
+    {
+      "session_id": "246db6591eadf893",
+      "snap_file": "2026-05-22_14-01-31-686762109.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "26ef4513063f913d",
+      "snap_file": "2026-05-26_14-11-15-510510909.snap",
+      "content_len": 4546,
+      "line_count": 136,
+      "preview": "#!/usr/bin/env bash\nset -euo pipefail\n\n# package-flakes.sh \u2014 Generate Nix flake input entries mapping local git mirrors\n# to /mnt/data1/git/<host>/<owner>/<repo>.git\n#\n# Reads flake.nix paths from ~/dasl/<file>.txt, resolves the git remote for\n# each directory, parses the remote URL, and writes Nix flake input entries\n# that reference the local mirror at /mnt/data1/git/<host>/<owner>/<repo>.git.\n\nDASL_ROOT=\"/mnt/data1/time-2026/02-february/22/dasl\"\nMIRROR_ROOT=\"/mnt/data1/git\"\nINPUT_FILE=\"${1:-$"
+    },
+    {
+      "session_id": "275a42671aab3b06",
+      "snap_file": "2026-05-22_10-23-12-592800670.snap",
+      "content_len": 11517,
+      "line_count": 423,
+      "preview": "#!/bin/bash\n\n# Rust Performance Tools Deployment Script - Corrected Path\n# Deploys Criterion.rs benchmark suite and coverage tools to actual Rust projects\n\nset -e\n\necho \"\ud83d\ude80 Rust Performance Tools Deployment - Corrected Path\"\necho \"=====================================================\"\n\n# Set the correct dasl directory path\nDASL_DIR=\"/home/mdupont/experiments/nixclean/monster-lattice/test/kiro_project_reconstruction_iso9k_20260304-163448/reconstruction/mentioned_path_structure_iso9k/abs/mnt/data1/"
+    },
+    {
+      "session_id": "27650efd0642f1c9",
+      "snap_file": "2026-05-25_17-52-14-706107386.snap",
+      "content_len": 600,
+      "line_count": 32,
+      "preview": "[package]\nname = \"decl-splitter\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[[bin]]\nname = \"decl-splitter\"\npath = \"src/main.rs\"\n\n[[bin]]\nname = \"decl-lattice\"\npath = \"src/lattice.rs\"\n\n[[bin]]\nname = \"decl-patterns\"\npath = \"src/patterns.rs\"\n\n[dependencies]\nanyhow = \"1.0\"\nclap = { version = \"4.0\", features = [\"derive\"] }\npetgraph = \"0.7\"\nproc-macro2 = \"1.0\"\nquote = \"1.0\"\nserde = { version = \"1.0\", features = [\"derive\"] }\nserde_json = \"1.0\"\nsyn = { version = \"2.0\", features = [\"full\", \"visit\", \"extra-trai"
+    },
+    {
+      "session_id": "29ca7bddaf09fb47",
+      "snap_file": "2026-05-21_11-55-38-767214981.snap",
+      "content_len": 24514,
+      "line_count": 602,
+      "preview": "use std::collections::HashMap;\nuse std::fs;\nuse std::io::{self, Write};\n\n#[derive(Debug, Clone)]\nstruct ZkperfMetrics {\n    coverage_score: f64,\n    performance_score: f64,\n    test_success_rate: f64,\n    test_duration_ms: u64,\n    files_generated: usize,\n    coverage_analysis_status: String,\n    performance_analysis_status: String,\n    integration_status: String,\n}\n\nimpl ZkperfMetrics {\n    fn new() -> Self {\n        ZkperfMetrics {\n            coverage_score: 0.0,\n            performance_score"
+    },
+    {
+      "session_id": "2a0dfe453c187930",
+      "snap_file": "2026-05-24_12-35-11-864098580.snap",
+      "content_len": 10456,
+      "line_count": 232,
+      "preview": "//! Decl Patterns Analyzer plugin \u2014 cross-project AST pattern matching\n//! Runs `decl-patterns` binary across projects and renders isomorphic code analysis tiles.\nuse crate::plugin::{Plugin, PluginInput, PluginResult};\nuse std::collections::HashMap;\n\npub struct DeclPatternsAnalyzerPlugin;\n\nimpl DeclPatternsAnalyzerPlugin {\n    pub fn new() -> Self {\n        Self\n    }\n}\n\nimpl Plugin for DeclPatternsAnalyzerPlugin {\n    fn name(&self) -> &str {\n        \"decl_patterns_analyzer\"\n    }\n\n    fn versi"
+    },
+    {
+      "session_id": "2ab60521e12832f0",
+      "snap_file": "2026-05-18_20-10-58-841024389.snap",
+      "content_len": 81,
+      "line_count": 4,
+      "preview": "pub mod main;\n\npub use main::*;\npub use clap::Parser;\npub use std::path::PathBuf;"
+    },
+    {
+      "session_id": "2b837cb10378752f",
+      "snap_file": "2026-05-27_14-28-36-629573661.snap",
+      "content_len": 904,
+      "line_count": 48,
+      "preview": "# Generated by Cargo\n# will have compiled files and executables\ndebug/\ntarget/\njobs/**\n\n\n# These are backup files generated by rustfmt\n**/*.rs.bk\n.idea\n# MSVC Windows builds of rustc generate these, which store debugging information\n*.pdb\n\n# RustRover\n#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can\n#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore\n#  and can be added to the global gitignore or merged into this file.  F"
+    },
+    {
+      "session_id": "2b9caf68c5003b48",
+      "snap_file": "2026-05-20_18-31-59-568902354.snap",
+      "content_len": 15297,
+      "line_count": 511,
+      "preview": "use std::collections::HashMap;\nuse serde::{Serialize, Deserialize};\nuse std::fs;\nuse std::path::Path;\n\n/// Atlas view configuration for custom compositions\n#[derive(Debug, Clone, Serialize, Deserialize)]\npub struct AtlasView {\n    pub name: String,\n    pub description: String,\n    pub groups: Vec<GroupSelection>,\n    pub composition_rules: CompositionRules,\n    pub visualization: VisualizationConfig,\n    pub metadata: ViewMetadata,\n}\n\n/// Selection criteria for groups\n#[derive(Debug, Clone, Seri"
+    },
+    {
+      "session_id": "2cc0dd81bb2823de",
+      "snap_file": "2026-05-26_16-10-02-682975161.snap",
+      "content_len": 10154,
+      "line_count": 296,
+      "preview": "/**\n * defsubr_tracer.c - LD_PRELOAD library to intercept and log defsubr calls\n *\n * Since defsubr is an internal function in temacs (not from a shared library),\n * we can't directly intercept it with LD_PRELOAD. Instead, we hook into\n * the functions that defsubr calls:\n *\n *   1. intern_c_string() - calls strcmp/malloc internally, we hook malloc\n *   2. Fpurecopy() - the key function that modifies Vcomp_subr_list\n *   3. Fcons() - called by Fpurecopy to create the cons cell\n *\n * We use backt"
+    },
+    {
+      "session_id": "2cf375d6b95b53e2",
+      "snap_file": "2026-05-15_13-25-37-672937005.snap",
+      "content_len": 0,
+      "line_count": 0,
+      "preview": ""
+    },
+    {
+      "session_id": "2cf48877cd06fdd0",
+      "snap_file": "2026-05-24_00-28-43-382111212.snap",
+      "content_len": 468,
+      "line_count": 24,
+      "preview": "#!/bin/bash\n# Build and validate the generated workspace\n\nset -e\n\nWORKSPACE_DIR=\"$1\"\n\nif [ -z \"$WORKSPACE_DIR\" ]; then\n    echo \"Usage: $0 <workspace_dir>\"\n    exit 1\nfi\n\nif [ ! -d \"$WORKSPACE_DIR\" ]; then\n    echo \"Error: Workspace directory '$WORKSPACE_DIR' not found\"\n    exit 1\nfi\n\necho \"Building workspace: $WORKSPACE_DIR\"\ncd \"$WORKSPACE_DIR\"\n\ncargo check --workspace 2>&1 | tee build_output.txt\n\necho \"\"\necho \"Build complete. Check build_output.txt for errors.\"\n"
+    },
+    {
+      "session_id": "2d23d401a7637c0f",
+      "snap_file": "2026-05-24_02-05-20-968313773.snap",
+      "content_len": 146,
+      "line_count": 9,
+      "preview": "pub mod bkma;\npub mod screenshot;\npub mod tiles;\npub mod midi;\npub mod plantuml;\npub mod graphviz;\npub mod minizinc;\npub mod lean;\npub mod tulip;\n"
+    },
+    {
+      "session_id": "2d60b2428766ae45",
+      "snap_file": "2026-05-27_13-53-57-107282462.snap",
+      "content_len": 4376,
+      "line_count": 159,
+      "preview": "{\n  description = \"forge: AI enabled pair programmer for Claude, GPT, O Series, Grok, Deepseek, Gemini and 300+ models\";\n\n  inputs = {\n    nixpkgs.url = \"github:NixOS/nixpkgs/nixos-unstable\";\n  };\n\n  outputs = { self, nixpkgs }:\n    let\n      systems = [\n        \"x86_64-linux\"\n        \"aarch64-linux\"\n        \"x86_64-darwin\"\n        \"aarch64-darwin\"\n      ];\n      forAllSystems = nixpkgs.lib.genAttrs systems;\n    in\n    {\n      formatter = forAllSystems (system:\n        let\n          pkgs = impor"
+    }
+  ]
+}

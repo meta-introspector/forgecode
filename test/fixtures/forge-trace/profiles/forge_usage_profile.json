@@ -1,0 +1,30 @@
+{
+  "extracted_at": "2026-05-27T14:39:04.049747+00:00",
+  "source": "/home/mdupont/.forge",
+  "conversations": {
+    "total": 109,
+    "with_titles": 73,
+    "with_metrics": 109,
+    "with_tool_calls": 1531,
+    "message_stats": {
+      "avg_per_conversation": 49.8,
+      "min": 0,
+      "max": 483
+    },
+    "role_distribution": {
+      "System": 212,
+      "User": 1260,
+      "Assistant": 1659,
+      "unknown": 2300
+    }
+  },
+  "logs": {
+    "total_files": 3,
+    "total_events": 25494,
+    "event_types": 35
+  },
+  "snapshots": {
+    "total_files": 1634,
+    "total_sessions": 443
+  }
+}

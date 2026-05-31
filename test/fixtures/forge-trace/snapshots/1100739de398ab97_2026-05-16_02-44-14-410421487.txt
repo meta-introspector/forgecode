@@ -1,0 +1,34 @@
+{ pkgs, fuzztest, tinycbor-src }:
+
+pkgs.llvmPackages_19.stdenv.mkDerivation {
+  pname = "tinycbor-fuzzer";
+  version = "0.1.0";
+  src = ./.;
+
+  nativeBuildInputs = with pkgs; [
+    cmake
+    ninja
+    pkg-config
+    git
+    llvmPackages_19.bintools
+  ];
+
+  buildInputs = [
+    fuzztest
+  ];
+
+  TINYCBOR_SOURCE_DIR = tinycbor-src;
+
+  configurePhase = ''
+    cmake -S . -B build
+  '';
+
+  buildPhase = ''
+    cmake --build build
+  '';
+
+  installPhase = ''
+    mkdir -p $out/bin
+    cp build/tinycbor_fuzzer $out/bin/
+  '';
+}

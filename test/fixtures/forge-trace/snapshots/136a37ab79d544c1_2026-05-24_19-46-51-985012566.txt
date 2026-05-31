@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""
+Convert cargo metadata JSON to the graph JSON format used by cargo-vendormod graph binary.
+This allows applying cargo-vendormod to itself.
+"""
+
+import json
+import sys
+from pathlib import Path
+
+def convert(metadata_path: str, output_path: str) -> None:
+    with open(metadata_path) as f:
+        metadata = json.load(f)
+    
+    workspace_path = Path(metadata.get('workspace_root', '.'))
+    
+    # Build package index
+    packages = {p['name']: p for p in metadata['packages']}
+    
+    # Build node map
+    nodes = []
+    edges = []
+    node_ids = set()
+    
+    # Track workspace members
+    workspace_members = set()
+    
+    # Get workspace members from the resolve root
+    resolve = metadata.get('resolve', {})
+    root = resolve.get('root')
+    if root:
+        # Root is in the format "package_name version (source)"
+        workspace_members.add(root.split()[0])
+    
+    # Also add all local packages as workspace members
+    for pkg in metadata['packages']:
+        source = pkg.get('source', '')
+        if not source or source == 'workspace':
+            workspace_members.add(pkg['name'])
+    
+    # Add workspace member nodes
+    for pkg_name in workspace_members:
+        pkg = packages.get(pkg_name)
+        if not pkg:
+            continue
+        node_id = f"workspace:{pkg_name}"
+        node_ids.add(node_id)
+        nodes.append({
+            "id": node_id,
+            "crate_name": pkg_name,
+            "version": pkg['version'],
+            "source": "workspace",
+            "is_workspace_member": True,
+            "is_direct_dependency": True,
+            "features": [],
+            "categories": ["workspace"],
+            "properties": {}
+        })
+    
+    # Add all nodes
+    for pkg in metadata['packages']:
+        if pkg['name'] in workspace_members:
+            continue
+        node_id = f"crate:{pkg['name']}"
+        if node_id in node_ids:
+            continue
+        node_ids.add(node_id)
+        
+        source = pkg.get('source', 'crates.io')
+        if source and source.startswith('git+'):
+            source = source[4:]  # Strip git+ prefix
+        
+        nodes.append({
+            "id": node_id,
+            "crate_name": pkg['name'],
+            "version": pkg['version'],
+            "source": source if source else 'crates.io',
+            "is_workspace_member": False,
+            "is_direct_dependency": False,
+            "features": [],
+            "categories": ["dependency"],
+            "properties": {}
+        })
+    
+    # Build edges from resolve graph
+    resolve = metadata.get('resolve', {})
+    for node in resolve.get('nodes', []):
+        pkg_name = node['id'].split()[0]
+        
+        # Determine parent node ID
+        if pkg_name in workspace_members:
+            from_id = f"workspace:{pkg_name}"
+        else:
+            from_id = f"crate:{pkg_name}"
+        
+        for dep_id in node.get('dependencies', []):
+            dep_pkg_name = dep_id.split()[0]
+            
+            if dep_pkg_name in workspace_members:
+                to_id = f"workspace:{dep_pkg_name}"
+            else:
+                to_id = f"crate:{dep_pkg_name}"
+            
+            if to_id not in node_ids:
+                # Add missing dependency node
+                dep_pkg = packages.get(dep_pkg_name)
+                if dep_pkg:
+                    source = dep_pkg.get('source', 'crates.io')
+                    if source and source.startswith('git+'):
+                        source = source[4:]
+                    nodes.append({
+                        "id": to_id,
+                        "crate_name": dep_pkg_name,
+                        "version": dep_pkg.get('version', '0.0.0'),
+                        "source": source if source else 'crates.io',
+                        "is_workspace_member": dep_pkg_name in workspace_members,
+                        "is_direct_dependency": False,
+                        "features": [],
+                        "categories": ["dependency"],
+                        "properties": {}
+                    })
+                    node_ids.add(to_id)
+            
+            # Determine edge type
+            edge_type = "Direct"
+            if to_id.startswith("workspace:"):
+                edge_type = "Workspace"
+            
+            # Check if this is a dev or build dependency
+            # We need to look at the package's dependency declarations
+            pkg = packages.get(pkg_name)
+            is_dev = False
+            is_build = False
+            if pkg:
+                for dep in pkg.get('dependencies', []):
+                    if dep['name'] == dep_pkg_name:
+                        dep_kind = dep.get('kind', 'normal')
+                        if dep_kind == 'dev':
+                            edge_type = "Dev"
+                            is_dev = True
+                        elif dep_kind == 'build':
+                            edge_type = "Build"
+                            is_build = True
+                        break
+            
+            edges.append({
+                "from": from_id,
+                "to": to_id,
+                "edge_type": edge_type,
+                "required_features": [],
+                "optional_features": [],
+                "is_dev_dependency": is_dev,
+                "is_build_dependency": is_build,
+                "properties": {}
+            })
+    
+    # Calculate SCCs (simplified)
+    strongly_connected_components = []
+    
+    # Build metrics
+    metrics = {
+        "node_count": len(nodes),
+        "edge_count": len(edges),
+        "workspace_members": len([n for n in nodes if n['is_workspace_member']]),
+        "direct_dependencies": len([e for e in edges if e['edge_type'] == 'Direct']),
+        "transitive_dependencies": 0,
+        "feature_gated_dependencies": 0,
+        "dev_dependencies": len([e for e in edges if e['is_dev_dependency']]),
+        "build_dependencies": len([e for e in edges if e['is_build_dependency']]),
+        "strongly_connected_components": 0,
+        "diameter": 0,
+        "average_degree": (2 * len(edges)) / max(len(nodes), 1)
+    }
+    
+    # Build the graph structure
+    graph = {
+        "nodes": nodes,
+        "edges": edges,
+        "features": [],
+        "toml_structures": [],
+        "strongly_connected_components": strongly_connected_components,
+        "partitions": [],
+        "metrics": metrics,
+        "workspace_path": str(workspace_path),
+        "publish_order": [],
+        "topological_order": [],
+        "external_dependency_order": []
+    }
+    
+    with open(output_path, 'w') as f:
+        json.dump(graph, f, indent=2)
+    
+    print(f"Graph written to {output_path}")
+    print(f"  Nodes: {len(nodes)}")
+    print(f"  Edges: {len(edges)}")
+    print(f"  Workspace members: {metrics['workspace_members']}")
+    print(f"  Direct dependencies: {metrics['direct_dependencies']}")
+    print(f"  Dev dependencies: {metrics['dev_dependencies']}")
+    print(f"  Build dependencies: {metrics['build_dependencies']}")
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("Usage: metadata_to_graph.py <metadata.json> [output.json]")
+        sys.exit(1)
+    
+    metadata_path = sys.argv[1]
+    output_path = sys.argv[2] if len(sys.argv) > 2 else 'graph.json'
+    convert(metadata_path, output_path)

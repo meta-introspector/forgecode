@@ -1,0 +1,458 @@
+{
+  "rowid": 22,
+  "conversation_id": "65b2c69e-d97e-46fa-93db-1b0a9baf59ab",
+  "title": "Extract repository information from pastebin workload",
+  "workspace_id": -8049755754430017748,
+  "created_at": "2026-05-18 23:45:17.577268047",
+  "updated_at": "2026-05-18 23:54:03.555163540",
+  "messages": [
+    {
+      "role": "System",
+      "content_len": 10042,
+      "content_preview": "You are Forge, an expert software engineering assistant designed to help users with programming tasks, file operations, and software development processes. Your knowledge spans multiple programming languages, frameworks, design patterns, and best practices.\n\n## Core Principles:\n\n1. **Solution-Orient"
+    },
+    {
+      "role": "System",
+      "content_len": 5908,
+      "content_preview": "<system_information>\n<operating_system>linux</operating_system>\n<current_working_directory>/mnt/data1/nix/vendor/rust/cargo2nix/submodules/cargo-clean/tools/cargo-vendormod</current_working_directory>\n<default_shell>/bin/bash</default_shell>\n<home_directory>/home/mdupont</home_directory>\n<file_list>"
+    },
+    {
+      "role": "User",
+      "content_len": 105,
+      "content_preview": "<task>Extract repository information from pastebin workload</task>\n<system_date>2026-05-18</system_date>\n"
+    },
+    {
+      "role": "Assistant",
+      "content_len": 161,
+      "content_preview": "I'll help you extract repository information from pastebin workload. Let me first explore the current directory structure to understand what we're working with.\n",
+      "tool_calls": [
+        {
+          "name": "ls",
+          "args_len": 93
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 84
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 85
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "fs_search",
+          "args_len": 80
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "fs_search",
+          "args_len": 113
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 117
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 141
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 127
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 89
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 95
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 140
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 145
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 159
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 159
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 136
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 138
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "fs_search",
+          "args_len": 100
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 169
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "fs_search",
+          "args_len": 126
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 149
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 106
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "read",
+          "args_len": 148
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    },
+    {
+      "role": "Assistant",
+      "content_len": 2919,
+      "content_preview": "Based on my analysis of the pastebin workload, I have extracted the following repository information:\n\n## Repository Information Extracted from Pastebin Workload\n\n### Primary Repository Being Processed\n\n**Main Repository:**\n- **Name:** cargo-rail\n- **URL:** https://github.com/loadingalias/cargo-rail"
+    }
+  ],
+  "msg_count": 48,
+  "role_counts": {
+    "System": 2,
+    "User": 1,
+    "Assistant": 23,
+    "unknown": 22
+  },
+  "tools_used": [
+    "read",
+    "fs_search",
+    "ls",
+    "shell"
+  ],
+  "files_touched": 10,
+  "file_operations": [
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "815ff998b046cb295d1242f5f4119c329c461799ef8715605d2648a659015984",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "ef7565a81e830fa3dddde1f8cf7f77e58c52acef255ace7c7aa612afc2f7154a",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "2669c1ff8e3b6fc0ba9e374ef131f9de92128a797bef955413472778c78480ec",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "57bd0a81a2ff755838ef047bd4105851496b36d5b2c7d15938cbb3abf89a725b",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "1a985b32d037d254134f160368948185e6e076d12547c8cdf3ab72e093cd5ddc",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "604b36d594b516b56b65bbe68008c7e95b250d76fe4c44893a71ce767169ea13",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "1a8222c2ef4feaf37f546a1ce9ac8298867592f560175967e00b493627278eb1",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "48ee5b1f8a1b59280e9f2e3270437ceebc440e49485ac0e17bdc49c3ce91f534",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "de9a5a562e56bb403e8fb79fdcf03e6e7b5041df2e764b72c3531cc6b3f2515b",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "26ef84ac49c29f3a8bfe3bbc1e924c75474593786b6cc267fb9aab5215ac6d0e",
+      "tool": "read"
+    }
+  ]
+}

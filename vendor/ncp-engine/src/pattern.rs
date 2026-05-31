@@ -1,0 +1,114 @@
+//! Patterns to prescribe matching behaviour.
+pub use ncp_matcher::pattern::{Atom, AtomKind, CaseMatching, Normalization, Pattern};
+use ncp_matcher::{Matcher, Utf32String};
+
+#[cfg(test)]
+mod tests;
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Default)]
+pub(crate) enum Status {
+    #[default]
+    Unchanged,
+    Update,
+    Rescore,
+}
+
+/// A list of patterns corresponding to the columns of a [`Nucleo`](crate::Nucleo) instance.
+#[derive(Debug)]
+pub struct MultiPattern {
+    cols: Vec<(Pattern, Status)>,
+}
+
+impl Clone for MultiPattern {
+    fn clone(&self) -> Self {
+        Self {
+            cols: self.cols.clone(),
+        }
+    }
+
+    fn clone_from(&mut self, source: &Self) {
+        self.cols.clone_from(&source.cols);
+    }
+}
+
+impl MultiPattern {
+    /// Creates a new multi-pattern with `columns` empty column patterns.
+    pub fn new(columns: usize) -> Self {
+        Self {
+            cols: vec![Default::default(); columns],
+        }
+    }
+
+    /// Reparses a column. By specifying `append` the caller promises that text passed
+    /// to the previous `reparse` invocation is a prefix of `new_text`. This enables
+    /// additional optimizations but can lead to missing matches if an incorrect value
+    /// is passed.
+    #[allow(clippy::unnecessary_map_or)]
+    pub fn reparse(
+        &mut self,
+        column: usize,
+        new_text: &str,
+        case_matching: CaseMatching,
+        normalization: Normalization,
+        append: bool,
+    ) {
+        let old_status = self.cols[column].1;
+        if append
+            && old_status != Status::Rescore
+                // must be rescored if the atom is negative or if there is an unescaped
+                // trailing `\`
+            && self.cols[column].0.atoms.last().map_or(true, |last| {
+                !last.negative
+                    && last
+                        .needle_text()
+                        .chars()
+                        .rev()
+                        .take_while(|c| *c == '\\')
+                        .count()
+                        % 2
+                        == 0
+            })
+        {
+            self.cols[column].1 = Status::Update;
+        } else {
+            self.cols[column].1 = Status::Rescore;
+        }
+        self.cols[column]
+            .0
+            .reparse(new_text, case_matching, normalization);
+    }
+
+    /// Returns the pattern corresponding to the provided column.
+    pub fn column_pattern(&self, column: usize) -> &Pattern {
+        &self.cols[column].0
+    }
+
+    pub(crate) fn status(&self) -> Status {
+        self.cols
+            .iter()
+            .map(|&(_, status)| status)
+            .max()
+            .unwrap_or(Status::Unchanged)
+    }
+
+    pub(crate) fn reset_status(&mut self) {
+        for (_, status) in &mut self.cols {
+            *status = Status::Unchanged;
+        }
+    }
+
+    /// Returns the score of the haystack corresponding to the pattern.
+    pub fn score(&self, haystack: &[Utf32String], matcher: &mut Matcher) -> Option<u32> {
+        // TODO: weight columns?
+        let mut score = 0;
+        for ((pattern, _), haystack) in self.cols.iter().zip(haystack) {
+            score += pattern.score(haystack.slice(..), matcher)?;
+        }
+        Some(score)
+    }
+
+    /// Returns whether or not all of the patterns are empty.
+    pub fn is_empty(&self) -> bool {
+        self.cols.iter().all(|(pat, _)| pat.atoms.is_empty())
+    }
+}

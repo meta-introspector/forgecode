@@ -1,0 +1,39 @@
+{
+  "rowid": 49,
+  "conversation_id": "b6bb6f20-5db0-4e09-abfb-c28bd2db191b",
+  "title": ":",
+  "workspace_id": 6692394623987231963,
+  "created_at": "2026-05-24 12:16:32.875172663",
+  "updated_at": "2026-05-24 12:16:34.669204425",
+  "messages": [
+    {
+      "role": "System",
+      "content_len": 14819,
+      "content_preview": "You are Forge, an expert software engineering assistant designed to help users with programming tasks, file operations, and software development processes. Your knowledge spans multiple programming languages, frameworks, design patterns, and best practices.\n\n## Core Principles:\n\n1. **Solution-Orient"
+    },
+    {
+      "role": "System",
+      "content_len": 10953,
+      "content_preview": "<system_information>\n<operating_system>linux</operating_system>\n<current_working_directory>/mnt/data1/time-2026/05-may/15/forgecode</current_working_directory>\n<default_shell>/bin/bash</default_shell>\n<home_directory>/home/mdupont</home_directory>\n<file_list>\n - benchmarks/\n - commands/\n - crates/\n "
+    },
+    {
+      "role": "User",
+      "content_len": 53,
+      "content_preview": "<task>:</task>\n<system_date>2026-05-24</system_date>\n"
+    },
+    {
+      "role": "Assistant",
+      "content_len": 50,
+      "content_preview": "I'm ready to help. What would you like to work on?"
+    }
+  ],
+  "msg_count": 4,
+  "role_counts": {
+    "System": 2,
+    "User": 1,
+    "Assistant": 1
+  },
+  "tools_used": [],
+  "files_touched": 0,
+  "file_operations": []
+}

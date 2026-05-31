@@ -1,0 +1,500 @@
+   37  cd ..
+   38  ls
+   39  gemini
+   40  hermes-agent
+   41  hermes
+   42  nix run /home/mdupont/llm-agents.nix#hermes-agent
+   43  nix run /home/mdupont/llm-agents.nix#hermes-agent
+   44  cd ..
+   45  cd ..
+   46  cd IMPL/deep_scanner/
+   47  nix run /home/mdupont/llm-agents.nix#hermes-agent
+   48  nix run /home/mdupont/llm-agents.nix#hermes-agent
+   49  nix run /home/mdupont/llm-agents.nix#
+   50  cd
+   51  locate forgecode
+   52  cd ~/05/15/forgecode/
+   53  git fetch --all
+   54  git checkout main
+   55  git pull main
+   56  git commit -m 'wup' -a
+   57  git pull main
+   58  git pull upstream main
+   59  nix run /home/mdupont/llm-agents.nix#forge
+   60  nix run /home/mdupont/llm-agents.nix#forge
+   61  pwd
+   62  cd 
+   63  cd dasl
+   64  cd
+   65  cd kant-pastebin
+   66  git status
+   67  git checkout src/plugins/decl_tile.rs src/plugins/perf_annotations.rs
+   68  git status
+   69  git commit -m 'wip' -a
+   70  nix build
+   71  nix run /home/mdupont/llm-agents.nix#forge
+   72  nix run /home/mdupont/projects/forgecode 
+   73  cd
+   74  cd projects/cargo-clean/tools/cargo-vendormod/
+   75  ls
+   76  nix run /home/mdupont/llm-agents.nix#forge
+   77  readlink ~/projects/forgecode/
+   78  realfile ~/projects/forgecode/
+   79  realpath ~/projects/forgecode/
+   80  ln -s /mnt/data1/time-2026/05-may/15/forgecode-decl-splitter/ ~/projects/forgecode/
+   81  nix run /home/mdupont/projects/forgecode
+   82  cd
+   83  cd projects/
+   84  cd dasl
+   85  nix run /home/mdupont/llm-agents.nix#forge
+   86  nix run ~/project/forgecode 
+   87  nix run ~/project/code-forge
+   88  nix run /home/mdupont/projects/forgecode/
+   89  cd 
+   90  cd projects/
+   91  cd forgecode/
+   92  nix build
+   93  nix run
+   94  nix build
+   95  nix run
+   96  nix buil
+   97  nix build
+   98  nix build
+   99  ls
+  100  nix run
+  101  nix build
+  102  nix build
+  103  nix build
+  104  nix build
+  105  nix run
+  106  nix build
+  107  nix run
+  108  nix build
+  109  nix build
+  110  nix run
+  111  nix build
+  112  nix run
+  113  nix run
+  114  top
+  115  cd ..
+  116  cd fuzzcheck-rs/
+  117  cargo build
+  118  cd ..
+  119  cd fuzzcheck-rs/
+  120  ls
+  121  cd ..
+  122  cd ~/projects/dasl/rust/ipld-core/fuzz-fuzzcheck-ipld/
+  123  cargo build
+  124  cd ..
+  125  make fuzz-fuzzcheck 
+  126  df -h
+  127  nix-collect-garbage 
+  128  cd fuzz-fuzzcheck-ipld 
+  129  cargo fuzzcheck fuzz_decode --test fuzz
+  130  cargo --version
+  131  cargo tree -a fuzzcheck_mutators_derive
+  132  cargo tree fuzzcheck_mutators_derive
+  133  cargo tree | grep fuzzcheck_mutators_derive
+  134  cargo tree -a | grep fuzzcheck_mutators_derive 
+  135  cargo tree -a | grep fuzzcheck_mutators_derive  -C10
+  136  cargo tree > tree.txt
+  137  less tree.txt 
+  138  vi Cargo.toml 
+  139  cargo fuzzcheck fuzz_decode --test fuzz
+  140  cd ~/projects/dasl/rust/ipld-core/flakes/fuzzcheck-rs/
+  141  nix build
+  142  ls -latr
+  143  ls result/bin/cargo-fuzzcheck 
+  144  cd -
+  145  cargo fuzzcheck fuzz_decode --test fuzz
+  146  cargo hfuzz run fuzz_target_honggfuzz --features honggfuzz --no-default-features
+  147  cd fuzz
+  148  cargo hfuzz run fuzz_target_honggfuzz --features honggfuzz --no-default-features
+  149  cargo hfuzz run fuzz_target_honggfuzz --features honggfuzz --no-default-features --help
+  150  cargo hfuzz run fuzz_target_honggfuzz --help
+  151  cargo hfuzz run z --help
+  152  cargo hfuzz run --help
+  153  cargo hfuzz run fuzz_target_honggfuzz --features honggfuzz --no-default-features 
+  154  cargo hfuzz run fuzz_target_honggfuzz --features=honggfuzz --no-default-features 
+  155  cargo hfuzz -F honggfuzz run fuzz_target_honggfuzz --features=honggfuzz --no-default-features 
+  156  cargo hfuzz honggfuzz run fuzz_target_honggfuzz --features=honggfuzz 
+  157  cargo hfuzz run fuzz_target_honggfuzz --features=honggfuzz 
+  158  cargo hfuzz run fuzz_target_honggfuzz
+  159  cd ..
+  160  pastebinit flake.nix 
+  161  make fuzz-hongfuzz
+  162  make build
+  163  cd fuzz
+  164  cargo build
+  165  cd ..
+  166  cd honggfuzz-rs/.
+  167  git remote -v
+  168  cd ..
+  169  grep honggfuzz .gitmodules 
+  170  git statu
+  171  git status
+  172  cd fuzz
+  173  cargo build
+  174  cd ..
+  175  nix develop
+  176  cd fuzz
+  177  cargo build
+  178  cd ..
+  179  make fuzz-hongfuzz
+  180  ls
+  181  cd fuzz
+  182  cd hongfuzz
+  183  ls
+  184  cd hfuzz_workspace/
+  185  ls
+  186  ls -latr
+  187  rm \--help 
+  188  make fuzz-hongfuzz
+  189  cd ..
+  190  make fuzz-hongfuzz
+  191  cd ..
+  192  make fuzz-hongfuzz
+  193  make fuzz-hongfuzz >  error_1.txt
+  194  make fuzz-hongfuzz >  error_1.txt 2>&1
+  195  pastebinit error_1.txt 
+  196  cd ..
+  197  cd
+  198  cd dasl/rust/ipld-core/fuzzcheck-rs/
+  199  ls
+  200  nix develop
+  201  ls
+  202  git status
+  203  cargo build
+  204  git add Cargo.lock 
+  205  git status
+  206  nix develop
+  207  git push local
+  208  pwd
+  209  cd ..
+  210  cd flakes/fuzzcheck-rs/
+  211  nix develop
+  212  nix build .
+  213  ls ./result/bin/cargo-fuzzcheck 
+  214  ./result/bin/cargo-fuzzcheck 
+  215  nix profile add .
+  216  ls
+  217  cd ..
+  218  ls
+  219  cd ..
+  220  cd honggfuzz-rs/
+  221  ls
+  222  nix build
+  223  ls
+  224  ls -altr
+  225  cd result/
+  226  ls  -latr
+  227  cd bin/
+  228  ls
+  229  cd ..
+  230  nix profile add .
+  231  git commit -m 'builds in nix' -a
+  232  git branch
+  233  git checkout -b 'feature/nix'
+  234  git push local
+  235  git remote -v
+  236  git remote add local ~/git/github.com/rust-fuzz/honggfuzz-rs.git
+  237  git push local
+  238  cd ..
+  239  cd fuzz
+  240  make
+  241  cd ..
+  242  mkdir fuzz/honggfuzz
+  243  cd fuzz/honggfuzz/
+  244  make
+  245  cp ../fuzz_targets/fuzz_target_honggfuzz.rs .
+  246  make
+  247  locate ipld_core_fuzz
+  248  locate ipld_core_fuzz.rs
+  249  locate ipld_core_fuzz | grep rs
+  250  locate ipld_core_fuzz | grep rs$
+  251  cd ..
+  252  grep ipld_core_fuzz *
+  253  make
+  254  cd honggfuzz/
+  255  ls
+  256  make
+  257  clear
+  258  make
+  259  ls /home/mdupont/projects/dasl/ipld-core/fuzz/target/x86_64-unknown-linux-gnu/release/build/honggfuzz-ea882f94e13800cf/out/honggfuzz/fuzz.h
+  260  ls /home/mdupont/projects/dasl/ipld-core/fuzz/target/x86_64-unknown-linux-gnu/release/build/honggfuzz-ea882f94e13800cf/out/honggfuzz/fuzz.h -latr
+  261  make
+  262  nix develop
+  263  cd fuzz 
+  264  export RUSTFLAGS='-C instrument-coverage' 
+  265  cargo fuzzcheck temp_test::tests::my_simple_fuzz_test"
+  266  "
+  267  cargo fuzzcheck temp_test::tests::my_simple_fuzz_test
+  268  cargo fuzzcheck temp_test
+  269  cargo fuzzcheck 
+  270  cargo fuzzcheck tests::my_simple_fuzz_test
+  271  cargo fuzzcheck my_simple_fuzz_test
+  272  cat src/lib.rs
+  273  ls
+  274  cargo fuzzcheck temp_test::tests::my_simple_fuzz_test"
+  275  "
+  276  cargo fuzzcheck temp_test::tests::my_simple_fuzz_test
+  277  strace -ccargo fuzzcheck temp_test::tests::my_simple_fuzz_test
+  278  strace -c -f cargo fuzzcheck temp_test::tests::my_simple_fuzz_test
+  279  strace -e statx,openat,stat,access, -f cargo fuzzcheck temp_test::tests::my_simple_fuzz_test
+  280  strace -o st.txt -e statx,openat,stat,access, -f cargo fuzzcheck temp_test::tests::my_simple_fuzz_test 
+  281  strace -c -f cargo fuzzcheck --verbose
+  282  cargo fuzzcheck --verbose
+  283  cargo fuzzcheck --help
+  284  d ..
+  285  cd ..
+  286  cd fuzz-fuzzcheck-ipld/
+  287  make
+  288  cd ..
+  289  make fuzz-alf
+  290  make fuzz-afl
+  291  locate pi agent -r \.rs$
+  292  locate decl splitter -r \.rs$
+  293  locate decl splitter -r \.rs$ > ~/dasl/CASES/decl_splitter.txt
+  294  cd ..
+  295  grep -r libipld  --include \*.rs >libipld.txt
+  296  cd ..
+  297  cd pastebin-spool/
+  298  grep fuzz *.txt
+  299  command dirs
+  300  today
+  301  ls
+  302  sage test.sage.py
+  303  cat test.sage.py > file.txt ; `sage test.sage.py >> file.txt`;pastebinit  file.txt
+  304  sage test2.py
+  305  cd
+  306  cd projects/
+  307  ln -s /mnt/data1/time-2026/05-may/15/forgecode/
+  308  cd forgecode/
+  309  ls
+  310  nix build
+  311  tudu
+  312  tudf
+  313  cd ..
+  314  cd dasl
+  315  git status > git-status.txt
+  316  git diff > git-diff.txt
+  317  fdf -h
+  318  df -h
+  319  nix-collect-garbage 
+  320  workmux 
+  321  workmux help
+  322  cd dasl
+  323  workmux open
+  324  workmux open .
+  325  workmux list
+  326  workmux open main
+  327  exit
+  328  sudo apt remove nginx
+  329  today
+  330  . .bashrc
+  331  today
+  332  locate github.com/meta-introspector/nur-combined
+  333  locate nur-combined
+  334  locate nur-combined | grep -v /git/
+  335  cd /mnt/data1/nix/time/2025/02/07/nur-combined/
+  336  git fetch --all
+  337  git checkout main
+  338  gti pull
+  339  git pull
+  340  locate remacs
+  341  locate remacs |less
+  342  cd /mnt/data1/2023/12/04/emacs-ng
+  343  git pull
+  344  git checkout master
+  345  findforks2.py
+  346  mkdir data
+  347  findforks2.py
+  348  findforks3.py
+  349  git fetch --all
+  350  git log --all
+  351  git log --all --patch
+  352  git log --all --patch | grep rust 
+  353  git log --all --patch | grep rust  | grep ast
+  354  git log --all --patch | grep rust  | grep enum
+  355  git log --all --patch | grep rustified_enum
+  356  nix build
+  357  systemctl nix start
+  358  systemctl start nix 
+  359  sudo systemctl start nix 
+  360  sudo systemctl start nix-daemon
+  361  nix build
+  362  nix develop -c make bootstrap
+  363  git stauts
+  364  git status
+  365  git submodule init
+  366  git submodule update
+  367  nix develop -c make clean
+  368  nix run /home/mdupont/projects/forgecode
+  369  /home/mdupont/projects/forgecode/result/bin/forge 
+  370  tmux save-buffer emacs.txt
+  371  ls ~/emacs.txt 
+  372  tmuix
+  373  ls ~/emacs.txt 
+  374  cat ~/emacs.txt 
+  375  exit
+  376  today
+  377  . ~/.bashrc
+  378  today
+  379  git submodule add https://github.com/Hmbown/CodeWhale.git
+  380  cd CodeWhale/
+  381  nix run .#
+  382  nix build
+  383  nix develop -c cargo buil
+  384  git log -1
+  385  git log --all
+  386  git checkout 3b8c3db5a8e57075ee0a7b70b7a01e7bbea80b05
+  387  nix develop -c cargo build
+  388  nix run
+  389  df -h
+  390  git log -1
+  391  nix develop -c cargo run
+  392  #nix develop -c cargo run
+  393  ls -latr ./target/debug/codewhale
+  394  realpath./target/debug/codewhale
+  395  realpath ./target/debug/codewhale
+  396  exit
+  397  cd
+  398  cd projects/forgecode
+  399  nix run
+  400  nix build
+  401  nix run
+  402  exit
+  403  sudo reboot now
+  404  cd projects/forgecode/
+  405  nix build
+  406  systemctl start nix-daemon
+  407  sudo su -
+  408  df -h
+  409  apt clean
+  410  sudo su -
+  411  sudo su - bash
+  412  pwd
+  413  whoami 
+  414  sudo vi /etc/bash.bashrc
+  415  vi /etc/sudo.conf 
+  416  sudo vi /etc/sudo.conf 
+  417  nix run 'github:numtide/system-manager' -- init
+  418  cd /run/system-manager/sw/bin/
+  419  mkdir -p /run/system-manager/sw/bin/
+  420  sudo mkdir -p /run/system-manager/sw/bin/
+  421  which bash
+  422  sudo ln -s /usr/bin/bash /run/system-manager/sw/bin/
+  423  sudo su - bash
+  424  sudo su -
+  425  cd
+  426  exit
+  427  coredumpctl
+  428  sudo apt install systemd-coredump
+  429  ulimit -c
+  430  ulimit -c unlimited
+  431  cd /var/crash/
+  432  ls
+  433  cd /var/log/
+  434  ls
+  435  ls apport.log
+  436  cat apport.log
+  437  cd
+  438  pwd
+  439  exit
+  440  sudo su -
+  441  exit
+  442  mount
+  443  mount | grep data
+  444  cd /var/log/
+  445  ls -latr
+  446  cat auth.log
+  447  cat syslog
+  448  cd
+  449  exit
+  450  nix --env
+  451  nix-env --version
+  452  exit
+  453  cd /var/log/
+  454  cat syslog
+  455  ls -latr ~/.nix-profile/nix
+  456  ls -latr ~/.nix-profile-*/
+  457  ls -latr ~/.nix-profile-*/bin/nix
+  458  ls -latr /etc/systemd/system/nix-daemon.service
+  459  cat /etc/systemd/system/nix-daemon.service
+  460  #cp /nix/store/j6k7vmkpcm26d6m78nfpcrswxlfgdn9q-nix-2.33.1/e
+  461  locate nix-daemon-service
+  462  locate nix-daemon.service
+  463  cp /mnt/data1/nix-store/store/j6k7vmkpcm26d6m78nfpcrswxlfgdn9q-nix-2.33.1/lib/systemd/system/nix-daemon.service /etc/systemd/system/nix-daemon.service
+  464  sudo cp /mnt/data1/nix-store/store/j6k7vmkpcm26d6m78nfpcrswxlfgdn9q-nix-2.33.1/lib/systemd/system/nix-daemon.service /etc/systemd/system/nix-daemon.service
+  465  sudo su -
+  466  vi ~/.config/systemd/user/nix-build-test.service
+  467  systemctl --user daemon-reload
+  468  systemctl --user enable nix-build-test.service
+  469  loginctl enable-linger "$USER"
+  470  systemctl --user status nix-build-test.service 
+  471  systemctl --user start nix-build-test.service 
+  472  systemctl --user status nix-build-test.service 
+  473  systemctl --user status nix-build-test.service 
+  474  systemd-cgls --user
+  475  $systemd-cgls --user
+  476  nix-store --verify --check-contents --repair
+  477  nix-store --verify --check-contents --repair
+  478  pwd
+  479  cd /nix/var/nix/db/
+  480  ls 
+  481  cp db.sqlite db.sqlite2
+  482  sudo cp db.sqlite db.sqlite2
+  483  cd
+  484  pwd
+  485  #git https://github.com/indiscipline/nix-db-repair.git
+  486  today
+  487  . ~/.bashrc
+  488  today
+  489  git submodule add https://github.com/indiscipline/nix-db-repair.git
+  490  ls -altr
+  491  cd nix-db-repair/
+  492  ls
+  493  bash ./nix-db-repair.sh  /nix/var/nix/db/db.sqlite
+  494  sudo su -
+  495  exit
+  496  vi /etc/passwd
+  497  sudo vi /etc/passwd
+  498  sudo vi /etc/group
+  499  sudo vi /etc/group
+  500  sudo emacs /etc/group
+  501  pwd
+  502  cd projects/
+  503  ls -latr
+  504  cd forgecode
+  505  nix buid
+  506  nix build
+  507  bash <(curl -L https://nixos.org/nix/install) --daemon
+  508  mv /etc/bashrc.backup-before-nix /etc/bashrc
+  509  sudo mv /etc/bashrc.backup-before-nix /etc/bashrc
+  510  bash <(curl -L https://nixos.org/nix/install) --daemon
+  511* 
+  512  curl -L https://nixos.org/nix/install >install_nix.sh
+  513  curl ./install_nix.sh --daemon
+  514  bash ./install_nix.sh --daemon
+  515  mv /etc/zshrc.backup-before-nix /etc/zshrc
+  516  sudo mv /etc/zshrc.backup-before-nix /etc/zshrc
+  517  bash ./install_nix.sh --daemon
+  518  sudo mv /etc/bash.bashrc.backup-before-nix /etc/bash.bashrc
+  519  bash ./install_nix.sh --daemon
+  520  sudo mv /etc/zsh/zshrc.backup-before-nix /etc/zsh/zshrc
+  521  bash ./install_nix.sh --daemon
+  522  rm /etc/systemd/system/nix-daemon.service
+  523  sudo rm /etc/systemd/system/nix-daemon.service
+  524  bash ./install_nix.sh --daemon --help
+  525  bash ./install_nix.sh --daemon --yes 
+  526  bash ./install_nix.sh --daemon --yes --no-modify-profile:
+  527  bash ./install_nix.sh --daemon --yes --no-modify-profile 
+  528  sudo mv /etc/zsh/zshrc.backup-before-nix /etc/zsh/zshrc
+  529  sudo mv /etc/bash.bashrc.backup-before-nix /etc/bash.bashrc
+  530  sudo mv /etc/bashrc.backup-before-nix /etc/bashrc
+  531  bash ./install_nix.sh --daemon --yes --no-modify-profile 
+  532  sudo mv mv /etc/profile.d/nix.sh.backup-before-nix /etc/profile.d/nix.sh
+  533  bash ./install_nix.sh --daemon --yes 
+  534  sudo rm  /etc/profile.d/nix.sh /etc/profile.d/nix.sh.backup-before-nix
+  535  bash ./install_nix.sh --daemon --yes 
+  536  history > install_sh.sh

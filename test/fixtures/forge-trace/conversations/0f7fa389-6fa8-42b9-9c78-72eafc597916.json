@@ -1,0 +1,14 @@
+{
+  "rowid": 91,
+  "conversation_id": "0f7fa389-6fa8-42b9-9c78-72eafc597916",
+  "title": "(untitled)",
+  "workspace_id": 77926229373718458,
+  "created_at": "2026-05-26 14:39:20.566952395",
+  "updated_at": "None",
+  "messages": [],
+  "msg_count": 0,
+  "role_counts": {},
+  "tools_used": [],
+  "files_touched": 0,
+  "file_operations": []
+}

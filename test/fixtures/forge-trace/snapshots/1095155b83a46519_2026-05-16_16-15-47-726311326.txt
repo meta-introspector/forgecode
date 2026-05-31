@@ -1,0 +1,73 @@
+# Implementation Plan for DASL Microservice Test Browser
+
+## Overview
+
+This plan outlines the approach to build a plugin-based microservice test suite for various DASL dag-cbor parser implementations across languages.
+
+Each implementation exposes a systemd service with a nix flake and HTTP web service interface, returning test results including CAR files (CID, dag-cbor), timing, and perf data.
+
+The goal is to create a unified test browser and control plane that can dynamically select any implementation, invoke tests, and display results in a grid of tiles representing each plugin.
+
+## Key Components
+
+### 1. Language Microservices
+
+- Provide existing implementations as independently deployable systemd-managed services.
+- Each service exposes unified HTTP JSON/CBOR API endpoints for decode, encode, roundtrip, batch testing.
+- Support performance tracing and CAR output generation.
+
+### 2. Plugin Selector & Dispatcher
+
+- A central control service or CLI that lists available microservices/plugins.
+- Enables invoking tests on any or all selected plugins.
+- Collects and aggregates results and performance profiles.
+
+### 3. Tile-Based Web Interface
+
+using @dasl/tiles 
+see ~/projects/dasl/IMPL/users/atproto/atproto_repos/
+dasl-tiles/
+webtil.es
+atmosphere-browser
+jakesimonds_jklb-social
+
+for package.json   "@dasl/tiles": "^1.1.3"
+
+
+- A web UI showing interactive tiles per implementation plugin.
+- Each tile shows test status, recent performance stats, crash counts.
+- Provides controls to trigger tests, view logs, and explore CAR artifacts.
+
+### 4. Integration with dasl-testing
+
+- Test results collected feed into dasl-testing unified reports.
+- Crash reproducers and fuzz test inputs auto-imported into fuzz harnesses.
+- Performance data aggregates into DASL-wide analysis dashboards.
+
+## Implementation Steps
+
+1. Audit existing language services for HTTP API compatibility and systemd integration.
+2. Design a plugin registry format to describe available implementations and endpoints.
+3. Build a plugin selector component capable of dispatching requests and collecting results.
+4. Design and implement the tile-based frontend UI for test browsing and triggering.
+5. Update dasl-testing report generation to include plugin test status.
+6. Automate fuzz and crash repro testing from findings through the microservices.
+7. Document usage, deployment, and development workflow.
+
+## Timeline & Milestones
+
+- Phase 1: Microservice audit and HTTP API harmonization (1 week)
+- Phase 2: Plugin selector service and dispatcher implementation (2 weeks)
+- Phase 3: Tile-based UI frontend development (3 weeks)
+- Phase 4: Integration with dasl-testing reports and automation (2 weeks)
+
+## Dependencies
+
+- Existing nix flakes and systemd services for each implementation
+- dasl-tiles web interface codebase
+- dasl-testing and fuzzing infrastructure
+
+
+---
+
+This plan can be used to guide the development of a robust cross-language DASL microservice testing ecosystem.

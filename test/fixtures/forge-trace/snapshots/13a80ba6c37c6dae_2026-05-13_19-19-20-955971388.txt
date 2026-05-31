@@ -1,0 +1,128 @@
+{ pkgs ? import <nixpkgs> {} }:
+
+let
+  # Monster number encoding DASL
+  monsterNumber = 243534541287849984;
+  
+  # Test runner with perf/strace
+  runTest = { name, testCmd, lang }:
+    pkgs.runCommand "test-${name}" {
+      buildInputs = [ pkgs.strace pkgs.linuxPackages.perf ];
+      preferLocalBuild = true;
+    } ''
+      mkdir -p $out
+      
+      # Run with strace
+      strace -c -o $out/strace.txt ${testCmd} 2>&1 > $out/test.log || true
+      
+      # Run with perf
+      perf stat -o $out/perf.txt ${testCmd} 2>&1 >> $out/test.log || true
+      
+      # Extract syscalls
+      if [ -f $out/strace.txt ]; then
+        grep -E "calls|syscall" $out/strace.txt > $out/syscalls.txt || true
+      fi
+      
+      # Metadata
+      cat > $out/metadata.json << JSON
+      {
+        "name": "${name}",
+        "lang": "${lang}",
+        "monster_number": ${toString monsterNumber},
+        "timestamp": $(date +%s)
+      }
+      JSON
+      
+      echo "✓ Test ${name} traced" > $out/status.txt
+    '';
+  
+  # Test configurations
+  tests = {
+    rust-ipld = runTest {
+      name = "rust-ipld";
+      testCmd = "${pkgs.coreutils}/bin/echo 'test'";
+      lang = "rust";
+    };
+    
+    go-ipld = runTest {
+      name = "go-ipld";
+      testCmd = "${pkgs.coreutils}/bin/echo 'test'";
+      lang = "go";
+    };
+    
+    python-ipld = runTest {
+      name = "python-ipld";
+      testCmd = "${pkgs.coreutils}/bin/echo 'test'";
+      lang = "python";
+    };
+    
+    js-ipld = runTest {
+      name = "js-ipld";
+      testCmd = "${pkgs.coreutils}/bin/echo 'test'";
+      lang = "javascript";
+    };
+  };
+  
+  # Aggregate all tests
+  allTests = pkgs.runCommand "all-tests" {
+    buildInputs = [ pkgs.python3 pkgs.jq ];
+  } ''
+    mkdir -p $out
+    
+    # Copy all test results
+    ${pkgs.lib.concatMapStringsSep "\n" (name: 
+      "cp -r ${tests.${name}} $out/${name}"
+    ) (builtins.attrNames tests)}
+    
+    # Create manifest
+    cat > $out/manifest.json << JSON
+    {
+      "monster_number": ${toString monsterNumber},
+      "tests": ${builtins.toJSON (builtins.attrNames tests)},
+      "pure": true,
+      "nix_store": true
+    }
+    JSON
+    
+    echo "✓ All tests collected in Nix store" > $out/status.txt
+  '';
+
+in {
+  inherit tests allTests;
+  
+  # Analysis derivation
+  analysis = pkgs.runCommand "dasl-analysis" {
+    buildInputs = [ pkgs.python3 ];
+  } ''
+    mkdir -p $out
+    
+    # Pure analysis script
+    cat > $out/analyze.py << 'PY'
+import json
+import math
+
+MONSTER_NUMBER = ${toString monsterNumber}
+
+def encode_dasl2(syscalls, lang_id):
+    emoji = lang_id % 4
+    state = syscalls % 196883
+    complexity = int(math.log2(syscalls + 1)) % 72
+    timestamp = syscalls % (2**32)
+    return {
+        'emoji': emoji,
+        'state': state,
+        'complexity': complexity,
+        'timestamp': timestamp,
+        'bits': 59
+    }
+
+def homotopy_class(enc):
+    return (enc['state'] % 71, enc['complexity'] % 10)
+
+print("Pure Nix analysis ready")
+PY
+    
+    chmod +x $out/analyze.py
+    echo "✓ Pure analysis in Nix store" > $out/status.txt
+  '';
+}

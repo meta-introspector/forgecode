@@ -1,0 +1,20 @@
+{
+  "System": {
+    "count": 212,
+    "min_len": 2690,
+    "max_len": 16816,
+    "avg_len": 8864.0
+  },
+  "User": {
+    "count": 1260,
+    "min_len": 53,
+    "max_len": 161317,
+    "avg_len": 2905.8
+  },
+  "Assistant": {
+    "count": 640,
+    "min_len": 51,
+    "max_len": 18006,
+    "avg_len": 563.6
+  }
+}

@@ -1,0 +1,19 @@
+[package]
+name = "streamdown-render"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Terminal rendering engine for streamdown"
+readme = "README.md"
+
+[dependencies]
+streamdown-core.workspace = true
+streamdown-ansi.workspace = true
+streamdown-config.workspace = true
+streamdown-parser.workspace = true
+streamdown-syntax.workspace = true
+crossterm.workspace = true
+unicode-width.workspace = true
+base64.workspace = true

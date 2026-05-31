@@ -1,0 +1,15 @@
+[package]
+name = "streamdown-parser"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Streaming markdown parser for streamdown"
+readme = "README.md"
+
+[dependencies]
+streamdown-core.workspace = true
+streamdown-ansi.workspace = true
+regex.workspace = true
+unicode-width.workspace = true

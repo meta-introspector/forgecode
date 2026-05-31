@@ -1,0 +1,33 @@
+{
+  "rowid": 7,
+  "conversation_id": "11989dc7-036c-4f8c-8990-eda016850c3c",
+  "title": "Document the usage of the skill for users to invoke the builds and fuzzers",
+  "workspace_id": -2352129105537594699,
+  "created_at": "2026-05-16 01:13:15.301157746",
+  "updated_at": "2026-05-16 01:13:15.357317601",
+  "messages": [
+    {
+      "role": "System",
+      "content_len": 8798,
+      "content_preview": "You are Forge, an expert software engineering assistant designed to help users with programming tasks, file operations, and software development processes. Your knowledge spans multiple programming languages, frameworks, design patterns, and best practices.\n\n## Core Principles:\n\n1. **Solution-Orient"
+    },
+    {
+      "role": "System",
+      "content_len": 5756,
+      "content_preview": "<system_information>\n<operating_system>linux</operating_system>\n<current_working_directory>/mnt/data1/time-2026/02-february/22/dasl</current_working_directory>\n<default_shell>/bin/bash</default_shell>\n<home_directory>/home/mdupont</home_directory>\n<file_list>\n - DOCS/\n - FINDINGS/\n - IMPL/\n - INPUT/"
+    },
+    {
+      "role": "User",
+      "content_len": 126,
+      "content_preview": "<task>Document the usage of the skill for users to invoke the builds and fuzzers</task>\n<system_date>2026-05-15</system_date>\n"
+    }
+  ],
+  "msg_count": 3,
+  "role_counts": {
+    "System": 2,
+    "User": 1
+  },
+  "tools_used": [],
+  "files_touched": 0,
+  "file_operations": []
+}

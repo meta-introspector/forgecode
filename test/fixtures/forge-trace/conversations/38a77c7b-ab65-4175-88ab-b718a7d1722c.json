@@ -1,0 +1,179 @@
+{
+  "rowid": 89,
+  "conversation_id": "38a77c7b-ab65-4175-88ab-b718a7d1722c",
+  "title": "(untitled)",
+  "workspace_id": -3494194827663472120,
+  "created_at": "2026-05-26 14:17:54.972920261",
+  "updated_at": "2026-05-26 15:39:11.608241680",
+  "messages": [
+    {
+      "role": "System",
+      "content_len": 11668,
+      "content_preview": "You are Forge, an expert software engineering assistant designed to help users with programming tasks, file operations, and software development processes. Your knowledge spans multiple programming languages, frameworks, design patterns, and best practices.\n\n## Core Principles:\n\n1. **Solution-Orient"
+    },
+    {
+      "role": "System",
+      "content_len": 3180,
+      "content_preview": "<system_information>\n<operating_system>linux</operating_system>\n<current_working_directory>/mnt/data1/nix/time/2025/02/07/nur-combined</current_working_directory>\n<default_shell>/bin/bash</default_shell>\n<home_directory>/home/mdupont</home_directory>\n<file_list>\n - data/\n - lib/\n - repos/\n - default"
+    },
+    {
+      "role": "User",
+      "content_len": 128,
+      "content_preview": "<task>now we will repackage ~/pastebin/deploy.sh to be a system-manager with nginx</task>\n<system_date>2026-05-26</system_date>\n"
+    },
+    {
+      "role": "User",
+      "content_len": 11998,
+      "content_preview": "Use the following summary frames as the authoritative reference for all coding suggestions and decisions. Do not re-explain or revisit it unless I ask. Additional summary frames will be added as the conversation progresses.\n\n## Summary\n\n### 1. Assistant\n\n**Read:** `/home/mdupont/pastebin/deploy.sh`\n"
+    },
+    {
+      "role": "Assistant",
+      "content_len": 0,
+      "content_preview": "",
+      "tool_calls": [
+        {
+          "name": "shell",
+          "args_len": 201
+        }
+      ]
+    },
+    {
+      "role": "unknown",
+      "content_len": 0,
+      "content_preview": ""
+    }
+  ],
+  "msg_count": 6,
+  "role_counts": {
+    "System": 2,
+    "User": 2,
+    "Assistant": 1,
+    "unknown": 1
+  },
+  "tools_used": [
+    "shell"
+  ],
+  "files_touched": 20,
+  "file_operations": [
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "ed292022e13fa3429ec303b7f9f282f6d4826684756ea580e964817705a4ec07",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "7fab4fd90beb5944639e23695ddbd96f9e40930d2dcebae7ef0ab0795e00b278",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 1,
+      "content_hash": "26b5872c26f92f75d9f27a7c1079d784bb574d90abb76bc1ebcbfac3a2d65d5a",
+      "tool": "patch"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "7e2403c5e1f709bb6a31a34337f3ebce1d11b7dc83af531485b7a6aac31b0075",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "c458a45a6314995de2e4a3118fac4c673c456b69986da408058eca238b28d44e",
+      "tool": "read"
+    },
+    {
+      "lines_added": 3,
+      "lines_removed": 3,
+      "content_hash": "96c87206836c0c9dc2df88082ea31361a828ea8422fca71b9bfe7811ebc1b384",
+      "tool": "undo"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "9633bc38898821f5f2bb46aeb6fb9e07b7ecdd491ed0fdfda3d0515db352a60d",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "b0de600ee6864f768ced506d8b4200e8279ad0ccc4f82db82e94b7577596c4dc",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "f062d4fbd7a5749e22eb8e871d4310ffb49ca4471398663e94e4585bd7bd13f1",
+      "tool": "read"
+    },
+    {
+      "lines_added": 13,
+      "lines_removed": 14,
+      "content_hash": "9ae355f69e4eedc7db26f3b4669f4dc338b332835296af8d7e3b33f05c47eb6c",
+      "tool": "write"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "8ee2e48f69c0e4d3d293b0063acbee2558482948fdb817389ee3ab69a6a9f101",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "434730540dd9dcc26b5db929100550b9b8c8dcc971f8a412941a4f164965664f",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "fcf329cb5a92fb71c64809474d93ec13fdf6b7a87739bd9aee93c269978d3b7c",
+      "tool": "read"
+    },
+    {
+      "lines_added": 1,
+      "lines_removed": 1,
+      "content_hash": "f55c14d0dba36bc84b28c7436298b84ac3841a7d61d661809b4f57188372a5de",
+      "tool": "patch"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "955a76329900cee675e21b210f6f982b17d1cd4f3355c7204522c933a859968e",
+      "tool": "read"
+    },
+    {
+      "lines_added": 41,
+      "lines_removed": 0,
+      "content_hash": "75c1bf715b722b8bfc2a91963c4ac881a5a108d2a5da975d15f295808dee6f94",
+      "tool": "write"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "9ec6033e6939b3d701a8dadfd31e830ae0f09d241627f246411783750d564deb",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "83109a625855740c5069109b98f8eb123bbf8e50e8662003b58ff10db8537e3a",
+      "tool": "read"
+    },
+    {
+      "lines_added": 0,
+      "lines_removed": 0,
+      "content_hash": "6e83882e61780d6b59f963e96fd77190e7759eb0f78c1b9df399fa65f3670b9b",
+      "tool": "read"
+    },
+    {
+      "lines_added": 22,
+      "lines_removed": 52,
+      "content_hash": "21e4680ab855f99df8a1752bf3a67dc5c4678620160780161ba20cb5ca94148b",
+      "tool": "write"
+    }
+  ]
+}

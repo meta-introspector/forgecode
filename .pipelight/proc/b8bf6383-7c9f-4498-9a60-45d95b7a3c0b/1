@@ -1,0 +1,5 @@
+warning: Git tree '/mnt/data1/time-2026/05-may/15/forgecode' is dirty
+warning: updating lock file "/mnt/data1/time-2026/05-may/15/forgecode/flake.lock":
+• Updated input 'pipelight':
+    'path:/mnt/data1/nix-controller/he-lattice/pipelight?lastModified=1779886488&narHash=sha256-dCQZ5EOHTNVcRj2Q3ANDM0BKb1bmnYgIaIY54oAWMaM%3D' (2026-05-27)
+  → 'github:pipelight/pipelight/478d67baa8d1db9d4620528d2e05d6d88a51c004?narHash=sha256-CZRypF3gr/u6kq/DFFuP6DmXP5PKnlzBTGVXB98kfY8%3D' (2026-01-23)

@@ -1,0 +1,327 @@
+{
+  "Adding": {
+    "count": 1622,
+    "levels": {
+      "DEBUG": 1622
+    },
+    "top_sources": {
+      "crates/forge_domain/src/context.rs": 1622
+    }
+  },
+  "Agent": {
+    "count": 2,
+    "levels": {
+      "WARN": 2
+    },
+    "top_sources": {
+      "crates/forge_app/src/orch.rs": 2
+    }
+  },
+  "Auto-denied": {
+    "count": 2,
+    "levels": {
+      "WARN": 2
+    },
+    "top_sources": {
+      "crates/forge_app/src/tool_registry.rs": 2
+    }
+  },
+  "Case": {
+    "count": 503,
+    "levels": {
+      "INFO": 503
+    },
+    "top_sources": {
+      "crates/forge_app/src/tool_registry.rs": 503
+    }
+  },
+  "Compaction": {
+    "count": 1725,
+    "levels": {
+      "DEBUG": 1704,
+      "INFO": 21
+    },
+    "top_sources": {
+      "crates/forge_app/src/hooks/compaction.rs": 1725
+    }
+  },
+  "Connecting": {
+    "count": 1898,
+    "levels": {
+      "INFO": 1898
+    },
+    "top_sources": {
+      "crates/forge_repo/src/provider/openai.rs": 1898
+    }
+  },
+  "Created": {
+    "count": 21,
+    "levels": {
+      "INFO": 21
+    },
+    "top_sources": {
+      "crates/forge_app/src/compact.rs": 21
+    }
+  },
+  "Deserializing": {
+    "count": 237,
+    "levels": {
+      "DEBUG": 237
+    },
+    "top_sources": {
+      "crates/forge_repo/src/conversation/conversation_record.rs": 237
+    }
+  },
+  "Detected": {
+    "count": 9,
+    "levels": {
+      "DEBUG": 9
+    },
+    "top_sources": {
+      "crates/forge_app/src/file_tracking.rs": 9
+    }
+  },
+  "Evaluating": {
+    "count": 509,
+    "levels": {
+      "INFO": 509
+    },
+    "top_sources": {
+      "crates/forge_app/src/tool_registry.rs": 509
+    }
+  },
+  "Event": {
+    "count": 133,
+    "levels": {
+      "DEBUG": 133
+    },
+    "top_sources": {
+      "crates/forge_app/src/user_prompt.rs": 133
+    }
+  },
+  "Executing": {
+    "count": 3597,
+    "levels": {
+      "INFO": 3597
+    },
+    "top_sources": {
+      "crates/forge_app/src/tool_registry.rs": 2453,
+      "crates/forge_infra/src/executor.rs": 1144
+    }
+  },
+  "Failed": {
+    "count": 16,
+    "levels": {
+      "ERROR": 16
+    },
+    "top_sources": {
+      "crates/forge_repo/src/provider/event.rs": 12,
+      "crates/forge_repo/src/provider/openai.rs": 4
+    }
+  },
+  "Fetching": {
+    "count": 660,
+    "levels": {
+      "DEBUG": 330,
+      "INFO": 330
+    },
+    "top_sources": {
+      "crates/forge_repo/src/provider/openai.rs": 660
+    }
+  },
+  "File": {
+    "count": 737,
+    "levels": {
+      "INFO": 737
+    },
+    "top_sources": {
+      "crates/forge_app/src/operation.rs": 737
+    }
+  },
+  "Initializing": {
+    "count": 136,
+    "levels": {
+      "DEBUG": 136
+    },
+    "top_sources": {
+      "crates/forge_app/src/hooks/tracing.rs": 136
+    }
+  },
+  "MultiPatch": {
+    "count": 2,
+    "levels": {
+      "DEBUG": 2
+    },
+    "top_sources": {
+      "crates/forge_domain/src/tools/catalog.rs": 2
+    }
+  },
+  "No": {
+    "count": 8,
+    "levels": {
+      "ERROR": 8
+    },
+    "top_sources": {
+      "crates/forge_app/src/tool_registry.rs": 8
+    }
+  },
+  "Patch": {
+    "count": 2,
+    "levels": {
+      "DEBUG": 2
+    },
+    "top_sources": {
+      "crates/forge_domain/src/tools/catalog.rs": 2
+    }
+  },
+  "Permission": {
+    "count": 872,
+    "levels": {
+      "INFO": 872
+    },
+    "top_sources": {
+      "crates/forge_app/src/tool_registry.rs": 525,
+      "crates/forge_services/src/policy.rs": 347
+    }
+  },
+  "Processing": {
+    "count": 1725,
+    "levels": {
+      "INFO": 1725
+    },
+    "top_sources": {
+      "crates/forge_app/src/hooks/tracing.rs": 1725
+    }
+  },
+  "Readline": {
+    "count": 5,
+    "levels": {
+      "DEBUG": 5
+    },
+    "top_sources": {
+      "crates/forge_select/src/input.rs": 5
+    }
+  },
+  "Received": {
+    "count": 1725,
+    "levels": {
+      "DEBUG": 1725
+    },
+    "top_sources": {
+      "crates/forge_repo/src/provider/event.rs": 1725
+    }
+  },
+  "Request": {
+    "count": 2257,
+    "levels": {
+      "DEBUG": 2257
+    },
+    "top_sources": {
+      "crates/forge_infra/src/http.rs": 2257
+    }
+  },
+  "Retry": {
+    "count": 11,
+    "levels": {
+      "ERROR": 11
+    },
+    "top_sources": {
+      "crates/forge_app/src/orch.rs": 11
+    }
+  },
+  "Set": {
+    "count": 2,
+    "levels": {
+      "DEBUG": 2
+    },
+    "top_sources": {
+      "crates/forge_infra/src/executor.rs": 2
+    }
+  },
+  "Starting": {
+    "count": 222,
+    "levels": {
+      "DEBUG": 222
+    },
+    "top_sources": {
+      "crates/forge_repo/src/validation.rs": 222
+    }
+  },
+  "Syntax": {
+    "count": 257,
+    "levels": {
+      "DEBUG": 213,
+      "WARN": 44
+    },
+    "top_sources": {
+      "crates/forge_repo/src/validation.rs": 257
+    }
+  },
+  "Title": {
+    "count": 3,
+    "levels": {
+      "DEBUG": 3
+    },
+    "top_sources": {
+      "crates/forge_app/src/hooks/tracing.rs": 3
+    }
+  },
+  "Token": {
+    "count": 1725,
+    "levels": {
+      "DEBUG": 1725
+    },
+    "top_sources": {
+      "crates/forge_domain/src/compact/compact_config.rs": 1725
+    }
+  },
+  "Tool": {
+    "count": 4467,
+    "levels": {
+      "DEBUG": 4312,
+      "WARN": 115,
+      "ERROR": 40
+    },
+    "top_sources": {
+      "crates/forge_app/src/hooks/tracing.rs": 4291,
+      "crates/forge_app/src/system_prompt.rs": 136,
+      "crates/forge_app/src/tool_executor.rs": 40
+    }
+  },
+  "User": {
+    "count": 54,
+    "levels": {
+      "INFO": 54
+    },
+    "top_sources": {
+      "crates/forge_main/src/ui.rs": 54
+    }
+  },
+  "background": {
+    "count": 4,
+    "levels": {
+      "WARN": 4
+    },
+    "top_sources": {
+      "crates/forge_repo/src/provider/chat.rs": 4
+    }
+  },
+  "returning": {
+    "count": 330,
+    "levels": {
+      "DEBUG": 330
+    },
+    "top_sources": {
+      "crates/forge_repo/src/provider/chat.rs": 330
+    }
+  },
+  "unknown": {
+    "count": 16,
+    "levels": {
+      "ERROR": 16
+    },
+    "top_sources": {
+      "crates/forge_main/src/ui.rs": 16
+    }
+  }
+}
