@@ -3,7 +3,6 @@ name = "forge_app"
 version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
-lints.workspace = true
 
 [dependencies]
 forge_domain.workspace = true
@@ -32,7 +31,6 @@ tempfile.workspace = true
 strum.workspace = true
 strum_macros.workspace = true
 forge_template.workspace = true
-forge_select.workspace = true
 merge.workspace = true
 convert_case.workspace = true
 backon.workspace = true
