@@ -37,7 +37,8 @@ static CACHED_CLIENT_ID: LazyLock<String> = LazyLock::new(|| {
 });
 static CACHED_OS_NAME: LazyLock<String> =
     LazyLock::new(|| System::long_os_version().unwrap_or("Unknown".to_string()));
-static CACHED_USER: LazyLock<String> = LazyLock::new(|| whoami::username());
+static CACHED_USER: LazyLock<String> =
+    LazyLock::new(|| whoami::username().unwrap_or_else(|_| "unknown".to_string()));
 static CACHED_CWD: LazyLock<Option<String>> = LazyLock::new(|| {
     std::env::current_dir()
         .ok()
