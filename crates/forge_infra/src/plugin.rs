@@ -11,7 +11,7 @@ use async_trait::async_trait;
 /// of the Forge application. They have access to services and can participate
 /// in the application lifecycle.
 #[async_trait::async_trait]
-pub trait Plugin<S: Services>: Send + Sync {
+pub trait Plugin<S>: Send + Sync {
     /// Returns the plugin's name.
     ///
     /// The name must be unique among all loaded plugins.
