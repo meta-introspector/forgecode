@@ -10,6 +10,7 @@ use forge_domain::{
     SkillRepository, SnapshotRepository, TextPatchRepository, ValidationRepository,
     WorkspaceIndexRepository,
 };
+use forge_infra::{Plugin, PluginManager};
 
 use crate::ForgeProviderAuthService;
 use crate::agent_registry::ForgeAgentRegistryService;
@@ -84,6 +85,7 @@ pub struct ForgeServices<
     workspace_service: Arc<crate::context_engine::ForgeWorkspaceService<F, FdDefault<F>>>,
     skill_service: Arc<ForgeSkillFetch<F>>,
     infra: Arc<F>,
+    plugin_manager: PluginManager,
 }
 
 impl<
@@ -171,6 +173,7 @@ impl<
             skill_service,
             chat_service,
             infra,
+            plugin_manager: PluginManager::new(),
         }
     }
 }
@@ -338,6 +341,61 @@ impl<
 
     fn provider_service(&self) -> &Self::ProviderService {
         &self.chat_service
+    }
+}
+
+impl<
+    F: EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + HttpInfra
+        + McpServerInfra
+        + WalkerInfra
+        + SnapshotRepository
+        + ConversationRepository
+        + KVStore
+        + ChatRepository
+        + ProviderRepository
+        + WorkspaceIndexRepository
+        + AgentRepository
+        + SkillRepository
+        + ValidationRepository,
+> ForgeServices<F>
+{
+    /// Initializes all registered plugins
+    ///
+    /// # Returns
+    ///
+    /// Returns Ok(()) if all plugins were initialized successfully, or an error if any failed
+    pub async fn initialize_plugins(&self) -> anyhow::Result<()> {
+        // Load ZOS plugins from the zos-server/plugins directory
+        let mut zos_bridge = crate::forge_infra::ZosPluginBridge::default();
+        let _ = zos_bridge.load_all_plugins().await;
+
+        // Add loaded ZOS plugins to the plugin manager
+        for (name, plugin) in zos_bridge.loaded_plugins.into_iter() {
+            self.plugin_manager.register_plugin(plugin);
+        }
+
+        let self_arc = Arc::new(self.clone()) as Arc<dyn Services>;
+        self.plugin_manager.initialize_all(self_arc).await
+    }
+
+    /// Shuts down all initialized plugins
+    ///
+    /// # Returns
+    ///
+    /// Returns Ok(()) if all plugins were shut down successfully, or an error if any failed
+    pub async fn shutdown_plugins(&self) -> anyhow::Result<()> {
+        self.plugin_manager.shutdown_all().await
+    }
+
+    /// Returns a reference to the plugin manager
+    pub fn plugin_manager(&self) -> &PluginManager {
+        &self.plugin_manager
+    }
+
+    /// Returns a mutable reference to the plugin manager
+    pub fn plugin_manager_mut(&mut self) -> &mut PluginManager {
+        &mut self.plugin_manager
     }
 }
 

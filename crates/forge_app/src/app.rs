@@ -28,6 +28,7 @@ use crate::{
 
 /// Builds a [`TemplateConfig`] from a [`ForgeConfig`].
 ///
+///
 /// Converts the configuration-layer field names into the domain-layer struct
 /// expected by [`SystemContext`] for tool description template rendering.
 pub(crate) fn build_template_config(config: &ForgeConfig) -> forge_domain::TemplateConfig {
@@ -53,6 +54,15 @@ impl<S: Services + EnvironmentInfra<Config = forge_config::ForgeConfig>> ForgeAp
     /// Creates a new ForgeApp instance with the provided services.
     pub fn new(services: Arc<S>) -> Self {
         Self { tool_registry: ToolRegistry::new(services.clone()), services }
+    }
+
+    /// Initializes all registered plugins
+    ///
+    /// # Returns
+    ///
+    /// Returns Ok(()) if all plugins were initialized successfully, or an error if any failed
+    pub async fn initialize_plugins(&self) -> anyhow::Result<()> {
+        self.services.initialize_plugins().await
     }
 
     /// Executes a chat request and returns a stream of responses.
@@ -106,7 +116,7 @@ impl<S: Services + EnvironmentInfra<Config = forge_config::ForgeConfig>> ForgeAp
         // Get system and mcp tool definitions and resolve them for the agent
         let all_tool_definitions = self.tool_registry.list().await?;
         let tool_resolver = ToolResolver::new(all_tool_definitions);
-        let tool_definitions: Vec<ToolDefinition> =
+        let token_definitions: Vec<ToolDefinition> =
             tool_resolver.resolve(&agent).into_iter().cloned().collect();
         let max_tool_failure_per_turn = agent.max_tool_failure_per_turn.unwrap_or(3);
 
@@ -116,7 +126,7 @@ impl<S: Services + EnvironmentInfra<Config = forge_config::ForgeConfig>> ForgeAp
         let conversation =
             SystemPrompt::new(self.services.clone(), environment.clone(), agent.clone())
                 .custom_instructions(custom_instructions.clone())
-                .tool_definitions(tool_definitions.clone())
+                .tool_definitions(token_definitions.clone())
                 .models(models.clone())
                 .files(files.clone())
                 .max_extensions(forge_config.max_extensions)
@@ -140,7 +150,7 @@ impl<S: Services + EnvironmentInfra<Config = forge_config::ForgeConfig>> ForgeAp
             .await;
 
         let conversation = InitConversationMetrics::new(current_time).apply(conversation);
-        let conversation = ApplyTunableParameters::new(agent.clone(), tool_definitions.clone())
+        let conversation = ApplyTunableParameters::new(agent.clone(), token_definitions.clone())
             .apply(conversation);
         let conversation = SetConversationId.apply(conversation);
 
@@ -178,7 +188,7 @@ impl<S: Services + EnvironmentInfra<Config = forge_config::ForgeConfig>> ForgeAp
             self.services.get_config()?,
         )
         .error_tracker(ToolErrorTracker::new(max_tool_failure_per_turn))
-        .tool_definitions(tool_definitions)
+        .tool_definitions(token_definitions)
         .models(models)
         .hook(Arc::new(hook));
 

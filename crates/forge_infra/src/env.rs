@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use forge_app::EnvironmentInfra;
 use forge_config::{ConfigReader, ForgeConfig, ModelConfig};
+use std::pin::Pin;
 use forge_domain::{ConfigOperation, Environment};
 use tracing::debug;
 
@@ -132,26 +133,34 @@ impl EnvironmentInfra for ForgeEnvironmentInfra {
         self.cached_config()
     }
 
-    async fn update_environment(&self, ops: Vec<ConfigOperation>) -> anyhow::Result<()> {
-        // Load the global config (with defaults applied) for the update round-trip
-        let mut fc = ConfigReader::default()
-            .read_defaults()
-            .read_global()
-            .build()?;
+    fn update_environment(&self, ops: Vec<ConfigOperation>) -> Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>> {
+        Box::pin(async move {
+            // Load the global config (with defaults applied) for the update round-trip
+            let mut fc = ConfigReader::default()
+                .read_defaults()
+                .read_global()
+                .build()?;
 
-        debug!(config = ?fc, ?ops, "applying app config operations");
 
-        for op in ops {
-            apply_config_op(&mut fc, op);
-        }
+            debug!(config = ?fc, ?ops, "applying app config operations");
 
-        fc.write()?;
-        debug!(config = ?fc, "written .forge.toml");
 
-        // Reset cache so next get_config() re-reads the updated values from disk
-        *self.cache.lock().expect("cache mutex poisoned") = None;
+            for op in ops {
+                apply_config_op(&mut fc, op);
+            }
 
-        Ok(())
+
+
+            fc.write()?;
+            debug!(config = ?fc, "written .forge.toml");
+
+
+            // Reset cache so next get_config() re-reads the updated values from disk
+            *self.cache.lock().expect("cache mutex poisoned") = None;
+
+
+            Ok(())
+        })
     }
 }
 

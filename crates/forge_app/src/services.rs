@@ -596,6 +596,13 @@ pub trait Services: Send + Sync + 'static + Clone + EnvironmentInfra {
     fn provider_auth_service(&self) -> &Self::ProviderAuthService;
     fn workspace_service(&self) -> &Self::WorkspaceService;
     fn skill_fetch_service(&self) -> &Self::SkillFetchService;
+
+    /// Initializes all registered plugins
+    ///
+    /// # Returns
+    ///
+    /// Returns Ok(()) if all plugins were initialized successfully, or an error if any failed
+    async fn initialize_plugins(&self) -> anyhow::Result<()>;
 }
 
 #[async_trait::async_trait]

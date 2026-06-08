@@ -45,7 +45,7 @@ pub trait EnvironmentInfra: Send + Sync {
     fn update_environment(
         &self,
         ops: Vec<ConfigOperation>,
-    ) -> impl std::future::Future<Output = anyhow::Result<()>> + Send;
+    ) -> Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>>;
 }
 
 /// Repository for accessing system environment information
