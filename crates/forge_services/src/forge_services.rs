@@ -55,7 +55,21 @@ pub struct ForgeServices<
         + WorkspaceIndexRepository
         + AgentRepository
         + SkillRepository
-        + ValidationRepository,
+        + ValidationRepository
+        + FileReaderInfra
+        + FileWriterInfra
+        + CommandInfra
+        + UserInfra
+        + FileRemoverInfra
+        + FileInfoInfra
+        + FileDirectoryInfra
+        + Clone
+        + StrategyFactory
+        + FuzzySearchRepository
+        + TextPatchRepository
+        + Send
+        + Sync
+        + 'static,
 > {
     chat_service: Arc<ForgeProviderService<F>>,
     config_service: Arc<ForgeAppConfigService<F>>,

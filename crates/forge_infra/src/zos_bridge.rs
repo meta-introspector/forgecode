@@ -11,7 +11,7 @@ use libloading::{Library, Symbol};
 use crate::plugin::{Plugin, PluginManager};
 use forge_config::ForgeConfig;
 use forge_domain::{AnyProvider, Conversation, ConversationId, FileInfo};
-use forge_services::{ProviderAuthService, Services};
+use forge_app::{Services, ProviderAuthService};
 
 /// Type definitions for ZOS plugin functions
 type ZosPluginNameFn = unsafe extern "C" fn() -> *const std::os::raw::c_char;
@@ -42,16 +42,17 @@ impl<S: Services> ZosPluginWrapper<S> {
     fn new(library: Library, name: String) -> Result<Self> {
         unsafe {
             // Get the required plugin functions
-            let init_fn: Symbol<ZosPluginInitFn> = library.get(b"zos_plugin_init")
+            let init_fn_symbol: Symbol<ZosPluginInitFn> = library.get(b"zos_plugin_init")
                 .context("Failed to find zos_plugin_init symbol")?;
-            let destroy_fn: Symbol<ZosPluginDestroyFn> = library.get(b"zos_plugin_destroy")
+            let destroy_fn_symbol: Symbol<ZosPluginDestroyFn> = library.get(b"zos_plugin_destroy")
                 .context("Failed to find zos_plugin_destroy symbol")?;
-
+            let init_fn = *init_fn_symbol;
+            let destroy_fn = *destroy_fn_symbol;
             Ok(Self {
                 _library: Arc::new(library),
                 name,
-                init_fn: *init_fn,
-                destroy_fn: *destroy_fn,
+                init_fn,
+                destroy_fn,
                 initialized: false,
                 _service_type: std::marker::PhantomData,
             })
@@ -80,7 +81,7 @@ impl<S: Services> Plugin<S> for ZosPluginWrapper<S> {
         }
 
         // Call the plugin's init function
-        let result = (self.init_fn)();
+        let result = unsafe { (self.init_fn)() };
         if result != 0 {
             anyhow::bail!("Plugin {} initialization failed with exit code {}", self.name, result);
         }
@@ -98,7 +99,7 @@ impl<S: Services> Plugin<S> for ZosPluginWrapper<S> {
         }
 
         // Call the plugin's destroy function
-        let result = (self.destroy_fn)();
+        let result = unsafe { (self.destroy_fn)() };
         if result != 0 {
             eprintln!("Warning: Plugin {} destroy function returned non-zero exit code: {}", self.name, result);
         }
@@ -212,7 +213,7 @@ impl<S: Services> ZosPluginBridge<S> {
     /// Result indicating success or failure
     async fn load_plugin_from_path(&mut self, so_path: &Path) -> Result<()> {
         // Load the library
-        let library = Library::new(so_path)
+        let library = unsafe { Library::new(so_path) }
             .with_context(|| format!("Failed to load plugin library: {}", so_path.display()))?;
 
         // Get the plugin name

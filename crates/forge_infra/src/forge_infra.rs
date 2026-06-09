@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
+use std::pin::Pin;
 use std::process::ExitStatus;
 use std::sync::Arc;
 
@@ -10,7 +11,7 @@ use forge_app::{
     StrategyFactory, UserInfra, WalkerInfra,
 };
 use forge_domain::{
-    AuthMethod, CommandOutput, FileInfo as FileInfoData, McpServerConfig, ProviderId, URLParamSpec,
+    AuthMethod, CommandOutput, ConfigOperation, FileInfo as FileInfoData, McpServerConfig, ProviderId, URLParamSpec,
 };
 use forge_eventsource::EventSource;
 use reqwest::header::HeaderMap;
@@ -139,11 +140,8 @@ impl EnvironmentInfra for ForgeInfra {
         self.config_infra.get_config()
     }
 
-    async fn update_environment(
-        &self,
-        ops: Vec<forge_domain::ConfigOperation>,
-    ) -> anyhow::Result<()> {
-        self.config_infra.update_environment(ops).await
+     fn update_environment(&self, ops: Vec<ConfigOperation>) -> Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>> {
+        Box::pin(self.config_infra.update_environment(ops))
     }
 }
 

@@ -134,6 +134,7 @@ impl EnvironmentInfra for ForgeEnvironmentInfra {
     }
 
     fn update_environment(&self, ops: Vec<ConfigOperation>) -> Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>> {
+        let cache = self.cache.clone();
         Box::pin(async move {
             // Load the global config (with defaults applied) for the update round-trip
             let mut fc = ConfigReader::default()
@@ -141,23 +142,17 @@ impl EnvironmentInfra for ForgeEnvironmentInfra {
                 .read_global()
                 .build()?;
 
-
             debug!(config = ?fc, ?ops, "applying app config operations");
-
 
             for op in ops {
                 apply_config_op(&mut fc, op);
             }
 
-
-
             fc.write()?;
             debug!(config = ?fc, "written .forge.toml");
 
-
             // Reset cache so next get_config() re-reads the updated values from disk
-            *self.cache.lock().expect("cache mutex poisoned") = None;
-
+            *cache.lock().expect("cache mutex poisoned") = None;
 
             Ok(())
         })
@@ -165,10 +160,8 @@ impl EnvironmentInfra for ForgeEnvironmentInfra {
 }
 
 #[cfg(test)]
-mod tests {
     use std::path::PathBuf;
 
-    use forge_config::ForgeConfig;
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -280,4 +273,3 @@ mod tests {
         assert_eq!(actual_provider, Some("anthropic"));
         assert_eq!(actual_model, Some("claude-3-5-sonnet-20241022"));
     }
-}

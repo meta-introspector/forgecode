@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use anyhow::Result;
+use forge_app::Services;
 use async_trait::async_trait;
 
 /// A plugin that can be loaded and managed by the Forge application.
@@ -58,7 +59,7 @@ pub trait Plugin<S>: Send + Sync {
 /// to them by name or type.
 pub struct PluginManager<S> {
     plugins: HashMap<String, Arc<dyn Plugin<S>>>,
-    _service_type: std::marker::PhantomData<S>,
+    _service_type: std::marker::PhantomData::<S>,
 }
 
 impl<S: Services> PluginManager<S> {
@@ -66,7 +67,7 @@ impl<S: Services> PluginManager<S> {
     pub fn new() -> Self {
         Self {
             plugins: HashMap::new(),
-            _service_type: std::marker::PhantomData,
+            _service_type: std::marker::PhantomData::<S>,
         }
     }
 

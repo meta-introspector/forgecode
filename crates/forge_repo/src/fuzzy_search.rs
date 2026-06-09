@@ -41,11 +41,11 @@ impl<I: GrpcInfra> FuzzySearchRepository for ForgeFuzzySearchRepository<I> {
         // Call gRPC API
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let response = client
+        let tonic_response = client
             .fuzzy_search(request)
             .await
-            .context("Failed to call FuzzySearch gRPC")?
-            .into_inner();
+            .context("Failed to call FuzzySearch gRPC")?;
+        let response = tonic_response.into_inner();
 
         // Convert proto matches to domain matches
         let matches = response

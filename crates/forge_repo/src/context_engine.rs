@@ -119,11 +119,11 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
         let mut client = ForgeServiceClient::new(channel);
         let request = tonic::Request::new(CreateApiKeyRequest { user_id: None });
 
-        let response = client
+        let tonic_response = client
             .create_api_key(request)
             .await
-            .context("Failed to call CreateApiKey gRPC")?
-            .into_inner();
+            .context("Failed to call CreateApiKey gRPC")?;
+        let response = tonic_response.into_inner();
 
         response.try_into()
     }
@@ -211,67 +211,26 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let request = self.with_auth(request, auth_token)?;
 
+    async fn create_workspace(
+        &self,
+        working_dir: &std::path::Path,
+        auth_token: &forge_domain::ApiKey,
+    ) -> Result<WorkspaceId> {
+        let request = tonic::Request::new(CreateWorkspaceRequest {
+            workspace: Some(WorkspaceDefinition {
+                working_dir: working_dir.to_string_lossy().replace("\\", "/"),
+                ..Default::default()
+            }),
+        });
+
+        let request = self.with_auth(request, auth_token)?;
+
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let response = client.search(request).await?;
+        let tonic_response = client.create_workspace(request).await?;
+        let response = tonic_response.into_inner();
 
-        let result = response.into_inner().result.unwrap_or_default();
-
-        // Convert QueryItems to CodeSearchResults
-        let results = result
-            .data
-            .into_iter()
-            .filter_map(|query_item| {
-                let node = query_item.node?;
-                let node_data = node.data?;
-                let node_id = node.node_id.map(|n| n.id).unwrap_or_default();
-
-                // Extract relevance and distance from proto (all optional)
-                let relevance = query_item.relevance;
-                let distance = query_item.distance;
-
-                // Convert proto node to domain CodeNode based on type
-                let code_node = match node_data.kind? {
-                    node_data::Kind::FileChunk(chunk) => {
-                        forge_domain::NodeData::FileChunk(forge_domain::FileChunk {
-                            file_path: chunk.path,
-                            content: chunk.content,
-                            start_line: chunk.start_line,
-                            end_line: chunk.end_line,
-                        })
-                    }
-                    node_data::Kind::File(file) => {
-                        forge_domain::NodeData::File(forge_domain::FileNode {
-                            file_path: file.path,
-                            content: file.content,
-                            hash: node.hash,
-                        })
-                    }
-                    node_data::Kind::FileRef(file_ref) => {
-                        forge_domain::NodeData::FileRef(forge_domain::FileRef {
-                            file_path: file_ref.path,
-                            file_hash: file_ref.file_hash,
-                        })
-                    }
-                    node_data::Kind::Note(note) => {
-                        forge_domain::NodeData::Note(forge_domain::Note { content: note.content })
-                    }
-                    node_data::Kind::Task(task) => {
-                        forge_domain::NodeData::Task(forge_domain::Task { task: task.task })
-                    }
-                };
-
-                // Wrap the node with its relevance and distance scores
-                Some(Node {
-                    node_id: node_id.into(),
-                    node: code_node,
-                    relevance,
-                    distance,
-                })
-            })
-            .collect();
-
-        Ok(results)
+        response.try_into()
     }
 
     /// List all workspaces for a user
@@ -284,10 +243,10 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let response = client.list_workspaces(request).await?;
+        let tonic_response: tonic::Response<ListWorkspacesResponse> = client.list_workspaces(request).await?;
+        let response = tonic_response.into_inner();
 
         response
-            .into_inner()
             .workspaces
             .into_iter()
             .map(|workspace| workspace.try_into())
@@ -307,9 +266,10 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let response = client.get_workspace_info(request).await?;
+        let tonic_response: tonic::Response<GetWorkspaceInfoResponse> = client.get_workspace_info(request).await?;
+        let response = tonic_response.into_inner();
 
-        let workspace = response.into_inner().workspace;
+        let workspace = response.workspace;
         workspace.map(|w| w.try_into()).transpose()
     }
 
@@ -329,10 +289,10 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let response = client.list_files(request).await?;
+        let tonic_response: tonic::Response<ListFilesResponse> = client.list_files(request).await?;
+        let response = tonic_response.into_inner();
 
         response
-            .into_inner()
             .files
             .into_iter()
             .map(|file_ref_node| file_ref_node.try_into())

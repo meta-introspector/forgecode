@@ -44,14 +44,14 @@ impl<I: GrpcInfra> ValidationRepository for ForgeValidationRepository<I> {
         // Call gRPC API
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let response = client
+        let tonic_response = client
             .validate_files(request)
             .await
-            .context("Failed to call ValidateFiles gRPC")?
-            .into_inner();
+            .context("Failed to call ValidateFiles gRPC")?;
+        let response = tonic_response.into_inner();
 
         // Extract validation result for our file
-        let result = response
+        let result: Vec<ValidationResult> = response
             .results
             .into_iter()
             .find(|r| r.file_path == path_str)
