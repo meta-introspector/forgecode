@@ -80,6 +80,55 @@ impl TryFrom<FileRefNode> for forge_domain::FileHash {
     }
 }
 
+impl TryFrom<QueryItem> for forge_domain::Node {
+    type Error = anyhow::Error;
+
+    fn try_from(item: QueryItem) -> Result<Self> {
+        let node = item.node.context("Missing node in QueryItem")?;
+        let node_id = node
+            .node_id
+            .context("Missing node_id in Node")?
+            .id;
+        let node_id = forge_domain::NodeId::new(node_id);
+
+        let data = node.data.context("Missing node data")?;
+        let data = match data.kind.context("Missing node data kind")? {
+            node_data::Kind::File(file) => forge_domain::NodeData::File(forge_domain::FileNode {
+                file_path: file.path,
+                content: file.content,
+                hash: node.hash,
+            }),
+            node_data::Kind::FileChunk(chunk) => {
+                forge_domain::NodeData::FileChunk(forge_domain::FileChunk {
+                    file_path: chunk.path,
+                    content: chunk.content,
+                    start_line: chunk.start_line,
+                    end_line: chunk.end_line,
+                })
+            }
+            node_data::Kind::FileRef(file_ref) => {
+                forge_domain::NodeData::FileRef(forge_domain::FileRef {
+                    file_path: file_ref.path,
+                    file_hash: file_ref.file_hash,
+                })
+            }
+            node_data::Kind::Note(note) => forge_domain::NodeData::Note(forge_domain::Note {
+                content: note.content,
+            }),
+            node_data::Kind::Task(task) => forge_domain::NodeData::Task(forge_domain::Task {
+                task: task.task,
+            }),
+        };
+
+        Ok(forge_domain::Node {
+            node_id,
+            node: data,
+            relevance: None,
+            distance: None,
+        })
+    }
+}
+
 /// gRPC implementation of WorkspaceIndexRepository
 ///
 /// This repository provides gRPC-based workspace operations.
@@ -119,7 +168,7 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
         let mut client = ForgeServiceClient::new(channel);
         let request = tonic::Request::new(CreateApiKeyRequest { user_id: None });
 
-        let tonic_response = client
+        let tonic_response: tonic::Response<CreateApiKeyResponse> = client
             .create_api_key(request)
             .await
             .context("Failed to call CreateApiKey gRPC")?;
@@ -144,7 +193,10 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let response = client.create_workspace(request).await?.into_inner();
+        let response: CreateWorkspaceResponse = client
+            .create_workspace(request)
+            .await?
+            .into_inner();
 
         response.try_into()
     }
@@ -174,10 +226,12 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let response = client.upload_files(request).await?;
+        let response: UploadFilesResponse = client
+            .upload_files(request)
+            .await?
+            .into_inner();
 
         let result = response
-            .into_inner()
             .result
             .context("Server did not return upload result in UploadFiles response")?;
 
@@ -211,26 +265,19 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let request = self.with_auth(request, auth_token)?;
 
-    async fn create_workspace(
-        &self,
-        working_dir: &std::path::Path,
-        auth_token: &forge_domain::ApiKey,
-    ) -> Result<WorkspaceId> {
-        let request = tonic::Request::new(CreateWorkspaceRequest {
-            workspace: Some(WorkspaceDefinition {
-                working_dir: working_dir.to_string_lossy().replace("\\", "/"),
-                ..Default::default()
-            }),
-        });
-
-        let request = self.with_auth(request, auth_token)?;
-
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let tonic_response = client.create_workspace(request).await?;
+        let tonic_response: tonic::Response<SearchResponse> = client.search(request).await?;
         let response = tonic_response.into_inner();
+        let result = response
+            .result
+            .context("Server did not return search result in SearchResponse")?;
 
-        response.try_into()
+        result
+            .data
+            .into_iter()
+            .map(|item: QueryItem| item.try_into())
+            .collect()
     }
 
     /// List all workspaces for a user

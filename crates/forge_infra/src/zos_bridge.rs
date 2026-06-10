@@ -268,6 +268,14 @@ impl<S: Services> ZosPluginBridge<S> {
     pub fn has_plugins(&self) -> bool {
         !self.loaded_plugins.is_empty()
     }
+
+    /// Consumes the bridge and returns all loaded plugins as plugin trait objects.
+    pub fn into_loaded_plugins(self) -> Vec<Arc<dyn Plugin<S>>> {
+        self.loaded_plugins
+            .into_values()
+            .map(|plugin| -> Arc<dyn Plugin<S>> { Arc::new(plugin) })
+            .collect()
+    }
 }
 
 impl<S: Services> Default for ZosPluginBridge<S> {

@@ -6,9 +6,9 @@ use forge_app::GrpcInfra;
 use forge_domain::{FuzzySearchRepository, SearchMatch};
 
 use crate::proto_generated::FuzzySearchRequest;
+use crate::proto_generated::FuzzySearchResponse;
 use crate::proto_generated::forge_service_client::ForgeServiceClient;
 
-/// gRPC implementation of FuzzySearchRepository
 pub struct ForgeFuzzySearchRepository<I> {
     infra: Arc<I>,
 }
@@ -41,7 +41,7 @@ impl<I: GrpcInfra> FuzzySearchRepository for ForgeFuzzySearchRepository<I> {
         // Call gRPC API
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let tonic_response = client
+        let tonic_response: tonic::Response<FuzzySearchResponse> = client
             .fuzzy_search(request)
             .await
             .context("Failed to call FuzzySearch gRPC")?;

@@ -8,7 +8,9 @@ use forge_domain::{SyntaxError, ValidationRepository};
 use tracing::{debug, warn};
 
 use crate::proto_generated::forge_service_client::ForgeServiceClient;
-use crate::proto_generated::{self, File, ValidateFilesRequest};
+use crate::proto_generated::{
+    self, File, FileValidationResult, ValidateFilesRequest, ValidateFilesResponse,
+};
 
 /// gRPC implementation of ValidationRepository
 pub struct ForgeValidationRepository<I> {
@@ -44,14 +46,14 @@ impl<I: GrpcInfra> ValidationRepository for ForgeValidationRepository<I> {
         // Call gRPC API
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let tonic_response = client
+        let tonic_response: tonic::Response<ValidateFilesResponse> = client
             .validate_files(request)
             .await
             .context("Failed to call ValidateFiles gRPC")?;
         let response = tonic_response.into_inner();
 
         // Extract validation result for our file
-        let result: Vec<ValidationResult> = response
+        let result: FileValidationResult = response
             .results
             .into_iter()
             .find(|r| r.file_path == path_str)

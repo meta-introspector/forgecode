@@ -65,14 +65,6 @@ impl ForgeEditor {
             KeyEvent(KeyCode::Enter, Modifiers::ALT),
             EventHandler::Simple(Cmd::Newline),
         );
-        editor.bind_sequence(
-            KeyEvent(KeyCode::Char('k'), Modifiers::CTRL),
-            EventHandler::Simple(Cmd::ClearScreen),
-        );
-        editor.bind_sequence(
-            KeyEvent(KeyCode::Char('K'), Modifiers::CTRL),
-            EventHandler::Simple(Cmd::ClearScreen),
-        );
         editor.set_helper(Some(helper));
         let _ = editor.load_history(&history_file);
         Self { editor, history_file, pending_buffer: None }

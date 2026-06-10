@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use forge_app::{
     AgentRepository, CommandInfra, DirectoryReaderInfra, EnvironmentInfra, FileDirectoryInfra,
@@ -10,7 +10,7 @@ use forge_domain::{
     SkillRepository, SnapshotRepository, TextPatchRepository, ValidationRepository,
     WorkspaceIndexRepository,
 };
-use forge_infra::{Plugin, PluginManager};
+use forge_infra::{PluginManager, ZosPluginBridge};
 
 use crate::ForgeProviderAuthService;
 use crate::agent_registry::ForgeAgentRegistryService;
@@ -41,10 +41,9 @@ type AuthService<F> = ForgeAuthService<F>;
 /// - F: The infrastructure implementation that provides core services like
 ///   environment, file reading, vector indexing, and embedding.
 /// - R: The repository implementation that provides data persistence
-#[derive(Clone)]
 pub struct ForgeServices<
     F: HttpInfra
-        + EnvironmentInfra
+        + EnvironmentInfra<Config = forge_config::ForgeConfig>
         + McpServerInfra
         + WalkerInfra
         + SnapshotRepository
@@ -63,6 +62,7 @@ pub struct ForgeServices<
         + FileRemoverInfra
         + FileInfoInfra
         + FileDirectoryInfra
+        + DirectoryReaderInfra
         + Clone
         + StrategyFactory
         + FuzzySearchRepository
@@ -99,7 +99,7 @@ pub struct ForgeServices<
     workspace_service: Arc<crate::context_engine::ForgeWorkspaceService<F, FdDefault<F>>>,
     skill_service: Arc<ForgeSkillFetch<F>>,
     infra: Arc<F>,
-    plugin_manager: PluginManager,
+    plugin_manager: Arc<Mutex<PluginManager<ForgeServices<F>>>>,
 }
 
 impl<
@@ -113,6 +113,12 @@ impl<
         + DirectoryReaderInfra
         + CommandInfra
         + UserInfra
+        + FileRemoverInfra
+        + FileDirectoryInfra
+        + Clone
+        + StrategyFactory
+        + FuzzySearchRepository
+        + TextPatchRepository
         + SnapshotRepository
         + ConversationRepository
         + ChatRepository
@@ -121,7 +127,10 @@ impl<
         + WorkspaceIndexRepository
         + AgentRepository
         + SkillRepository
-        + ValidationRepository,
+        + ValidationRepository
+        + Send
+        + Sync
+        + 'static,
 > ForgeServices<F>
 {
     pub fn new(infra: Arc<F>) -> Self {
@@ -187,7 +196,73 @@ impl<
             skill_service,
             chat_service,
             infra,
-            plugin_manager: PluginManager::new(),
+            plugin_manager: Arc::new(Mutex::new(PluginManager::new())),
+        }
+    }
+}
+
+impl<
+    F: McpServerInfra
+        + EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + FileWriterInfra
+        + FileInfoInfra
+        + FileReaderInfra
+        + HttpInfra
+        + WalkerInfra
+        + DirectoryReaderInfra
+        + CommandInfra
+        + UserInfra
+        + FileRemoverInfra
+        + FileDirectoryInfra
+        + Clone
+        + StrategyFactory
+        + FuzzySearchRepository
+        + TextPatchRepository
+        + SnapshotRepository
+        + ConversationRepository
+        + ChatRepository
+        + ProviderRepository
+        + KVStore
+        + WorkspaceIndexRepository
+        + AgentRepository
+        + SkillRepository
+        + ValidationRepository
+        + Send
+        + Sync
+        + 'static,
+> Clone for ForgeServices<F>
+{
+    fn clone(&self) -> Self {
+        Self {
+            chat_service: self.chat_service.clone(),
+            config_service: self.config_service.clone(),
+            conversation_service: self.conversation_service.clone(),
+            template_service: self.template_service.clone(),
+            attachment_service: self.attachment_service.clone(),
+            discovery_service: self.discovery_service.clone(),
+            mcp_manager: self.mcp_manager.clone(),
+            file_create_service: self.file_create_service.clone(),
+            plan_create_service: self.plan_create_service.clone(),
+            file_read_service: self.file_read_service.clone(),
+            image_read_service: self.image_read_service.clone(),
+            file_search_service: self.file_search_service.clone(),
+            file_remove_service: self.file_remove_service.clone(),
+            file_patch_service: self.file_patch_service.clone(),
+            file_undo_service: self.file_undo_service.clone(),
+            shell_service: self.shell_service.clone(),
+            fetch_service: self.fetch_service.clone(),
+            followup_service: self.followup_service.clone(),
+            mcp_service: self.mcp_service.clone(),
+            custom_instructions_service: self.custom_instructions_service.clone(),
+            auth_service: self.auth_service.clone(),
+            agent_registry_service: self.agent_registry_service.clone(),
+            command_loader_service: self.command_loader_service.clone(),
+            policy_service: self.policy_service.clone(),
+            provider_auth_service: self.provider_auth_service.clone(),
+            workspace_service: self.workspace_service.clone(),
+            skill_service: self.skill_service.clone(),
+            infra: self.infra.clone(),
+            plugin_manager: Arc::new(Mutex::new(PluginManager::new())),
         }
     }
 }
@@ -218,7 +293,8 @@ impl<
         + ValidationRepository
         + FuzzySearchRepository
         + TextPatchRepository
-        + Clone
+        + Send
+        + Sync
         + 'static,
 > Services for ForgeServices<F>
 {
@@ -356,13 +432,50 @@ impl<
     fn provider_service(&self) -> &Self::ProviderService {
         &self.chat_service
     }
+
+    async fn initialize_plugins(&self) -> anyhow::Result<()> {
+        // Load ZOS plugins from the zos-server/plugins directory
+        let mut zos_bridge = ZosPluginBridge::<ForgeServices<F>>::default();
+        let _ = zos_bridge.load_all_plugins().await;
+
+        // Add loaded ZOS plugins to the plugin manager
+        {
+            let mut plugin_manager = self
+                .plugin_manager
+                .lock()
+                .map_err(|_| anyhow::anyhow!("plugin manager lock poisoned"))?;
+            for plugin in zos_bridge.into_loaded_plugins() {
+                plugin_manager.register_plugin(plugin);
+            }
+        }
+
+        let self_arc = Arc::new(self.clone());
+        self.plugin_manager
+            .lock()
+            .map_err(|_| anyhow::anyhow!("plugin manager lock poisoned"))?
+            .initialize_all(self_arc)
+            .await
+    }
 }
 
 impl<
     F: EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + FileWriterInfra
+        + FileInfoInfra
+        + FileReaderInfra
         + HttpInfra
         + McpServerInfra
         + WalkerInfra
+        + DirectoryReaderInfra
+        + CommandInfra
+        + UserInfra
+        + FileRemoverInfra
+        + FileInfoInfra
+        + FileDirectoryInfra
+        + Clone
+        + StrategyFactory
+        + FuzzySearchRepository
+        + TextPatchRepository
         + SnapshotRepository
         + ConversationRepository
         + KVStore
@@ -371,53 +484,35 @@ impl<
         + WorkspaceIndexRepository
         + AgentRepository
         + SkillRepository
-        + ValidationRepository,
+        + ValidationRepository
+        + Send
+        + Sync,
 > ForgeServices<F>
 {
-    /// Initializes all registered plugins
-    ///
-    /// # Returns
-    ///
-    /// Returns Ok(()) if all plugins were initialized successfully, or an error if any failed
-    pub async fn initialize_plugins(&self) -> anyhow::Result<()> {
-        // Load ZOS plugins from the zos-server/plugins directory
-        let mut zos_bridge = crate::forge_infra::ZosPluginBridge::default();
-        let _ = zos_bridge.load_all_plugins().await;
-
-        // Add loaded ZOS plugins to the plugin manager
-        for (name, plugin) in zos_bridge.loaded_plugins.into_iter() {
-            self.plugin_manager.register_plugin(plugin);
-        }
-
-        let self_arc = Arc::new(self.clone()) as Arc<dyn Services>;
-        self.plugin_manager.initialize_all(self_arc).await
-    }
-
-    /// Shuts down all initialized plugins
-    ///
-    /// # Returns
-    ///
-    /// Returns Ok(()) if all plugins were shut down successfully, or an error if any failed
-    pub async fn shutdown_plugins(&self) -> anyhow::Result<()> {
-        self.plugin_manager.shutdown_all().await
-    }
-
     /// Returns a reference to the plugin manager
-    pub fn plugin_manager(&self) -> &PluginManager {
+    pub fn plugin_manager(&self) -> &Arc<Mutex<PluginManager<ForgeServices<F>>>> {
         &self.plugin_manager
-    }
-
-    /// Returns a mutable reference to the plugin manager
-    pub fn plugin_manager_mut(&mut self) -> &mut PluginManager {
-        &mut self.plugin_manager
     }
 }
 
 impl<
     F: EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + FileWriterInfra
+        + FileInfoInfra
+        + FileReaderInfra
         + HttpInfra
         + McpServerInfra
         + WalkerInfra
+        + DirectoryReaderInfra
+        + CommandInfra
+        + UserInfra
+        + FileRemoverInfra
+        + FileInfoInfra
+        + FileDirectoryInfra
+        + Clone
+        + StrategyFactory
+        + FuzzySearchRepository
+        + TextPatchRepository
         + SnapshotRepository
         + ConversationRepository
         + KVStore
@@ -444,7 +539,7 @@ impl<
     fn update_environment(
         &self,
         ops: Vec<forge_domain::ConfigOperation>,
-    ) -> impl std::future::Future<Output = anyhow::Result<()>> + Send {
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>> {
         self.infra.update_environment(ops)
     }
 

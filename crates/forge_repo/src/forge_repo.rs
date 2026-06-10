@@ -32,6 +32,8 @@ use crate::fuzzy_search::ForgeFuzzySearchRepository;
 use crate::provider::{ForgeChatRepository, ForgeProviderRepository};
 use crate::skill::ForgeSkillRepository;
 use crate::validation::ForgeValidationRepository;
+use crate::proto_generated::forge_service_client::ForgeServiceClient;
+use crate::proto_generated::BuildTextPatchResponse;
 
 /// Repository layer that implements all domain repository traits
 ///
@@ -225,8 +227,8 @@ impl<F: EnvironmentInfra<Config = forge_config::ForgeConfig> + Send + Sync> Envi
     fn update_environment(
         &self,
         ops: Vec<forge_domain::ConfigOperation>,
-    ) -> impl std::future::Future<Output = anyhow::Result<()>> + Send {
-        self.infra.update_environment(ops)
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>> {
+        Box::pin(self.infra.update_environment(ops))
     }
 
     fn get_env_var(&self, key: &str) -> Option<String> {
@@ -643,9 +645,11 @@ impl<F: GrpcInfra + Send + Sync> TextPatchRepository for ForgeRepo<F> {
         });
 
         let channel = self.infra.channel()?;
-        let mut client =
-            crate::proto_generated::forge_service_client::ForgeServiceClient::new(channel);
-        let response = client.build_text_patch(request).await?.into_inner();
+        let mut client = ForgeServiceClient::new(channel);
+        let response: BuildTextPatchResponse = client
+            .build_text_patch(request)
+            .await?
+            .into_inner();
 
         Ok(TextPatchBlock { patch: response.patch, patched_text: response.patched_text })
     }
