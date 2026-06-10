@@ -3,9 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, rust-overlay }:
     let
       systems = [
         "x86_64-linux"
@@ -25,7 +26,15 @@
 
       packages = forAllSystems (system:
         let
-          pkgs = import nixpkgs { inherit system; };
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ (import rust-overlay) ];
+          };
+          rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+          rustPlatform = pkgs.makeRustPlatform {
+            cargo = rustToolchain;
+            rustc = rustToolchain;
+          };
           lib = pkgs.lib;
           src = lib.cleanSourceWith {
             src = ./.;
@@ -34,7 +43,7 @@
               && baseNameOf path != "target"
               && baseNameOf path != "result";
           };
-          forge = pkgs.rustPlatform.buildRustPackage {
+          forge = rustPlatform.buildRustPackage {
             pname = "forge";
             version = "0.1.0-dev";
             inherit src;
@@ -114,25 +123,25 @@
 
       devShells = forAllSystems (system:
         let
-          pkgs = import nixpkgs { inherit system; };
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ (import rust-overlay) ];
+          };
+          rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
           lib = pkgs.lib;
         in
         {
           default = pkgs.mkShell {
             packages =
               [
-                pkgs.cargo
                 pkgs.cargo-insta
                 pkgs.cargo-llvm-cov
-                pkgs.clippy
                 pkgs.cmake
                 pkgs.nasm
                 pkgs.perl
                 pkgs.pkg-config
                 pkgs.protobuf
-                pkgs.rust-analyzer
-                pkgs.rustc
-                pkgs.rustfmt
+                rustToolchain
                 pkgs.sqlite
               ]
               ++ lib.optionals pkgs.stdenv.isLinux [
