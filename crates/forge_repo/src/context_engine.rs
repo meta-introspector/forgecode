@@ -85,10 +85,7 @@ impl TryFrom<QueryItem> for forge_domain::Node {
 
     fn try_from(item: QueryItem) -> Result<Self> {
         let node = item.node.context("Missing node in QueryItem")?;
-        let node_id = node
-            .node_id
-            .context("Missing node_id in Node")?
-            .id;
+        let node_id = node.node_id.context("Missing node_id in Node")?.id;
         let node_id = forge_domain::NodeId::new(node_id);
 
         let data = node.data.context("Missing node data")?;
@@ -112,20 +109,15 @@ impl TryFrom<QueryItem> for forge_domain::Node {
                     file_hash: file_ref.file_hash,
                 })
             }
-            node_data::Kind::Note(note) => forge_domain::NodeData::Note(forge_domain::Note {
-                content: note.content,
-            }),
-            node_data::Kind::Task(task) => forge_domain::NodeData::Task(forge_domain::Task {
-                task: task.task,
-            }),
+            node_data::Kind::Note(note) => {
+                forge_domain::NodeData::Note(forge_domain::Note { content: note.content })
+            }
+            node_data::Kind::Task(task) => {
+                forge_domain::NodeData::Task(forge_domain::Task { task: task.task })
+            }
         };
 
-        Ok(forge_domain::Node {
-            node_id,
-            node: data,
-            relevance: None,
-            distance: None,
-        })
+        Ok(forge_domain::Node { node_id, node: data, relevance: None, distance: None })
     }
 }
 
@@ -193,10 +185,8 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let response: CreateWorkspaceResponse = client
-            .create_workspace(request)
-            .await?
-            .into_inner();
+        let response: CreateWorkspaceResponse =
+            client.create_workspace(request).await?.into_inner();
 
         response.try_into()
     }
@@ -226,10 +216,7 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let response: UploadFilesResponse = client
-            .upload_files(request)
-            .await?
-            .into_inner();
+        let response: UploadFilesResponse = client.upload_files(request).await?.into_inner();
 
         let result = response
             .result
@@ -290,7 +277,8 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let tonic_response: tonic::Response<ListWorkspacesResponse> = client.list_workspaces(request).await?;
+        let tonic_response: tonic::Response<ListWorkspacesResponse> =
+            client.list_workspaces(request).await?;
         let response = tonic_response.into_inner();
 
         response
@@ -313,7 +301,8 @@ impl<I: GrpcInfra> WorkspaceIndexRepository for ForgeContextEngineRepository<I> 
 
         let channel = self.infra.channel()?;
         let mut client = ForgeServiceClient::new(channel);
-        let tonic_response: tonic::Response<GetWorkspaceInfoResponse> = client.get_workspace_info(request).await?;
+        let tonic_response: tonic::Response<GetWorkspaceInfoResponse> =
+            client.get_workspace_info(request).await?;
         let response = tonic_response.into_inner();
 
         let workspace = response.workspace;

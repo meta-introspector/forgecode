@@ -9,9 +9,9 @@ use dirs::home_dir;
 use libloading::{Library, Symbol};
 
 use crate::plugin::{Plugin, PluginManager};
+use forge_app::{ProviderAuthService, Services};
 use forge_config::ForgeConfig;
 use forge_domain::{AnyProvider, Conversation, ConversationId, FileInfo};
-use forge_app::{Services, ProviderAuthService};
 
 /// Type definitions for ZOS plugin functions
 type ZosPluginNameFn = unsafe extern "C" fn() -> *const std::os::raw::c_char;
@@ -42,9 +42,11 @@ impl<S: Services> ZosPluginWrapper<S> {
     fn new(library: Library, name: String) -> Result<Self> {
         unsafe {
             // Get the required plugin functions
-            let init_fn_symbol: Symbol<ZosPluginInitFn> = library.get(b"zos_plugin_init")
+            let init_fn_symbol: Symbol<ZosPluginInitFn> = library
+                .get(b"zos_plugin_init")
                 .context("Failed to find zos_plugin_init symbol")?;
-            let destroy_fn_symbol: Symbol<ZosPluginDestroyFn> = library.get(b"zos_plugin_destroy")
+            let destroy_fn_symbol: Symbol<ZosPluginDestroyFn> = library
+                .get(b"zos_plugin_destroy")
                 .context("Failed to find zos_plugin_destroy symbol")?;
             let init_fn = *init_fn_symbol;
             let destroy_fn = *destroy_fn_symbol;
@@ -83,7 +85,11 @@ impl<S: Services> Plugin<S> for ZosPluginWrapper<S> {
         // Call the plugin's init function
         let result = unsafe { (self.init_fn)() };
         if result != 0 {
-            anyhow::bail!("Plugin {} initialization failed with exit code {}", self.name, result);
+            anyhow::bail!(
+                "Plugin {} initialization failed with exit code {}",
+                self.name,
+                result
+            );
         }
 
         // TODO: Actually use the services parameter if needed by the plugin
@@ -101,7 +107,10 @@ impl<S: Services> Plugin<S> for ZosPluginWrapper<S> {
         // Call the plugin's destroy function
         let result = unsafe { (self.destroy_fn)() };
         if result != 0 {
-            eprintln!("Warning: Plugin {} destroy function returned non-zero exit code: {}", self.name, result);
+            eprintln!(
+                "Warning: Plugin {} destroy function returned non-zero exit code: {}",
+                self.name, result
+            );
         }
 
         Ok(())
@@ -150,8 +159,12 @@ impl<S: Services> ZosPluginBridge<S> {
     /// Result indicating success or failure
     pub async fn load_all_plugins(&mut self) -> Result<()> {
         // Read the plugins directory
-        let entries = std::fs::read_dir(&self.plugins_dir)
-            .with_context(|| format!("Failed to read plugins directory: {}", self.plugins_dir.display()))?;
+        let entries = std::fs::read_dir(&self.plugins_dir).with_context(|| {
+            format!(
+                "Failed to read plugins directory: {}",
+                self.plugins_dir.display()
+            )
+        })?;
 
         for entry in entries.flatten() {
             let path = entry.path();
@@ -180,7 +193,9 @@ impl<S: Services> ZosPluginBridge<S> {
                             for entry in entries.flatten() {
                                 let file_name = entry.file_name();
                                 let file_name_str = file_name.to_string_lossy();
-                                if file_name_str.starts_with("libzos_plugin_") && file_name_str.ends_with(".so") {
+                                if file_name_str.starts_with("libzos_plugin_")
+                                    && file_name_str.ends_with(".so")
+                                {
                                     plugin_so_path = Some(entry.path());
                                     break;
                                 }
@@ -218,8 +233,13 @@ impl<S: Services> ZosPluginBridge<S> {
 
         // Get the plugin name
         unsafe {
-            let name_fn: Symbol<ZosPluginNameFn> = library.get(b"zos_plugin_name")
-                .with_context(|| format!("Failed to find zos_plugin_name symbol in {}", so_path.display()))?;
+            let name_fn: Symbol<ZosPluginNameFn> =
+                library.get(b"zos_plugin_name").with_context(|| {
+                    format!(
+                        "Failed to find zos_plugin_name symbol in {}",
+                        so_path.display()
+                    )
+                })?;
             let c_str = CString::from_raw(name_fn() as *mut i8);
             let name = c_str.to_string_lossy().into_owned();
 
@@ -227,7 +247,8 @@ impl<S: Services> ZosPluginBridge<S> {
             let wrapper = ZosPluginWrapper::<S>::new(library, name)?;
 
             // Store the plugin
-            self.loaded_plugins.insert(wrapper.name().to_string(), wrapper);
+            self.loaded_plugins
+                .insert(wrapper.name().to_string(), wrapper);
         }
 
         Ok(())
@@ -281,8 +302,7 @@ impl<S: Services> ZosPluginBridge<S> {
 impl<S: Services> Default for ZosPluginBridge<S> {
     fn default() -> Self {
         // Default to ~/zos-server/plugins/
-        let mut plugins_dir = home_dir()
-            .expect("Could not find home directory");
+        let mut plugins_dir = home_dir().expect("Could not find home directory");
         plugins_dir.push("zos-server");
         plugins_dir.push("plugins");
         Self::new(plugins_dir)
@@ -298,7 +318,10 @@ mod tests {
     struct MockServices;
     #[async_trait::async_trait]
     impl Services for MockServices {
-        async fn find_conversation(&self, _conversation_id: &ConversationId) -> Result<Option<Conversation>> {
+        async fn find_conversation(
+            &self,
+            _conversation_id: &ConversationId,
+        ) -> Result<Option<Conversation>> {
             Ok(None)
         }
         async fn upsert_conversation(&self, _conversation: Conversation) -> Result<()> {
@@ -322,7 +345,10 @@ mod tests {
         async fn get_custom_instructions(&self) -> Result<Option<String>> {
             Ok(None)
         }
-        async fn get_agent(&self, _agent_id: &forge_domain::AgentId) -> Result<Option<forge_domain::Agent>> {
+        async fn get_agent(
+            &self,
+            _agent_id: &forge_domain::AgentId,
+        ) -> Result<Option<forge_domain::Agent>> {
             Ok(None)
         }
         async fn get_all_providers(&self) -> Result<Vec<AnyProvider>> {
@@ -347,45 +373,73 @@ mod tests {
     #[tokio::test]
     async fn test_load_all_plugins_from_actual_directory() {
         // Use the actual zos-server/plugins directory
-        let plugins_dir = std::path::PathBuf::from(std::env::var("HOME").unwrap()).join("zos-server").join("plugins");
-        
+        let plugins_dir = std::path::PathBuf::from(std::env::var("HOME").unwrap())
+            .join("zos-server")
+            .join("plugins");
+
         // Skip test if plugins directory doesn't exist
         if !plugins_dir.exists() {
-            println!("Skipping test: plugins directory does not exist at {}", plugins_dir.display());
+            println!(
+                "Skipping test: plugins directory does not exist at {}",
+                plugins_dir.display()
+            );
             return;
         }
 
         let mut bridge = ZosPluginBridge::<MockServices>::new(plugins_dir);
         let result = bridge.load_all_plugins().await;
-        
+
         // Should succeed in loading plugins
         assert!(result.is_ok(), "Failed to load plugins: {:?}", result.err());
-        
+
         // Should have loaded at least our test plugins
         let count = bridge.plugin_count();
         println!("Loaded {} plugins", count);
-        
+
         // Check that we can get specific plugins
         let generators_plugin = bridge.get_plugin("generators");
-        assert!(generators_plugin.is_some(), "Should be able to get generators plugin");
-        
+        assert!(
+            generators_plugin.is_some(),
+            "Should be able to get generators plugin"
+        );
+
         let git_tools_plugin = bridge.get_plugin("git-tools");
-        assert!(git_tools_plugin.is_some(), "Should be able to get git-tools plugin");
-        
+        assert!(
+            git_tools_plugin.is_some(),
+            "Should be able to get git-tools plugin"
+        );
+
         // Test that plugins are initialized
         if let Some(plugin) = generators_plugin {
-            assert!(!plugin.is_active(), "Plugin should not be active until initialized");
-            
+            assert!(
+                !plugin.is_active(),
+                "Plugin should not be active until initialized"
+            );
+
             // Initialize the plugin
             let services = Arc::new(MockServices);
             let init_result = plugin.initialize(services.clone()).await;
-            assert!(init_result.is_ok(), "Failed to initialize generators plugin: {:?}", init_result.err());
-            assert!(plugin.is_active(), "Plugin should be active after initialization");
-            
+            assert!(
+                init_result.is_ok(),
+                "Failed to initialize generators plugin: {:?}",
+                init_result.err()
+            );
+            assert!(
+                plugin.is_active(),
+                "Plugin should be active after initialization"
+            );
+
             // Test shutdown
             let shutdown_result = plugin.shutdown().await;
-            assert!(shutdown_result.is_ok(), "Failed to shutdown generators plugin: {:?}", shutdown_result.err());
-            assert!(!plugin.is_active(), "Plugin should not be active after shutdown");
+            assert!(
+                shutdown_result.is_ok(),
+                "Failed to shutdown generators plugin: {:?}",
+                shutdown_result.err()
+            );
+            assert!(
+                !plugin.is_active(),
+                "Plugin should not be active after shutdown"
+            );
         }
     }
 
@@ -399,27 +453,42 @@ mod tests {
             .join("target")
             .join("debug")
             .join("libzos_plugin_generators.so");
-            
+
         // Skip test if plugin doesn't exist
         if !generators_so_path.exists() {
-            println!("Skipping test: generators plugin not found at {}", generators_so_path.display());
+            println!(
+                "Skipping test: generators plugin not found at {}",
+                generators_so_path.display()
+            );
             return;
         }
 
         let mut bridge = ZosPluginBridge::<MockServices>::new(std::path::PathBuf::new());
         let result = bridge.load_plugin_from_path(&generators_so_path).await;
-        
-        assert!(result.is_ok(), "Failed to load generators plugin: {:?}", result.err());
-        assert_eq!(bridge.plugin_count(), 1, "Should have loaded exactly one plugin");
-        
+
+        assert!(
+            result.is_ok(),
+            "Failed to load generators plugin: {:?}",
+            result.err()
+        );
+        assert_eq!(
+            bridge.plugin_count(),
+            1,
+            "Should have loaded exactly one plugin"
+        );
+
         let plugin = bridge.get_plugin("generators");
         assert!(plugin.is_some(), "Should be able to get generators plugin");
-        
+
         if let Some(plugin) = plugin {
             // Test that we can initialize it
             let services = Arc::new(MockServices);
             let init_result = plugin.initialize(services.clone()).await;
-            assert!(init_result.is_ok(), "Failed to initialize generators plugin: {:?}", init_result.err());
+            assert!(
+                init_result.is_ok(),
+                "Failed to initialize generators plugin: {:?}",
+                init_result.err()
+            );
         }
     }
 }
