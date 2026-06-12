@@ -12,6 +12,7 @@ use forge_domain::{
 };
 use forge_infra::{PluginManager, ZosPluginBridge};
 
+use crate::ForgeProviderAuthService;
 use crate::agent_registry::ForgeAgentRegistryService;
 use crate::app_config::ForgeAppConfigService;
 use crate::attachment::ForgeChatRequest;
@@ -29,7 +30,6 @@ use crate::tool_services::{
     ForgeFetch, ForgeFollowup, ForgeFsPatch, ForgeFsRead, ForgeFsRemove, ForgeFsSearch,
     ForgeFsUndo, ForgeFsWrite, ForgeImageRead, ForgePlanCreate, ForgeShell, ForgeSkillFetch,
 };
-use crate::ForgeProviderAuthService;
 
 type McpService<F> = ForgeMcpService<ForgeMcpManager<F>, F, <F as McpServerInfra>::Client>;
 type AuthService<F> = ForgeAuthService<F>;
@@ -103,35 +103,35 @@ pub struct ForgeServices<
 }
 
 impl<
-        F: McpServerInfra
-            + EnvironmentInfra<Config = forge_config::ForgeConfig>
-            + FileWriterInfra
-            + FileInfoInfra
-            + FileReaderInfra
-            + HttpInfra
-            + WalkerInfra
-            + DirectoryReaderInfra
-            + CommandInfra
-            + UserInfra
-            + FileRemoverInfra
-            + FileDirectoryInfra
-            + Clone
-            + StrategyFactory
-            + FuzzySearchRepository
-            + TextPatchRepository
-            + SnapshotRepository
-            + ConversationRepository
-            + ChatRepository
-            + ProviderRepository
-            + KVStore
-            + WorkspaceIndexRepository
-            + AgentRepository
-            + SkillRepository
-            + ValidationRepository
-            + Send
-            + Sync
-            + 'static,
-    > ForgeServices<F>
+    F: McpServerInfra
+        + EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + FileWriterInfra
+        + FileInfoInfra
+        + FileReaderInfra
+        + HttpInfra
+        + WalkerInfra
+        + DirectoryReaderInfra
+        + CommandInfra
+        + UserInfra
+        + FileRemoverInfra
+        + FileDirectoryInfra
+        + Clone
+        + StrategyFactory
+        + FuzzySearchRepository
+        + TextPatchRepository
+        + SnapshotRepository
+        + ConversationRepository
+        + ChatRepository
+        + ProviderRepository
+        + KVStore
+        + WorkspaceIndexRepository
+        + AgentRepository
+        + SkillRepository
+        + ValidationRepository
+        + Send
+        + Sync
+        + 'static,
+> ForgeServices<F>
 {
     pub fn new(infra: Arc<F>) -> Self {
         let mcp_manager = Arc::new(ForgeMcpManager::new(infra.clone()));
@@ -202,35 +202,35 @@ impl<
 }
 
 impl<
-        F: McpServerInfra
-            + EnvironmentInfra<Config = forge_config::ForgeConfig>
-            + FileWriterInfra
-            + FileInfoInfra
-            + FileReaderInfra
-            + HttpInfra
-            + WalkerInfra
-            + DirectoryReaderInfra
-            + CommandInfra
-            + UserInfra
-            + FileRemoverInfra
-            + FileDirectoryInfra
-            + Clone
-            + StrategyFactory
-            + FuzzySearchRepository
-            + TextPatchRepository
-            + SnapshotRepository
-            + ConversationRepository
-            + ChatRepository
-            + ProviderRepository
-            + KVStore
-            + WorkspaceIndexRepository
-            + AgentRepository
-            + SkillRepository
-            + ValidationRepository
-            + Send
-            + Sync
-            + 'static,
-    > Clone for ForgeServices<F>
+    F: McpServerInfra
+        + EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + FileWriterInfra
+        + FileInfoInfra
+        + FileReaderInfra
+        + HttpInfra
+        + WalkerInfra
+        + DirectoryReaderInfra
+        + CommandInfra
+        + UserInfra
+        + FileRemoverInfra
+        + FileDirectoryInfra
+        + Clone
+        + StrategyFactory
+        + FuzzySearchRepository
+        + TextPatchRepository
+        + SnapshotRepository
+        + ConversationRepository
+        + ChatRepository
+        + ProviderRepository
+        + KVStore
+        + WorkspaceIndexRepository
+        + AgentRepository
+        + SkillRepository
+        + ValidationRepository
+        + Send
+        + Sync
+        + 'static,
+> Clone for ForgeServices<F>
 {
     fn clone(&self) -> Self {
         Self {
@@ -268,35 +268,35 @@ impl<
 }
 
 impl<
-        F: FileReaderInfra
-            + FileWriterInfra
-            + CommandInfra
-            + UserInfra
-            + McpServerInfra
-            + FileRemoverInfra
-            + FileInfoInfra
-            + FileDirectoryInfra
-            + EnvironmentInfra<Config = forge_config::ForgeConfig>
-            + DirectoryReaderInfra
-            + HttpInfra
-            + WalkerInfra
-            + Clone
-            + SnapshotRepository
-            + ConversationRepository
-            + KVStore
-            + ChatRepository
-            + ProviderRepository
-            + AgentRepository
-            + SkillRepository
-            + StrategyFactory
-            + WorkspaceIndexRepository
-            + ValidationRepository
-            + FuzzySearchRepository
-            + TextPatchRepository
-            + Send
-            + Sync
-            + 'static,
-    > Services for ForgeServices<F>
+    F: FileReaderInfra
+        + FileWriterInfra
+        + CommandInfra
+        + UserInfra
+        + McpServerInfra
+        + FileRemoverInfra
+        + FileInfoInfra
+        + FileDirectoryInfra
+        + EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + DirectoryReaderInfra
+        + HttpInfra
+        + WalkerInfra
+        + Clone
+        + SnapshotRepository
+        + ConversationRepository
+        + KVStore
+        + ChatRepository
+        + ProviderRepository
+        + AgentRepository
+        + SkillRepository
+        + StrategyFactory
+        + WorkspaceIndexRepository
+        + ValidationRepository
+        + FuzzySearchRepository
+        + TextPatchRepository
+        + Send
+        + Sync
+        + 'static,
+> Services for ForgeServices<F>
 {
     type AppConfigService = ForgeAppConfigService<F>;
     type ConversationService = ForgeConversationService<F>;
@@ -435,9 +435,7 @@ impl<
 
     fn initialize_plugins(
         &self,
-    ) -> std::pin::Pin<
-        Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + '_>,
-    > {
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + '_>> {
         Box::pin(async move {
             // Load ZOS plugins from the zos-server/plugins directory and register the
             // bridge as a Forge plugin so the manager can control its lifecycle.
@@ -468,35 +466,35 @@ impl<
 }
 
 impl<
-        F: EnvironmentInfra<Config = forge_config::ForgeConfig>
-            + FileWriterInfra
-            + FileInfoInfra
-            + FileReaderInfra
-            + HttpInfra
-            + McpServerInfra
-            + WalkerInfra
-            + DirectoryReaderInfra
-            + CommandInfra
-            + UserInfra
-            + FileRemoverInfra
-            + FileInfoInfra
-            + FileDirectoryInfra
-            + Clone
-            + StrategyFactory
-            + FuzzySearchRepository
-            + TextPatchRepository
-            + SnapshotRepository
-            + ConversationRepository
-            + KVStore
-            + ChatRepository
-            + ProviderRepository
-            + WorkspaceIndexRepository
-            + AgentRepository
-            + SkillRepository
-            + ValidationRepository
-            + Send
-            + Sync,
-    > ForgeServices<F>
+    F: EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + FileWriterInfra
+        + FileInfoInfra
+        + FileReaderInfra
+        + HttpInfra
+        + McpServerInfra
+        + WalkerInfra
+        + DirectoryReaderInfra
+        + CommandInfra
+        + UserInfra
+        + FileRemoverInfra
+        + FileInfoInfra
+        + FileDirectoryInfra
+        + Clone
+        + StrategyFactory
+        + FuzzySearchRepository
+        + TextPatchRepository
+        + SnapshotRepository
+        + ConversationRepository
+        + KVStore
+        + ChatRepository
+        + ProviderRepository
+        + WorkspaceIndexRepository
+        + AgentRepository
+        + SkillRepository
+        + ValidationRepository
+        + Send
+        + Sync,
+> ForgeServices<F>
 {
     /// Returns a reference to the plugin manager
     pub fn plugin_manager(&self) -> &Arc<Mutex<PluginManager<ForgeServices<F>>>> {
@@ -505,35 +503,35 @@ impl<
 }
 
 impl<
-        F: EnvironmentInfra<Config = forge_config::ForgeConfig>
-            + FileWriterInfra
-            + FileInfoInfra
-            + FileReaderInfra
-            + HttpInfra
-            + McpServerInfra
-            + WalkerInfra
-            + DirectoryReaderInfra
-            + CommandInfra
-            + UserInfra
-            + FileRemoverInfra
-            + FileInfoInfra
-            + FileDirectoryInfra
-            + Clone
-            + StrategyFactory
-            + FuzzySearchRepository
-            + TextPatchRepository
-            + SnapshotRepository
-            + ConversationRepository
-            + KVStore
-            + ChatRepository
-            + ProviderRepository
-            + WorkspaceIndexRepository
-            + AgentRepository
-            + SkillRepository
-            + ValidationRepository
-            + Send
-            + Sync,
-    > forge_app::EnvironmentInfra for ForgeServices<F>
+    F: EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + FileWriterInfra
+        + FileInfoInfra
+        + FileReaderInfra
+        + HttpInfra
+        + McpServerInfra
+        + WalkerInfra
+        + DirectoryReaderInfra
+        + CommandInfra
+        + UserInfra
+        + FileRemoverInfra
+        + FileInfoInfra
+        + FileDirectoryInfra
+        + Clone
+        + StrategyFactory
+        + FuzzySearchRepository
+        + TextPatchRepository
+        + SnapshotRepository
+        + ConversationRepository
+        + KVStore
+        + ChatRepository
+        + ProviderRepository
+        + WorkspaceIndexRepository
+        + AgentRepository
+        + SkillRepository
+        + ValidationRepository
+        + Send
+        + Sync,
+> forge_app::EnvironmentInfra for ForgeServices<F>
 {
     type Config = forge_config::ForgeConfig;
 
