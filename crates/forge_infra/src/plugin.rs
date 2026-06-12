@@ -3,8 +3,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use anyhow::Result;
-use forge_app::Services;
-use async_trait::async_trait;
 
 /// A plugin that can be loaded and managed by the Forge application.
 ///
@@ -12,17 +10,20 @@ use async_trait::async_trait;
 /// of the Forge application. They have access to services and can participate
 /// in the application lifecycle.
 #[async_trait::async_trait]
-pub trait Plugin<S>: Send + Sync {
+pub trait Plugin<S>: Send + Sync
+where
+    S: Send + Sync + 'static,
+{
     /// Returns the plugin's name.
     ///
     /// The name must be unique among all loaded plugins.
-    fn name(&self) -> &'static str;
+    fn name(&self) -> &str;
 
     /// Returns a human-readable description of the plugin.
-    fn description(&self) -> &'static str;
+    fn description(&self) -> &str;
 
     /// Returns the plugin's version.
-    fn version(&self) -> &'static str;
+    fn version(&self) -> &str;
 
     /// Initializes the plugin with access to application services.
     ///
@@ -59,10 +60,10 @@ pub trait Plugin<S>: Send + Sync {
 /// to them by name or type.
 pub struct PluginManager<S> {
     plugins: HashMap<String, Arc<dyn Plugin<S>>>,
-    _service_type: std::marker::PhantomData::<S>,
+    _service_type: std::marker::PhantomData<S>,
 }
 
-impl<S: Services> PluginManager<S> {
+impl<S: Send + Sync + 'static> PluginManager<S> {
     /// Creates a new, empty PluginManager.
     pub fn new() -> Self {
         Self {
@@ -161,8 +162,113 @@ impl<S: Services> PluginManager<S> {
     }
 }
 
-impl<S: Services> Default for PluginManager<S> {
+impl<S: Send + Sync + 'static> Default for PluginManager<S> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl<S: Send + Sync + 'static> Clone for PluginManager<S> {
+    fn clone(&self) -> Self {
+        Self {
+            plugins: self.plugins.clone(),
+            _service_type: std::marker::PhantomData::<S>,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+
+    struct CountingPlugin {
+        initializes: AtomicUsize,
+        shutdowns: AtomicUsize,
+        active: AtomicUsize,
+    }
+
+    impl CountingPlugin {
+        fn new() -> Self {
+            Self {
+                initializes: AtomicUsize::new(0),
+                shutdowns: AtomicUsize::new(0),
+                active: AtomicUsize::new(0),
+            }
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl<S: Send + Sync + 'static> Plugin<S> for CountingPlugin {
+        fn name(&self) -> &str {
+            "counting-plugin"
+        }
+
+        fn description(&self) -> &str {
+            "Counts lifecycle calls"
+        }
+
+        fn version(&self) -> &str {
+            "0.1.0"
+        }
+
+        async fn initialize(&self, _services: Arc<S>) -> Result<()> {
+            self.initializes.fetch_add(1, Ordering::SeqCst);
+            self.active.store(1, Ordering::SeqCst);
+            Ok(())
+        }
+
+        async fn shutdown(&self) -> Result<()> {
+            self.shutdowns.fetch_add(1, Ordering::SeqCst);
+            self.active.store(0, Ordering::SeqCst);
+            Ok(())
+        }
+
+        fn is_active(&self) -> bool {
+            self.active.load(Ordering::SeqCst) == 1
+        }
+
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+
+        fn as_any_mut(&mut self) -> &mut dyn Any {
+            self
+        }
+    }
+
+    #[tokio::test]
+    async fn test_plugin_manager_initializes_and_shutdowns_plugins() {
+        let mut manager = PluginManager::<()>::new();
+        let plugin = Arc::new(CountingPlugin::new());
+
+        let setup = manager.plugin_count();
+        manager.register_plugin(plugin.clone() as Arc<dyn Plugin<()>>);
+
+        let actual = manager.plugin_count();
+        let expected = setup + 1;
+        assert_eq!(actual, expected);
+
+        let services = Arc::new(());
+        manager.initialize_all(services.clone()).await.unwrap();
+        manager.initialize_all(services).await.unwrap();
+
+        let actual_initializes = plugin.initializes.load(Ordering::SeqCst);
+        let actual_active = <CountingPlugin as Plugin<()>>::is_active(&plugin);
+        let expected_initializes = 1;
+        assert_eq!(actual_initializes, expected_initializes);
+        assert!(actual_active);
+
+        let actual = manager.shutdown_all().await;
+        assert!(actual.is_ok());
+
+        let actual_shutdowns = plugin.shutdowns.load(Ordering::SeqCst);
+        let actual_active = <CountingPlugin as Plugin<()>>::is_active(&plugin);
+        let expected_shutdowns = 1;
+        assert_eq!(actual_shutdowns, expected_shutdowns);
+        assert!(!actual_active);
     }
 }

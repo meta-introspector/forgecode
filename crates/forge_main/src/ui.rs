@@ -209,6 +209,7 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
         self.config = config.clone();
         self.api = Arc::new((self.new_api)(config));
         self.init_state(false).await?;
+        self.initialize_plugins().await?;
 
         // Set agent if provided via CLI
         if let Some(agent_id) = self.cli.agent.clone() {
@@ -335,6 +336,17 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
         self.console.prompt(&mut forge_prompt).await
     }
 
+    async fn initialize_plugins(&mut self) -> Result<()> {
+        if let Err(error) = self.api.initialize_plugins().await {
+            tracing::warn!(error = ?error, "Failed to initialize dynamic plugins");
+            self.writeln_title(TitleFormat::warning(format!(
+                "Failed to initialize dynamic plugins: {error}"
+            )))?;
+        }
+
+        Ok(())
+    }
+
     pub async fn run(&mut self) {
         match self.run_inner().await {
             Ok(_) => {}
@@ -356,6 +368,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
     }
 
     async fn run_inner(&mut self) -> Result<()> {
+        self.initialize_plugins().await?;
+
         if let Some(cmd) = self.cli.subcommands.clone() {
             return self.handle_subcommands(cmd).await;
         }

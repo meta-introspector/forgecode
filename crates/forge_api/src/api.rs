@@ -180,6 +180,12 @@ pub trait API: Sync + Send {
     /// first tool use. Must be called once at startup.
     async fn init_mcp(&self) -> Result<()>;
 
+    /// Loads and initializes dynamic plugins registered by the service layer.
+    ///
+    /// This is called once during UI startup so optional runtime plugins, such
+    /// as ZOS dynamic plugins, are available before commands and agents are used.
+    async fn initialize_plugins(&self) -> Result<()>;
+
     /// List of commands defined in .md file(s)
     async fn get_commands(&self) -> Result<Vec<Command>>;
 

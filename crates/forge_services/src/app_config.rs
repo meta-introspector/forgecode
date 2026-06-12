@@ -173,9 +173,10 @@ mod tests {
         fn update_environment(
             &self,
             ops: Vec<ConfigOperation>,
-        ) -> impl std::future::Future<Output = anyhow::Result<()>> + Send {
+        ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>>
+        {
             let config = self.config.clone();
-            async move {
+            Box::pin(async move {
                 let mut config = config.lock().unwrap();
                 for op in ops {
                     match op {
@@ -204,7 +205,7 @@ mod tests {
                     }
                 }
                 Ok(())
-            }
+            })
         }
 
         fn get_config(&self) -> anyhow::Result<ForgeConfig> {

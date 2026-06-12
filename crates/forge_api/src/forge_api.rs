@@ -310,6 +310,11 @@ impl<
     async fn init_mcp(&self) -> Result<()> {
         self.services.mcp_service().init_mcp().await
     }
+
+    async fn initialize_plugins(&self) -> Result<()> {
+        self.services.initialize_plugins().await
+    }
+
     async fn get_commands(&self) -> Result<Vec<Command>> {
         self.services.get_commands().await
     }

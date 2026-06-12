@@ -4,8 +4,8 @@ use std::sync::Arc;
 
 use forge_app::EnvironmentInfra;
 use forge_config::{ConfigReader, ForgeConfig, ModelConfig};
-use std::pin::Pin;
 use forge_domain::{ConfigOperation, Environment};
+use std::pin::Pin;
 use tracing::debug;
 
 /// Builds a [`forge_domain::Environment`] from runtime context only.
@@ -133,7 +133,10 @@ impl EnvironmentInfra for ForgeEnvironmentInfra {
         self.cached_config()
     }
 
-    fn update_environment(&self, ops: Vec<ConfigOperation>) -> Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>> {
+    fn update_environment(
+        &self,
+        ops: Vec<ConfigOperation>,
+    ) -> Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>> {
         let cache = self.cache.clone();
         Box::pin(async move {
             // Load the global config (with defaults applied) for the update round-trip
@@ -160,6 +163,7 @@ impl EnvironmentInfra for ForgeEnvironmentInfra {
 }
 
 #[cfg(test)]
+mod tests {
     use std::path::PathBuf;
 
     use pretty_assertions::assert_eq;
@@ -170,6 +174,7 @@ impl EnvironmentInfra for ForgeEnvironmentInfra {
     fn test_to_environment_sets_cwd() {
         let fixture_cwd = PathBuf::from("/test/cwd");
         let actual = to_environment(fixture_cwd.clone());
+
         assert_eq!(actual.cwd, fixture_cwd);
     }
 
@@ -273,3 +278,4 @@ impl EnvironmentInfra for ForgeEnvironmentInfra {
         assert_eq!(actual_provider, Some("anthropic"));
         assert_eq!(actual_model, Some("claude-3-5-sonnet-20241022"));
     }
+}

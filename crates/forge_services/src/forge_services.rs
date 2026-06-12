@@ -262,7 +262,7 @@ impl<
             workspace_service: self.workspace_service.clone(),
             skill_service: self.skill_service.clone(),
             infra: self.infra.clone(),
-            plugin_manager: Arc::new(Mutex::new(PluginManager::new())),
+            plugin_manager: self.plugin_manager.clone(),
         }
     }
 }
@@ -433,28 +433,37 @@ impl<
         &self.chat_service
     }
 
-    async fn initialize_plugins(&self) -> anyhow::Result<()> {
-        // Load ZOS plugins from the zos-server/plugins directory
-        let mut zos_bridge = ZosPluginBridge::<ForgeServices<F>>::default();
-        let _ = zos_bridge.load_all_plugins().await;
+    fn initialize_plugins(
+        &self,
+    ) -> std::pin::Pin<
+        Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + '_>,
+    > {
+        Box::pin(async move {
+            // Load ZOS plugins from the zos-server/plugins directory and register the
+            // bridge as a Forge plugin so the manager can control its lifecycle.
+            let mut zos_bridge = ZosPluginBridge::<ForgeServices<F>>::default();
+            zos_bridge.load_all_plugins().await?;
 
-        // Add loaded ZOS plugins to the plugin manager
-        {
-            let mut plugin_manager = self
-                .plugin_manager
-                .lock()
-                .map_err(|_| anyhow::anyhow!("plugin manager lock poisoned"))?;
-            for plugin in zos_bridge.into_loaded_plugins() {
-                plugin_manager.register_plugin(plugin);
+            if zos_bridge.has_plugins() {
+                let mut plugin_manager = self
+                    .plugin_manager
+                    .lock()
+                    .map_err(|_| anyhow::anyhow!("plugin manager lock poisoned"))?;
+                if plugin_manager.get_plugin("zos-plugin-bridge").is_none() {
+                    plugin_manager.register_plugin(Arc::new(zos_bridge));
+                }
             }
-        }
 
-        let self_arc = Arc::new(self.clone());
-        self.plugin_manager
-            .lock()
-            .map_err(|_| anyhow::anyhow!("plugin manager lock poisoned"))?
-            .initialize_all(self_arc)
-            .await
+            let plugin_manager = {
+                let plugin_manager = self
+                    .plugin_manager
+                    .lock()
+                    .map_err(|_| anyhow::anyhow!("plugin manager lock poisoned"))?;
+                plugin_manager.clone()
+            };
+            let self_arc = Arc::new(self.clone());
+            plugin_manager.initialize_all(self_arc).await
+        })
     }
 }
 

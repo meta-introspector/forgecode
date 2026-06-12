@@ -1,35 +1,32 @@
 use std::collections::HashMap;
-use std::ffi::CString;
+use std::ffi::CStr;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use anyhow::{Context, Result};
-use async_trait::async_trait;
 use dirs::home_dir;
 use libloading::{Library, Symbol};
 
-use crate::plugin::{Plugin, PluginManager};
-use forge_app::{ProviderAuthService, Services};
-use forge_config::ForgeConfig;
-use forge_domain::{AnyProvider, Conversation, ConversationId, FileInfo};
+use crate::plugin::Plugin;
 
-/// Type definitions for ZOS plugin functions
+/// Type definitions for ZOS plugin functions.
 type ZosPluginNameFn = unsafe extern "C" fn() -> *const std::os::raw::c_char;
 type ZosPluginInitFn = unsafe extern "C" fn() -> i32;
 type ZosPluginDestroyFn = unsafe extern "C" fn() -> i32;
 
-/// Wrapper for a loaded ZOS plugin that implements the Forge Plugin trait
-struct ZosPluginWrapper<S: Services> {
-    _library: Arc<Library>, // Keep the library loaded
+/// Wrapper for a loaded ZOS plugin that implements the Forge Plugin trait.
+pub(crate) struct ZosPluginWrapper<S> {
+    _library: Arc<Library>, // Keep the library loaded.
     name: String,
     init_fn: ZosPluginInitFn,
     destroy_fn: ZosPluginDestroyFn,
-    initialized: bool,
+    initialized: AtomicBool,
     _service_type: std::marker::PhantomData<S>,
 }
 
-impl<S: Services> ZosPluginWrapper<S> {
-    /// Create a new ZosPluginWrapper from a loaded library
+impl<S: Send + Sync + 'static> ZosPluginWrapper<S> {
+    /// Create a new ZosPluginWrapper from a loaded library.
     ///
     /// # Arguments
     ///
@@ -38,10 +35,9 @@ impl<S: Services> ZosPluginWrapper<S> {
     ///
     /// # Returns
     ///
-    /// Result containing the wrapper or an error if required symbols are missing
+    /// Result containing the wrapper or an error if required symbols are missing.
     fn new(library: Library, name: String) -> Result<Self> {
         unsafe {
-            // Get the required plugin functions
             let init_fn_symbol: Symbol<ZosPluginInitFn> = library
                 .get(b"zos_plugin_init")
                 .context("Failed to find zos_plugin_init symbol")?;
@@ -50,12 +46,13 @@ impl<S: Services> ZosPluginWrapper<S> {
                 .context("Failed to find zos_plugin_destroy symbol")?;
             let init_fn = *init_fn_symbol;
             let destroy_fn = *destroy_fn_symbol;
+
             Ok(Self {
                 _library: Arc::new(library),
                 name,
                 init_fn,
                 destroy_fn,
-                initialized: false,
+                initialized: AtomicBool::new(false),
                 _service_type: std::marker::PhantomData,
             })
         }
@@ -63,28 +60,31 @@ impl<S: Services> ZosPluginWrapper<S> {
 }
 
 #[async_trait::async_trait]
-impl<S: Services> Plugin<S> for ZosPluginWrapper<S> {
-    fn name(&self) -> &'static str {
-        // Leak the string to get a 'static lifetime
-        Box::leak(self.name.clone().into_boxed_str())
+impl<S: Send + Sync + 'static> Plugin<S> for ZosPluginWrapper<S> {
+    fn name(&self) -> &str {
+        &self.name
     }
 
-    fn description(&self) -> &'static str {
+    fn description(&self) -> &str {
         "A ZOS plugin loaded via the ZOS plugin bridge"
     }
 
-    fn version(&self) -> &'static str {
+    fn version(&self) -> &str {
         "0.1.0"
     }
 
-    async fn initialize(&self, services: Arc<S>) -> Result<()> {
-        if self.initialized {
+    async fn initialize(&self, _services: Arc<S>) -> Result<()> {
+        if self
+            .initialized
+            .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+            .is_err()
+        {
             return Ok(());
         }
 
-        // Call the plugin's init function
         let result = unsafe { (self.init_fn)() };
         if result != 0 {
+            self.initialized.store(false, Ordering::SeqCst);
             anyhow::bail!(
                 "Plugin {} initialization failed with exit code {}",
                 self.name,
@@ -92,24 +92,24 @@ impl<S: Services> Plugin<S> for ZosPluginWrapper<S> {
             );
         }
 
-        // TODO: Actually use the services parameter if needed by the plugin
-        // For now, we just call the init function and assume the plugin
-        // will use any global state it needs
-
         Ok(())
     }
 
     async fn shutdown(&self) -> Result<()> {
-        if !self.initialized {
+        if !self
+            .initialized
+            .compare_exchange(true, false, Ordering::SeqCst, Ordering::SeqCst)
+            .is_ok()
+        {
             return Ok(());
         }
 
-        // Call the plugin's destroy function
         let result = unsafe { (self.destroy_fn)() };
         if result != 0 {
-            eprintln!(
-                "Warning: Plugin {} destroy function returned non-zero exit code: {}",
-                self.name, result
+            tracing::warn!(
+                plugin = self.name.as_str(),
+                exit_code = result,
+                "ZOS plugin destroy function returned non-zero exit code"
             );
         }
 
@@ -117,7 +117,7 @@ impl<S: Services> Plugin<S> for ZosPluginWrapper<S> {
     }
 
     fn is_active(&self) -> bool {
-        self.initialized
+        self.initialized.load(Ordering::SeqCst)
     }
 
     fn as_any(&self) -> &dyn std::any::Any {
@@ -129,14 +129,14 @@ impl<S: Services> Plugin<S> for ZosPluginWrapper<S> {
     }
 }
 
-/// Bridge for loading and managing ZOS plugins from the zos-server/plugins directory
-pub struct ZosPluginBridge<S: Services> {
+/// Bridge for loading and managing ZOS plugins from the zos-server/plugins directory.
+pub struct ZosPluginBridge<S> {
     plugins_dir: PathBuf,
     loaded_plugins: HashMap<String, ZosPluginWrapper<S>>,
 }
 
-impl<S: Services> ZosPluginBridge<S> {
-    /// Create a new ZosPluginBridge
+impl<S: Send + Sync + 'static> ZosPluginBridge<S> {
+    /// Create a new ZosPluginBridge.
     ///
     /// # Arguments
     ///
@@ -144,7 +144,7 @@ impl<S: Services> ZosPluginBridge<S> {
     ///
     /// # Returns
     ///
-    /// New ZosPluginBridge instance
+    /// New ZosPluginBridge instance.
     pub fn new<P: Into<PathBuf>>(plugins_dir: P) -> Self {
         Self {
             plugins_dir: plugins_dir.into(),
@@ -152,16 +152,38 @@ impl<S: Services> ZosPluginBridge<S> {
         }
     }
 
-    /// Discovers and loads all ZOS plugins in the plugins directory
+    /// Returns the configured plugin directory.
+    pub fn plugins_dir(&self) -> &Path {
+        &self.plugins_dir
+    }
+
+    /// Discovers and loads all ZOS plugins in the plugins directory.
+    ///
+    /// Missing plugin directories are treated as an empty plugin set so Forge can
+    /// start even when the optional ZOS plugin tree has not been installed.
     ///
     /// # Returns
     ///
-    /// Result indicating success or failure
+    /// Result indicating success or failure.
     pub async fn load_all_plugins(&mut self) -> Result<()> {
-        // Read the plugins directory
+        if !self.plugins_dir.exists() {
+            tracing::debug!(
+                plugins_dir = %self.plugins_dir.display(),
+                "ZOS plugin directory does not exist"
+            );
+            return Ok(());
+        }
+
+        if !self.plugins_dir.is_dir() {
+            anyhow::bail!(
+                "ZOS plugins path is not a directory: {}",
+                self.plugins_dir.display()
+            );
+        }
+
         let entries = std::fs::read_dir(&self.plugins_dir).with_context(|| {
             format!(
-                "Failed to read plugins directory: {}",
+                "Failed to read ZOS plugins directory: {}",
                 self.plugins_dir.display()
             )
         })?;
@@ -169,69 +191,36 @@ impl<S: Services> ZosPluginBridge<S> {
         for entry in entries.flatten() {
             let path = entry.path();
 
-            // Skip if not a directory
+            if path.is_file() && is_dynamic_library(&path) {
+                self.load_plugin_from_path(&path).await?;
+                continue;
+            }
+
             if !path.is_dir() {
                 continue;
             }
 
-            // Check if this looks like a ZOS plugin (has Cargo.toml and lib.rs)
-            let cargo_toml = path.join("Cargo.toml");
-            let lib_rs = path.join("src").join("lib.rs");
-
-            // For now, we'll look for pre-built .so files in a standard location
-            // In a real implementation, we might want to build the plugins first
-            let mut plugin_so_path = None;
-
-            // Check if there's a target directory with .so files
-            let target_dir = path.join("target");
-            if target_dir.is_dir() {
-                // Look for .so files in debug and release directories
-                for subdir in ["debug", "release"] {
-                    let plugin_dir = target_dir.join(subdir);
-                    if plugin_dir.is_dir() {
-                        if let Ok(entries) = std::fs::read_dir(&plugin_dir) {
-                            for entry in entries.flatten() {
-                                let file_name = entry.file_name();
-                                let file_name_str = file_name.to_string_lossy();
-                                if file_name_str.starts_with("libzos_plugin_")
-                                    && file_name_str.ends_with(".so")
-                                {
-                                    plugin_so_path = Some(entry.path());
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if plugin_so_path.is_some() {
-                        break;
-                    }
-                }
-            }
-
-            // If we found a .so file, try to load it
-            if let Some(so_path) = plugin_so_path {
-                self.load_plugin_from_path(&so_path).await?;
+            if let Some(plugin_so_path) = find_plugin_library(&path) {
+                self.load_plugin_from_path(&plugin_so_path).await?;
             }
         }
 
         Ok(())
     }
 
-    /// Loads a single ZOS plugin from a .so file path
+    /// Loads a single ZOS plugin from a dynamic library path.
     ///
     /// # Arguments
     ///
-    /// * `so_path` - Path to the plugin .so file
+    /// * `so_path` - Path to the plugin dynamic library
     ///
     /// # Returns
     ///
-    /// Result indicating success or failure
-    async fn load_plugin_from_path(&mut self, so_path: &Path) -> Result<()> {
-        // Load the library
+    /// Result indicating success or failure.
+    pub async fn load_plugin_from_path(&mut self, so_path: &Path) -> Result<()> {
         let library = unsafe { Library::new(so_path) }
             .with_context(|| format!("Failed to load plugin library: {}", so_path.display()))?;
 
-        // Get the plugin name
         unsafe {
             let name_fn: Symbol<ZosPluginNameFn> =
                 library.get(b"zos_plugin_name").with_context(|| {
@@ -240,13 +229,23 @@ impl<S: Services> ZosPluginBridge<S> {
                         so_path.display()
                     )
                 })?;
-            let c_str = CString::from_raw(name_fn() as *mut i8);
-            let name = c_str.to_string_lossy().into_owned();
 
-            // Create the wrapper
+            let name_ptr = name_fn();
+            if name_ptr.is_null() {
+                anyhow::bail!(
+                    "zos_plugin_name returned a null pointer in {}",
+                    so_path.display()
+                );
+            }
+
+            let name = CStr::from_ptr(name_ptr)
+                .to_str()
+                .with_context(|| {
+                    format!("Plugin name in {} is not valid UTF-8", so_path.display())
+                })?
+                .to_string();
+
             let wrapper = ZosPluginWrapper::<S>::new(library, name)?;
-
-            // Store the plugin
             self.loaded_plugins
                 .insert(wrapper.name().to_string(), wrapper);
         }
@@ -254,38 +253,12 @@ impl<S: Services> ZosPluginBridge<S> {
         Ok(())
     }
 
-    /// Gets a reference to a loaded plugin by name
-    ///
-    /// # Arguments
-    ///
-    /// * `name` - The name of the plugin
-    ///
-    /// # Returns
-    ///
-    /// Optional reference to the plugin if found
-    pub fn get_plugin(&self, name: &str) -> Option<&ZosPluginWrapper<S>> {
-        self.loaded_plugins.get(name)
-    }
-
-    /// Gets a mutable reference to a loaded plugin by name
-    ///
-    /// # Arguments
-    ///
-    /// * `name` - The name of the plugin
-    ///
-    /// # Returns
-    ///
-    /// Optional mutable reference to the plugin if found
-    pub fn get_plugin_mut(&mut self, name: &str) -> Option<&mut ZosPluginWrapper<S>> {
-        self.loaded_plugins.get_mut(name)
-    }
-
-    /// Returns the number of loaded plugins
+    /// Returns the number of loaded plugins.
     pub fn plugin_count(&self) -> usize {
         self.loaded_plugins.len()
     }
 
-    /// Returns true if any plugins have been loaded
+    /// Returns true if any plugins have been loaded.
     pub fn has_plugins(&self) -> bool {
         !self.loaded_plugins.is_empty()
     }
@@ -299,9 +272,8 @@ impl<S: Services> ZosPluginBridge<S> {
     }
 }
 
-impl<S: Services> Default for ZosPluginBridge<S> {
+impl<S: Send + Sync + 'static> Default for ZosPluginBridge<S> {
     fn default() -> Self {
-        // Default to ~/zos-server/plugins/
         let mut plugins_dir = home_dir().expect("Could not find home directory");
         plugins_dir.push("zos-server");
         plugins_dir.push("plugins");
@@ -309,186 +281,151 @@ impl<S: Services> Default for ZosPluginBridge<S> {
     }
 }
 
+#[async_trait::async_trait]
+impl<S: Send + Sync + 'static> Plugin<S> for ZosPluginBridge<S> {
+    fn name(&self) -> &str {
+        "zos-plugin-bridge"
+    }
+
+    fn description(&self) -> &str {
+        "Loads and manages ZOS dynamic plugins"
+    }
+
+    fn version(&self) -> &str {
+        "0.1.0"
+    }
+
+    async fn initialize(&self, services: Arc<S>) -> Result<()> {
+        for plugin in self.loaded_plugins.values() {
+            plugin.initialize(services.clone()).await?;
+        }
+        Ok(())
+    }
+
+    async fn shutdown(&self) -> Result<()> {
+        let mut plugins: Vec<_> = self.loaded_plugins.values().collect();
+        plugins.reverse();
+
+        for plugin in plugins {
+            plugin.shutdown().await?;
+        }
+
+        Ok(())
+    }
+
+    fn is_active(&self) -> bool {
+        self.loaded_plugins
+            .values()
+            .any(|plugin| plugin.is_active())
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
+}
+
+fn is_dynamic_library(path: &Path) -> bool {
+    matches!(
+        path.extension().and_then(|extension| extension.to_str()),
+        Some("so" | "dylib" | "dll")
+    )
+}
+
+fn find_plugin_library(plugin_dir: &Path) -> Option<PathBuf> {
+    find_library_file(plugin_dir)
+        .or_else(|| find_library_file(&plugin_dir.join("target").join("debug")))
+        .or_else(|| find_library_file(&plugin_dir.join("target").join("release")))
+}
+
+fn find_library_file(directory: &Path) -> Option<PathBuf> {
+    if directory.is_file() && is_dynamic_library(directory) {
+        return Some(directory.to_path_buf());
+    }
+
+    if !directory.is_dir() {
+        return None;
+    }
+
+    std::fs::read_dir(directory)
+        .ok()?
+        .flatten()
+        .map(|entry| entry.path())
+        .find(|path| path.is_file() && is_dynamic_library(path))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::plugin::PluginManager;
     use std::sync::Arc;
 
-    // Mock Services trait for testing
-    struct MockServices;
-    #[async_trait::async_trait]
-    impl Services for MockServices {
-        async fn find_conversation(
-            &self,
-            _conversation_id: &ConversationId,
-        ) -> Result<Option<Conversation>> {
-            Ok(None)
-        }
-        async fn upsert_conversation(&self, _conversation: Conversation) -> Result<()> {
-            Ok(())
-        }
-        fn get_config(&self) -> Result<ForgeConfig> {
-            Ok(ForgeConfig::default())
-        }
-        fn get_environment(&self) -> forge_domain::Environment {
-            forge_domain::Environment {
-                os: "test".to_string(),
-                cwd: std::path::PathBuf::from("/test"),
-                home: std::path::PathBuf::from("/home/test"),
-                shell: "/bin/bash".to_string(),
-                base_path: ".forge".to_string(),
-            }
-        }
-        async fn list_current_directory(&self) -> Result<Vec<FileInfo>> {
-            Ok(vec![])
-        }
-        async fn get_custom_instructions(&self) -> Result<Option<String>> {
-            Ok(None)
-        }
-        async fn get_agent(
-            &self,
-            _agent_id: &forge_domain::AgentId,
-        ) -> Result<Option<forge_domain::Agent>> {
-            Ok(None)
-        }
-        async fn get_all_providers(&self) -> Result<Vec<AnyProvider>> {
-            Ok(vec![])
-        }
-        async fn provider_auth_service(&self) -> Arc<dyn ProviderAuthService> {
-            Arc::new(MockProviderAuthService)
-        }
-        async fn initialize_plugins(&self) -> Result<()> {
-            Ok(())
-        }
-    }
+    #[tokio::test]
+    async fn test_load_all_plugins_missing_directory_is_ok() {
+        let plugins_dir = tempfile::tempdir().unwrap().path().join("missing");
+        let mut bridge = ZosPluginBridge::<()>::new(plugins_dir);
 
-    struct MockProviderAuthService;
-    #[async_trait::async_trait]
-    impl ProviderAuthService for MockProviderAuthService {
-        async fn refresh_provider_credential(&self, _provider: AnyProvider) -> Result<AnyProvider> {
-            Ok(_provider)
-        }
+        let actual = bridge.load_all_plugins().await;
+
+        assert!(actual.is_ok());
+        assert_eq!(bridge.plugin_count(), 0);
     }
 
     #[tokio::test]
-    async fn test_load_all_plugins_from_actual_directory() {
-        // Use the actual zos-server/plugins directory
-        let plugins_dir = std::path::PathBuf::from(std::env::var("HOME").unwrap())
-            .join("zos-server")
-            .join("plugins");
+    async fn test_load_all_plugins_empty_directory_is_ok() {
+        let plugins_dir = tempfile::tempdir().unwrap();
+        let mut bridge = ZosPluginBridge::<()>::new(plugins_dir.path());
 
-        // Skip test if plugins directory doesn't exist
-        if !plugins_dir.exists() {
-            println!(
-                "Skipping test: plugins directory does not exist at {}",
-                plugins_dir.display()
-            );
-            return;
-        }
+        let actual = bridge.load_all_plugins().await;
 
-        let mut bridge = ZosPluginBridge::<MockServices>::new(plugins_dir);
-        let result = bridge.load_all_plugins().await;
-
-        // Should succeed in loading plugins
-        assert!(result.is_ok(), "Failed to load plugins: {:?}", result.err());
-
-        // Should have loaded at least our test plugins
-        let count = bridge.plugin_count();
-        println!("Loaded {} plugins", count);
-
-        // Check that we can get specific plugins
-        let generators_plugin = bridge.get_plugin("generators");
-        assert!(
-            generators_plugin.is_some(),
-            "Should be able to get generators plugin"
-        );
-
-        let git_tools_plugin = bridge.get_plugin("git-tools");
-        assert!(
-            git_tools_plugin.is_some(),
-            "Should be able to get git-tools plugin"
-        );
-
-        // Test that plugins are initialized
-        if let Some(plugin) = generators_plugin {
-            assert!(
-                !plugin.is_active(),
-                "Plugin should not be active until initialized"
-            );
-
-            // Initialize the plugin
-            let services = Arc::new(MockServices);
-            let init_result = plugin.initialize(services.clone()).await;
-            assert!(
-                init_result.is_ok(),
-                "Failed to initialize generators plugin: {:?}",
-                init_result.err()
-            );
-            assert!(
-                plugin.is_active(),
-                "Plugin should be active after initialization"
-            );
-
-            // Test shutdown
-            let shutdown_result = plugin.shutdown().await;
-            assert!(
-                shutdown_result.is_ok(),
-                "Failed to shutdown generators plugin: {:?}",
-                shutdown_result.err()
-            );
-            assert!(
-                !plugin.is_active(),
-                "Plugin should not be active after shutdown"
-            );
-        }
+        assert!(actual.is_ok());
+        assert_eq!(bridge.plugin_count(), 0);
     }
 
     #[tokio::test]
-    async fn test_load_specific_plugin() {
-        // Test loading a specific plugin by path
-        let generators_so_path = std::path::PathBuf::from(std::env::var("HOME").unwrap())
-            .join("zos-server")
-            .join("plugins")
-            .join("generators")
-            .join("target")
-            .join("debug")
-            .join("libzos_plugin_generators.so");
+    async fn test_zos_plugin_bridge_lifecycle_without_plugins() {
+        let bridge = ZosPluginBridge::<()>::new(tempfile::tempdir().unwrap().path());
 
-        // Skip test if plugin doesn't exist
-        if !generators_so_path.exists() {
-            println!(
-                "Skipping test: generators plugin not found at {}",
-                generators_so_path.display()
-            );
-            return;
-        }
+        let setup = Arc::new(());
+        let actual = bridge.initialize(setup.clone()).await;
+        assert!(actual.is_ok());
+        assert!(!bridge.is_active());
 
-        let mut bridge = ZosPluginBridge::<MockServices>::new(std::path::PathBuf::new());
-        let result = bridge.load_plugin_from_path(&generators_so_path).await;
+        let actual = bridge.shutdown().await;
+        assert!(actual.is_ok());
+        assert!(!bridge.is_active());
+    }
 
-        assert!(
-            result.is_ok(),
-            "Failed to load generators plugin: {:?}",
-            result.err()
-        );
-        assert_eq!(
-            bridge.plugin_count(),
-            1,
-            "Should have loaded exactly one plugin"
-        );
+    #[test]
+    fn test_plugin_manager_clone_preserves_plugins() {
+        let bridge = ZosPluginBridge::<()>::new(tempfile::tempdir().unwrap().path());
+        let mut manager = PluginManager::new();
 
-        let plugin = bridge.get_plugin("generators");
-        assert!(plugin.is_some(), "Should be able to get generators plugin");
+        let setup = manager.plugin_count();
+        manager.register_plugin(Arc::new(bridge));
+        let cloned = manager.clone();
 
-        if let Some(plugin) = plugin {
-            // Test that we can initialize it
-            let services = Arc::new(MockServices);
-            let init_result = plugin.initialize(services.clone()).await;
-            assert!(
-                init_result.is_ok(),
-                "Failed to initialize generators plugin: {:?}",
-                init_result.err()
-            );
-        }
+        let actual = cloned.plugin_count();
+        let expected = setup + 1;
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_is_dynamic_library_recognizes_common_extensions() {
+        let setup = [
+            PathBuf::from("libzos_plugin_example.so"),
+            PathBuf::from("zos_plugin_example.dylib"),
+            PathBuf::from("zos_plugin_example.dll"),
+            PathBuf::from("zos_plugin_example.txt"),
+        ];
+
+        let actual: Vec<_> = setup.iter().map(|path| is_dynamic_library(path)).collect();
+        let expected = vec![true, true, true, false];
+
+        assert_eq!(actual, expected);
     }
 }

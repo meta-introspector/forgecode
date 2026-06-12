@@ -602,7 +602,9 @@ pub trait Services: Send + Sync + 'static + Clone + EnvironmentInfra {
     /// # Returns
     ///
     /// Returns Ok(()) if all plugins were initialized successfully, or an error if any failed
-    async fn initialize_plugins(&self) -> anyhow::Result<()>;
+    fn initialize_plugins(
+        &self,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + '_>>;
 }
 
 #[async_trait::async_trait]

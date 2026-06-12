@@ -14,53 +14,10 @@
 ///
 /// # Creating a Plugin
 ///
-/// To create a Forge plugin, implement the `Plugin<S>` trait where `S` is a type that
-/// implements the `Services` trait (providing access to Forge services):
-///
-/// ```
-/// use forge_infra::Plugin;
-/// use forge_services::Services;
-///
-/// struct MyPlugin;
-///
-/// #[async_trait::async_trait]
-/// impl<S: Services> Plugin<S> for MyPlugin {
-///     fn name(&self) -> &'static str {
-///         "my-plugin"
-///     }
-///     
-///     fn description(&self) -> &'static str {
-///         "A sample Forge plugin"
-///     }
-///     
-///     fn version(&self) -> &'static str {
-///         "0.1.0"
-///     }
-///     
-///     async fn initialize(&self, services: Arc<S>) -> Result<()> {
-///         // Initialize plugin with access to Forge services
-///         Ok(())
-///     }
-///     
-///     async fn shutdown(&self) -> Result<()> {
-///         // Clean up resources
-///         Ok(())
-///     }
-///     
-///     fn is_active(&self) -> bool {
-///         // Return true if plugin is initialized
-///         true
-///     }
-///     
-///     fn as_any(&self) -> &dyn Any {
-///         self
-///     }
-///     
-///     fn as_any_mut(&mut self) -> &mut dyn Any {
-///         self
-///     }
-/// }
-/// ```
+/// To create a Forge plugin, implement the `Plugin<S>` trait where `S` is a
+/// Send + Sync service container type. The manager registers plugins by name,
+/// initializes them with an Arc-wrapped service container, and shuts them down
+/// in reverse lifecycle order.
 ///
 /// # ZOS Plugin Bridge
 ///
@@ -76,17 +33,11 @@
 /// # Using the Plugin System
 ///
 /// Plugins are typically managed through the `ForgeServices` struct, which
-/// contains a `PluginManager` and automatically loads ZOS plugins during initialization:
-///
-/// ```
-/// let services = ForgeServices::new(infra);
-/// services.initialize_plugins().await?; // Loads and initializes all plugins
-/// ```
-/// 
-/// The plugin system enables Forge to be extended with new functionality
-/// without modifying the core application, supporting both first-party plugins
-/// (like those in zos-server/plugins) and third-party extensions.
-
+/// contains a `PluginManager` and automatically loads ZOS plugins during
+/// initialization. The plugin system enables Forge to be extended with new
+/// functionality without modifying the core application, supporting both
+/// first-party plugins (like those in zos-server/plugins) and third-party
+/// extensions.
 mod auth;
 mod console;
 mod env;

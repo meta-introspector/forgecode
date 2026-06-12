@@ -404,8 +404,12 @@ mod tests {
             Ok(ForgeConfig::default())
         }
 
-        async fn update_environment(&self, _ops: Vec<ConfigOperation>) -> anyhow::Result<()> {
-            Ok(())
+        fn update_environment(
+            &self,
+            _ops: Vec<ConfigOperation>,
+        ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>>
+        {
+            Box::pin(async move { Ok(()) })
         }
     }
 
