@@ -131,6 +131,13 @@ impl Environment {
         self.home.as_ref().map(|home| home.join(".agents/skills"))
     }
 
+    /// Returns the Dotagents skills directory path (~/dotagents/skills)
+    ///
+    /// Returns `None` when the home directory cannot be determined.
+    pub fn dotagents_skills_path(&self) -> Option<PathBuf> {
+        self.home.as_ref().map(|home| home.join("dotagents/skills"))
+    }
+
     /// Returns the project-local skills directory path (.forge/skills)
     pub fn local_skills_path(&self) -> PathBuf {
         self.cwd.join(".forge/skills")
@@ -257,6 +264,17 @@ mod tests {
     }
 
     #[test]
+    fn test_dotagents_skills_path_with_home() {
+        let fixture: Environment = Faker.fake();
+        let fixture = fixture.home(PathBuf::from("/home/user"));
+
+        let actual = fixture.dotagents_skills_path();
+        let expected = Some(PathBuf::from("/home/user/dotagents/skills"));
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
     fn test_agents_skills_path_without_home() {
         let fixture: Environment = Faker.fake();
         // Explicitly clear the home field
@@ -264,6 +282,17 @@ mod tests {
         fixture.home = None;
 
         let actual = fixture.agents_skills_path();
+
+        assert_eq!(actual, None);
+    }
+
+    #[test]
+    fn test_dotagents_skills_path_without_home() {
+        let fixture: Environment = Faker.fake();
+        let mut fixture = fixture;
+        fixture.home = None;
+
+        let actual = fixture.dotagents_skills_path();
 
         assert_eq!(actual, None);
     }
