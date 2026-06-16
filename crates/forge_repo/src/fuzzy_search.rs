@@ -5,9 +5,9 @@ use async_trait::async_trait;
 use forge_app::GrpcInfra;
 use forge_domain::{FuzzySearchRepository, SearchMatch};
 
-use crate::proto_generated::forge_service_client::ForgeServiceClient;
 use crate::proto_generated::FuzzySearchRequest;
 use crate::proto_generated::FuzzySearchResponse;
+use crate::proto_generated::forge_service_client::ForgeServiceClient;
 
 pub struct ForgeFuzzySearchRepository<I> {
     infra: Arc<I>,

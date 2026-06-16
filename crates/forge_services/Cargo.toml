@@ -55,6 +55,9 @@ http.workspace = true
 infer.workspace = true
 uuid.workspace = true
 tonic.workspace = true
+postcard = { version = "1", default-features = false, features = ["alloc"] }
+serde_bytes = "0.11"
+uds = "0.4"
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt", "time", "test-util"] }

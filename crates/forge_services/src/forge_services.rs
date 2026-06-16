@@ -10,13 +10,15 @@ use forge_domain::{
     SkillRepository, SnapshotRepository, TextPatchRepository, ValidationRepository,
     WorkspaceIndexRepository,
 };
-use forge_infra::{PluginManager, ZosPluginBridge};
+use forge_infra::{Plugin, PluginManager, ZosPluginBridge};
 
+use crate::CarShmemService;
 use crate::ForgeProviderAuthService;
 use crate::agent_registry::ForgeAgentRegistryService;
 use crate::app_config::ForgeAppConfigService;
 use crate::attachment::ForgeChatRequest;
 use crate::auth::ForgeAuthService;
+use crate::car_shmem_plugin::CarShmemPlugin;
 use crate::command::CommandLoaderService as ForgeCommandLoaderService;
 use crate::conversation::ForgeConversationService;
 use crate::discovery::ForgeDiscoveryService;
@@ -72,6 +74,8 @@ pub struct ForgeServices<
         + 'static,
 > {
     chat_service: Arc<ForgeProviderService<F>>,
+    car_shmem_service: Arc<CarShmemService>,
+    car_shmem_plugin: Arc<CarShmemPlugin>,
     config_service: Arc<ForgeAppConfigService<F>>,
     conversation_service: Arc<ForgeConversationService<F>>,
     template_service: Arc<ForgeTemplateService<F>>,
@@ -136,6 +140,11 @@ impl<
     pub fn new(infra: Arc<F>) -> Self {
         let mcp_manager = Arc::new(ForgeMcpManager::new(infra.clone()));
         let mcp_service = Arc::new(ForgeMcpService::new(mcp_manager.clone(), infra.clone()));
+        let car_shmem_service = Arc::new(CarShmemService::new_with_socket(
+            infra.get_environment().cache_dir().join("ipld-car-shmem"),
+            true,
+        ));
+        let car_shmem_plugin = Arc::new(CarShmemPlugin::from_service(car_shmem_service.clone()));
         let template_service = Arc::new(ForgeTemplateService::new(infra.clone()));
         let attachment_service = Arc::new(ForgeChatRequest::new(infra.clone()));
         let suggestion_service = Arc::new(ForgeDiscoveryService::new(infra.clone()));
@@ -188,6 +197,8 @@ impl<
             custom_instructions_service,
             auth_service,
             config_service,
+            car_shmem_service,
+            car_shmem_plugin,
             agent_registry_service,
             command_loader_service,
             policy_service,
@@ -255,6 +266,8 @@ impl<
             mcp_service: self.mcp_service.clone(),
             custom_instructions_service: self.custom_instructions_service.clone(),
             auth_service: self.auth_service.clone(),
+            car_shmem_service: self.car_shmem_service.clone(),
+            car_shmem_plugin: self.car_shmem_plugin.clone(),
             agent_registry_service: self.agent_registry_service.clone(),
             command_loader_service: self.command_loader_service.clone(),
             policy_service: self.policy_service.clone(),
@@ -302,6 +315,7 @@ impl<
     type ConversationService = ForgeConversationService<F>;
     type TemplateService = ForgeTemplateService<F>;
     type ProviderAuthService = ForgeProviderAuthService<F>;
+    type CarShmemAccessService = CarShmemService;
 
     fn provider_auth_service(&self) -> &Self::ProviderAuthService {
         &self.provider_auth_service
@@ -418,6 +432,10 @@ impl<
         &self.policy_service
     }
 
+    fn car_shmem_access_service(&self) -> &Self::CarShmemAccessService {
+        self.car_shmem_service.as_ref()
+    }
+
     fn workspace_service(&self) -> &Self::WorkspaceService {
         &self.workspace_service
     }
@@ -437,6 +455,17 @@ impl<
         &self,
     ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + '_>> {
         Box::pin(async move {
+            {
+                let mut plugin_manager = self
+                    .plugin_manager
+                    .lock()
+                    .map_err(|_| anyhow::anyhow!("plugin manager lock poisoned"))?;
+
+                plugin_manager.register_plugin(
+                    self.car_shmem_plugin.clone() as Arc<dyn Plugin<ForgeServices<F>>>
+                );
+            }
+
             // Load ZOS plugins from the zos-server/plugins directory and register the
             // bridge as a Forge plugin so the manager can control its lifecycle.
             let mut zos_bridge = ZosPluginBridge::<ForgeServices<F>>::default();
@@ -462,6 +491,40 @@ impl<
             let self_arc = Arc::new(self.clone());
             plugin_manager.initialize_all(self_arc).await
         })
+    }
+
+    fn reload_plugins(
+        &self,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + '_>> {
+        Box::pin(async move {
+            let plugins = {
+                let mut plugin_manager = self
+                    .plugin_manager
+                    .lock()
+                    .map_err(|_| anyhow::anyhow!("plugin manager lock poisoned"))?;
+                let plugins = plugin_manager.get_all_plugins();
+                plugin_manager.replace_plugins([]);
+                plugins
+            };
+
+            let mut plugins = plugins;
+            plugins.reverse();
+            for plugin in plugins {
+                if plugin.is_active() {
+                    plugin.shutdown().await?;
+                }
+            }
+
+            self.initialize_plugins().await
+        })
+    }
+
+    fn list_plugins(&self) -> anyhow::Result<Vec<forge_domain::PluginInfo>> {
+        let plugin_manager = self
+            .plugin_manager
+            .lock()
+            .map_err(|_| anyhow::anyhow!("plugin manager lock poisoned"))?;
+        Ok(plugin_manager.list_plugins())
     }
 }
 

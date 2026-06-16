@@ -18,7 +18,8 @@ use forge_app::{CommitResult, ToolResolver};
 use forge_config::ForgeConfig;
 use forge_display::MarkdownFormat;
 use forge_domain::{
-    AuthMethod, ChatResponseContent, ConsoleWriter, ContextMessage, Role, TitleFormat, UserCommand,
+    AuthMethod, CarShmemQuery, ChatResponseContent, ConsoleWriter, ContextMessage, Role,
+    TitleFormat, UserCommand,
 };
 use forge_fs::ForgeFS;
 use forge_select::{ForgeWidget, SelectRow};
@@ -31,8 +32,8 @@ use tokio_stream::StreamExt;
 use url::Url;
 
 use crate::cli::{
-    Cli, CommitCommandGroup, ConversationCommand, ListCommand, McpCommand, SelectCommand,
-    TopLevelCommand,
+    Cli, CommitCommandGroup, ConversationCommand, ListCommand, McpCommand, PluginCommand,
+    SelectCommand, ShmemCommand, TopLevelCommand,
 };
 use crate::conversation_selector::ConversationSelector;
 use crate::display_constants::{CommandType, headers, markers, status};
@@ -100,6 +101,10 @@ fn format_mcp_headers(server: &forge_domain::McpServerConfig) -> Option<String> 
             }
         }
     }
+}
+
+fn format_json<T: serde::Serialize>(value: &T) -> anyhow::Result<String> {
+    serde_json::to_string_pretty(value).context("failed to serialize response")
 }
 
 pub struct UI<A: ConsoleWriter, F: Fn(ForgeConfig) -> A> {
@@ -477,6 +482,39 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
         Ok(())
     }
 
+    async fn handle_shmem_command(&mut self, command: ShmemCommand) -> anyhow::Result<()> {
+        let query = match command {
+            ShmemCommand::Stats => CarShmemQuery::Stats,
+            ShmemCommand::Cid { cid } => CarShmemQuery::Cid(cid),
+            ShmemCommand::Search { query } => CarShmemQuery::Search(query),
+            ShmemCommand::Path { path } => CarShmemQuery::Path(path),
+        };
+
+        let result = self.api.query_car_shmem(query).await?;
+        self.writeln(format_json(&result)?)?;
+        Ok(())
+    }
+
+    async fn handle_plugin_command(
+        &mut self,
+        command: PluginCommand,
+        porcelain: bool,
+    ) -> anyhow::Result<()> {
+        match command {
+            PluginCommand::List => {
+                self.on_show_plugins(porcelain).await?;
+            }
+            PluginCommand::Reload => {
+                self.spinner.start(Some("Reloading plugins"))?;
+                self.api.reload_plugins().await?;
+                self.on_show_plugins(porcelain).await?;
+                self.writeln_title(TitleFormat::info("Dynamic plugins reloaded"))?;
+            }
+        }
+
+        Ok(())
+    }
+
     async fn handle_subcommands(&mut self, subcommand: TopLevelCommand) -> anyhow::Result<()> {
         match subcommand {
             TopLevelCommand::Agent(agent_group) => {
@@ -642,6 +680,15 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
                     self.handle_mcp_logout(&args.name).await?;
                 }
             },
+            TopLevelCommand::Shmem(shmem_command) => {
+                self.handle_shmem_command(shmem_command.command).await?;
+                return Ok(());
+            }
+            TopLevelCommand::Plugin(plugin_command) => {
+                self.handle_plugin_command(plugin_command.command, plugin_command.porcelain)
+                    .await?;
+                return Ok(());
+            }
             TopLevelCommand::Info { porcelain, conversation_id } => {
                 // Only initialize state (agent/provider/model resolution).
                 // Avoid on_new() which also spawns fire-and-forget background
@@ -1742,6 +1789,30 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
         Ok(())
     }
 
+    /// Displays loaded dynamic plugins.
+    async fn on_show_plugins(&mut self, porcelain: bool) -> anyhow::Result<()> {
+        self.spinner.start(Some("Loading plugins"))?;
+        let plugins = self.api.list_plugins().await?;
+
+        let mut info = Info::new();
+        for plugin in plugins {
+            info = info
+                .add_title(plugin.name.to_uppercase())
+                .add_key_value("Name", plugin.name)
+                .add_key_value("Version", plugin.version)
+                .add_key_value("Active", if plugin.active { "yes" } else { "no" })
+                .add_key_value("Description", plugin.description);
+        }
+
+        if porcelain {
+            self.writeln(Porcelain::from(&info).uppercase_headers().truncate(4, 60))?;
+        } else {
+            self.writeln(info)?;
+        }
+
+        Ok(())
+    }
+
     async fn on_info(
         &mut self,
         porcelain: bool,
@@ -2117,6 +2188,12 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
                 } else {
                     self.list_conversations().await?;
                 }
+            }
+            AppCommand::Shmem { command } => {
+                self.handle_shmem_command(command).await?;
+            }
+            AppCommand::Plugin { command } => {
+                self.handle_plugin_command(command, false).await?;
             }
             AppCommand::Compact => {
                 self.spinner.start(Some("Compacting"))?;

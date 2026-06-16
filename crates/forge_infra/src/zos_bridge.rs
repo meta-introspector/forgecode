@@ -96,10 +96,10 @@ impl<S: Send + Sync + 'static> Plugin<S> for ZosPluginWrapper<S> {
     }
 
     async fn shutdown(&self) -> Result<()> {
-        if !self
+        if self
             .initialized
             .compare_exchange(true, false, Ordering::SeqCst, Ordering::SeqCst)
-            .is_ok()
+            .is_err()
         {
             return Ok(());
         }

@@ -65,6 +65,24 @@ impl<S: Services + EnvironmentInfra<Config = forge_config::ForgeConfig>> ForgeAp
         self.services.initialize_plugins().await
     }
 
+    /// Reloads dynamic plugins from configured plugin sources.
+    ///
+    /// # Returns
+    ///
+    /// Returns Ok(()) if all reloaded plugins initialized successfully.
+    pub async fn reload_plugins(&self) -> anyhow::Result<()> {
+        self.services.reload_plugins().await
+    }
+
+    /// Lists registered plugins and their active state.
+    ///
+    /// # Returns
+    ///
+    /// Returns plugin metadata sorted by plugin name.
+    pub fn list_plugins(&self) -> anyhow::Result<Vec<forge_domain::PluginInfo>> {
+        self.services.list_plugins()
+    }
+
     /// Executes a chat request and returns a stream of responses.
     /// This method contains the core chat logic extracted from ForgeAPI.
     pub async fn chat(

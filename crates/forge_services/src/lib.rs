@@ -2,6 +2,8 @@ mod agent_registry;
 mod app_config;
 mod attachment;
 mod auth;
+mod car_shmem;
+mod car_shmem_plugin;
 mod clipper;
 mod command;
 mod context_engine;
@@ -25,6 +27,8 @@ mod tool_services;
 mod utils;
 
 pub use app_config::*;
+pub use car_shmem::*;
+pub use car_shmem_plugin::*;
 pub use clipper::*;
 pub use command::*;
 pub use context_engine::*;

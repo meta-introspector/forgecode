@@ -5,8 +5,8 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use forge_app::dto::ToolsOverview;
 use forge_app::{
-    AgentProviderResolver, AgentRegistry, AppConfigService, AuthService, CommandInfra,
-    CommandLoaderService, ConversationService, DataGenerationApp, EnvironmentInfra,
+    AgentProviderResolver, AgentRegistry, AppConfigService, AuthService, CarShmemAccessService,
+    CommandInfra, CommandLoaderService, ConversationService, DataGenerationApp, EnvironmentInfra,
     FileDiscoveryService, ForgeApp, GitApp, GrpcInfra, McpConfigManager, McpService,
     ProviderAuthService, ProviderService, Services, User, UserUsage, Walker, WorkspaceService,
 };
@@ -313,6 +313,21 @@ impl<
 
     async fn initialize_plugins(&self) -> Result<()> {
         self.services.initialize_plugins().await
+    }
+
+    async fn reload_plugins(&self) -> Result<()> {
+        self.services.reload_plugins().await
+    }
+
+    async fn list_plugins(&self) -> Result<Vec<forge_domain::PluginInfo>> {
+        self.services.list_plugins()
+    }
+
+    async fn query_car_shmem(
+        &self,
+        query: forge_domain::CarShmemQuery,
+    ) -> Result<forge_domain::CarShmemQueryResult> {
+        self.services.car_shmem_access_service().query(query)
     }
 
     async fn get_commands(&self) -> Result<Vec<Command>> {

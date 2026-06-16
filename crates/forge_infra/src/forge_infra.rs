@@ -11,7 +11,8 @@ use forge_app::{
     StrategyFactory, UserInfra, WalkerInfra,
 };
 use forge_domain::{
-    AuthMethod, CommandOutput, ConfigOperation, FileInfo as FileInfoData, McpServerConfig, ProviderId, URLParamSpec,
+    AuthMethod, CommandOutput, ConfigOperation, FileInfo as FileInfoData, McpServerConfig,
+    ProviderId, URLParamSpec,
 };
 use forge_eventsource::EventSource;
 use reqwest::header::HeaderMap;
@@ -140,7 +141,10 @@ impl EnvironmentInfra for ForgeInfra {
         self.config_infra.get_config()
     }
 
-     fn update_environment(&self, ops: Vec<ConfigOperation>) -> Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>> {
+    fn update_environment(
+        &self,
+        ops: Vec<ConfigOperation>,
+    ) -> Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send>> {
         Box::pin(self.config_infra.update_environment(ops))
     }
 }

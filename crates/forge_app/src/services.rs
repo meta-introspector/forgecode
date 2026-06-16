@@ -323,6 +323,24 @@ pub trait WorkspaceService: Send + Sync {
     async fn init_workspace(&self, path: PathBuf) -> anyhow::Result<WorkspaceId>;
 }
 
+/// Service for inspecting and querying IPLD CAR shared-memory blocks.
+pub trait CarShmemAccessService: Send + Sync {
+    /// Returns store statistics and index counts.
+    fn stats(&self) -> anyhow::Result<forge_domain::CarShmemStats>;
+
+    /// Queries the CAR shared-memory store.
+    fn query(
+        &self,
+        query: forge_domain::CarShmemQuery,
+    ) -> anyhow::Result<forge_domain::CarShmemQueryResult>;
+
+    /// Returns metadata for a block by CID.
+    fn get_block(&self, cid: String) -> anyhow::Result<forge_domain::CarShmemBlock>;
+
+    /// Returns metadata for a memory block by path.
+    fn get_block_by_path(&self, path: &str) -> anyhow::Result<forge_domain::CarShmemBlock>;
+}
+
 #[async_trait::async_trait]
 pub trait FileDiscoveryService: Send + Sync {
     async fn collect_files(&self, config: Walker) -> anyhow::Result<Vec<File>>;
@@ -567,9 +585,11 @@ pub trait Services: Send + Sync + 'static + Clone + EnvironmentInfra {
     type PolicyService: PolicyService;
     type ProviderAuthService: ProviderAuthService;
     type WorkspaceService: WorkspaceService;
+    type CarShmemAccessService: CarShmemAccessService;
     type SkillFetchService: SkillFetchService;
 
     fn provider_service(&self) -> &Self::ProviderService;
+    fn provider_auth_service(&self) -> &Self::ProviderAuthService;
     fn config_service(&self) -> &Self::AppConfigService;
     fn conversation_service(&self) -> &Self::ConversationService;
     fn template_service(&self) -> &Self::TemplateService;
@@ -593,8 +613,8 @@ pub trait Services: Send + Sync + 'static + Clone + EnvironmentInfra {
     fn agent_registry(&self) -> &Self::AgentRegistry;
     fn command_loader_service(&self) -> &Self::CommandLoaderService;
     fn policy_service(&self) -> &Self::PolicyService;
-    fn provider_auth_service(&self) -> &Self::ProviderAuthService;
     fn workspace_service(&self) -> &Self::WorkspaceService;
+    fn car_shmem_access_service(&self) -> &Self::CarShmemAccessService;
     fn skill_fetch_service(&self) -> &Self::SkillFetchService;
 
     /// Initializes all registered plugins
@@ -605,6 +625,22 @@ pub trait Services: Send + Sync + 'static + Clone + EnvironmentInfra {
     fn initialize_plugins(
         &self,
     ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + '_>>;
+
+    /// Reloads dynamic plugins from the configured plugin sources.
+    ///
+    /// # Returns
+    ///
+    /// Returns Ok(()) if all reloaded plugins initialized successfully.
+    fn reload_plugins(
+        &self,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + '_>>;
+
+    /// Lists registered plugins and their active state.
+    ///
+    /// # Returns
+    ///
+    /// Returns plugin metadata sorted by plugin name.
+    fn list_plugins(&self) -> anyhow::Result<Vec<forge_domain::PluginInfo>>;
 }
 
 #[async_trait::async_trait]
@@ -1032,6 +1068,27 @@ impl<I: Services> ProviderAuthService for I {
         self.provider_auth_service()
             .refresh_provider_credential(provider)
             .await
+    }
+}
+
+impl<I: Services> CarShmemAccessService for I {
+    fn stats(&self) -> anyhow::Result<forge_domain::CarShmemStats> {
+        self.car_shmem_access_service().stats()
+    }
+
+    fn query(
+        &self,
+        query: forge_domain::CarShmemQuery,
+    ) -> anyhow::Result<forge_domain::CarShmemQueryResult> {
+        self.car_shmem_access_service().query(query)
+    }
+
+    fn get_block(&self, cid: String) -> anyhow::Result<forge_domain::CarShmemBlock> {
+        self.car_shmem_access_service().get_block(cid)
+    }
+
+    fn get_block_by_path(&self, path: &str) -> anyhow::Result<forge_domain::CarShmemBlock> {
+        self.car_shmem_access_service().get_block_by_path(path)
     }
 }
 

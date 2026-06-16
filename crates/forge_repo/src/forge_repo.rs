@@ -19,8 +19,8 @@ use forge_domain::{
 use forge_eventsource::EventSource;
 // Re-export CacacheStorage from forge_infra
 pub use forge_infra::CacacheStorage;
-use reqwest::header::HeaderMap;
 use reqwest::Response;
+use reqwest::header::HeaderMap;
 use url::Url;
 
 use crate::agent::ForgeAgentRepository;
@@ -29,8 +29,8 @@ use crate::conversation::ConversationRepositoryImpl;
 use crate::database::{DatabasePool, PoolConfig};
 use crate::fs_snap::ForgeFileSnapshotService;
 use crate::fuzzy_search::ForgeFuzzySearchRepository;
-use crate::proto_generated::forge_service_client::ForgeServiceClient;
 use crate::proto_generated::BuildTextPatchResponse;
+use crate::proto_generated::forge_service_client::ForgeServiceClient;
 use crate::provider::{ForgeChatRepository, ForgeProviderRepository};
 use crate::skill::ForgeSkillRepository;
 use crate::validation::ForgeValidationRepository;
@@ -55,12 +55,12 @@ pub struct ForgeRepo<F> {
 }
 
 impl<
-        F: EnvironmentInfra<Config = forge_config::ForgeConfig>
-            + FileReaderInfra
-            + FileWriterInfra
-            + GrpcInfra
-            + HttpInfra,
-    > ForgeRepo<F>
+    F: EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + FileReaderInfra
+        + FileWriterInfra
+        + GrpcInfra
+        + HttpInfra,
+> ForgeRepo<F>
 {
     pub fn new(infra: Arc<F>) -> Self {
         let env = infra.get_environment();
@@ -151,13 +151,13 @@ impl<F: Send + Sync> ConversationRepository for ForgeRepo<F> {
 
 #[async_trait::async_trait]
 impl<
-        F: EnvironmentInfra<Config = forge_config::ForgeConfig>
-            + FileReaderInfra
-            + FileWriterInfra
-            + HttpInfra
-            + Send
-            + Sync,
-    > ChatRepository for ForgeRepo<F>
+    F: EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + FileReaderInfra
+        + FileWriterInfra
+        + HttpInfra
+        + Send
+        + Sync,
+> ChatRepository for ForgeRepo<F>
 {
     async fn chat(
         &self,
@@ -175,13 +175,13 @@ impl<
 
 #[async_trait::async_trait]
 impl<
-        F: EnvironmentInfra<Config = forge_config::ForgeConfig>
-            + FileReaderInfra
-            + FileWriterInfra
-            + HttpInfra
-            + Send
-            + Sync,
-    > ProviderRepository for ForgeRepo<F>
+    F: EnvironmentInfra<Config = forge_config::ForgeConfig>
+        + FileReaderInfra
+        + FileWriterInfra
+        + HttpInfra
+        + Send
+        + Sync,
+> ProviderRepository for ForgeRepo<F>
 {
     async fn get_all_providers(&self) -> anyhow::Result<Vec<AnyProvider>> {
         self.provider_repository.get_all_providers().await
@@ -490,9 +490,8 @@ where
 }
 
 #[async_trait::async_trait]
-impl<
-        F: FileInfoInfra + EnvironmentInfra<Config = ForgeConfig> + DirectoryReaderInfra + Send + Sync,
-    > AgentRepository for ForgeRepo<F>
+impl<F: FileInfoInfra + EnvironmentInfra<Config = ForgeConfig> + DirectoryReaderInfra + Send + Sync>
+    AgentRepository for ForgeRepo<F>
 {
     async fn get_agents(&self) -> anyhow::Result<Vec<forge_domain::Agent>> {
         self.agent_repository.get_agents().await

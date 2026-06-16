@@ -109,6 +109,44 @@ impl<S: Send + Sync + 'static> PluginManager<S> {
         self.plugins.values().cloned().collect()
     }
 
+    /// Lists registered plugins as lightweight metadata.
+    ///
+    /// # Returns
+    ///
+    /// Returns plugin metadata sorted by name for stable command output.
+    pub fn list_plugins(&self) -> Vec<forge_domain::PluginInfo> {
+        let mut plugins: Vec<_> = self
+            .plugins
+            .values()
+            .map(|plugin| forge_domain::PluginInfo {
+                name: plugin.name().to_string(),
+                description: plugin.description().to_string(),
+                version: plugin.version().to_string(),
+                active: plugin.is_active(),
+            })
+            .collect();
+        plugins.sort_by(|left, right| left.name.cmp(&right.name));
+        plugins
+    }
+
+    /// Replaces the current plugin registry with the provided plugins.
+    ///
+    /// Existing plugins are not shut down by this method; callers should invoke
+    /// `shutdown_all` before replacing the registry when a reload is intended.
+    ///
+    /// # Arguments
+    ///
+    /// * `plugins` - New plugins to register.
+    pub fn replace_plugins<I>(&mut self, plugins: I)
+    where
+        I: IntoIterator<Item = Arc<dyn Plugin<S>>>,
+    {
+        self.plugins.clear();
+        for plugin in plugins {
+            self.register_plugin(plugin);
+        }
+    }
+
     /// Initializes all registered plugins.
     ///
     /// Plugins are initialized in the order they were registered.

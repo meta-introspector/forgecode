@@ -153,6 +153,9 @@ impl ForgeCommandManager {
                 | "sync-info"
                 | "workspace-init"
                 | "sync-init"
+                | "shmem"
+                | "plugin"
+                | "plugins"
         )
     }
 
@@ -669,6 +672,23 @@ pub enum AppCommand {
     #[command(skip)]
     AgentSwitch(String),
 
+    /// Query IPLD CAR shared-memory blocks.
+    #[strum(props(usage = "Query IPLD CAR shared-memory blocks"))]
+    Shmem {
+        /// Shared-memory query to run.
+        #[command(subcommand)]
+        command: crate::cli::ShmemCommand,
+    },
+
+    /// Manage dynamic plugins.
+    #[strum(props(usage = "Manage dynamic plugins"))]
+    #[command(name = "plugin", alias = "plugins")]
+    Plugin {
+        /// Plugin command to run.
+        #[command(subcommand)]
+        command: crate::cli::PluginCommand,
+    },
+
     /// Generate and optionally commit changes with AI-generated message
     ///
     /// Examples:
@@ -716,6 +736,8 @@ impl AppCommand {
             AppCommand::Logout => "logout",
             AppCommand::Retry => "retry",
             AppCommand::Conversations { .. } => "conversation",
+            AppCommand::Shmem { .. } => "shmem",
+            AppCommand::Plugin { .. } => "plugin",
             AppCommand::Delete => "delete",
             AppCommand::Rename { .. } => "rename",
             AppCommand::AgentSwitch(agent_id) => agent_id,
@@ -787,6 +809,7 @@ mod tests {
     use url::Url;
 
     use super::*;
+    use crate::cli::{PluginCommand, ShmemCommand};
     use crate::display_constants::markers;
 
     /// Test-only wrapper for displaying models in selection menus
@@ -851,6 +874,101 @@ mod tests {
             }
             Ok(())
         }
+    }
+
+    #[test]
+    fn test_parse_shmem_stats_command() {
+        // Setup
+        let cmd_manager = ForgeCommandManager::default();
+
+        // Execute
+        let result = cmd_manager.parse("/shmem stats").unwrap();
+
+        // Verify
+        assert_eq!(result, AppCommand::Shmem { command: ShmemCommand::Stats });
+    }
+
+    #[test]
+    fn test_parse_shmem_cid_command() {
+        // Setup
+        let cmd_manager = ForgeCommandManager::default();
+
+        // Execute
+        let result = cmd_manager.parse("/shmem cid abc123").unwrap();
+
+        // Verify
+        assert_eq!(
+            result,
+            AppCommand::Shmem { command: ShmemCommand::Cid { cid: "abc123".to_string() } }
+        );
+    }
+
+    #[test]
+    fn test_parse_shmem_search_command() {
+        // Setup
+        let cmd_manager = ForgeCommandManager::default();
+
+        // Execute
+        let result = cmd_manager.parse("/shmem search car-shmem").unwrap();
+
+        // Verify
+        assert_eq!(
+            result,
+            AppCommand::Shmem {
+                command: ShmemCommand::Search { query: "car-shmem".to_string() }
+            }
+        );
+    }
+
+    #[test]
+    fn test_shmem_is_reserved_command() {
+        // Setup
+        let command_name = "shmem";
+
+        // Execute
+        let actual = ForgeCommandManager::is_reserved_command(command_name);
+
+        // Verify
+        assert!(actual);
+    }
+
+    #[test]
+    fn test_parse_plugin_list_command() {
+        // Setup
+        let cmd_manager = ForgeCommandManager::default();
+
+        // Execute
+        let result = cmd_manager.parse("/plugin list").unwrap();
+
+        // Verify
+        assert_eq!(result, AppCommand::Plugin { command: PluginCommand::List });
+    }
+
+    #[test]
+    fn test_parse_plugin_reload_command() {
+        // Setup
+        let cmd_manager = ForgeCommandManager::default();
+
+        // Execute
+        let result = cmd_manager.parse("/plugin reload").unwrap();
+
+        // Verify
+        assert_eq!(
+            result,
+            AppCommand::Plugin { command: PluginCommand::Reload }
+        );
+    }
+
+    #[test]
+    fn test_plugin_is_reserved_command() {
+        // Setup
+        let command_name = "plugin";
+
+        // Execute
+        let actual = ForgeCommandManager::is_reserved_command(command_name);
+
+        // Verify
+        assert!(actual);
     }
 
     #[test]

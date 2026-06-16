@@ -186,6 +186,26 @@ pub trait API: Sync + Send {
     /// as ZOS dynamic plugins, are available before commands and agents are used.
     async fn initialize_plugins(&self) -> Result<()>;
 
+    /// Reloads dynamic plugins from configured plugin sources.
+    ///
+    /// # Returns
+    ///
+    /// Returns Ok(()) if all reloaded plugins initialized successfully.
+    async fn reload_plugins(&self) -> Result<()>;
+
+    /// Lists registered plugins and their active state.
+    ///
+    /// # Returns
+    ///
+    /// Returns plugin metadata sorted by plugin name.
+    async fn list_plugins(&self) -> Result<Vec<forge_domain::PluginInfo>>;
+
+    /// Queries the IPLD CAR shared-memory store.
+    async fn query_car_shmem(
+        &self,
+        query: forge_domain::CarShmemQuery,
+    ) -> Result<forge_domain::CarShmemQueryResult>;
+
     /// List of commands defined in .md file(s)
     async fn get_commands(&self) -> Result<Vec<Command>>;
 

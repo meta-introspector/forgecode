@@ -116,6 +116,13 @@ pub enum TopLevelCommand {
     /// Manage Model Context Protocol servers.
     Mcp(McpCommandGroup),
 
+    /// Query IPLD CAR shared-memory blocks.
+    Shmem(ShmemCommandGroup),
+
+    /// Manage dynamic plugins.
+    #[command(alias = "plugins")]
+    Plugin(PluginCommandGroup),
+
     /// Suggest shell commands from natural language.
     Suggest {
         /// Natural language description of the desired command.
@@ -580,6 +587,59 @@ pub struct McpLogoutArgs {
     /// Name of the MCP server to remove credentials for, or "all" to
     /// remove all MCP OAuth credentials.
     pub name: String,
+}
+
+/// Command group for CAR shared-memory access.
+#[derive(Parser, Debug, Clone)]
+pub struct ShmemCommandGroup {
+    #[command(subcommand)]
+    pub command: ShmemCommand,
+}
+
+#[derive(Subcommand, Debug, Clone, Default, PartialEq, Eq)]
+pub enum ShmemCommand {
+    /// Show shared-memory store statistics.
+    #[default]
+    Stats,
+
+    /// Look up a block by CID.
+    Cid {
+        /// Hex-encoded CID to look up.
+        cid: String,
+    },
+
+    /// Search memory block metadata by path or description.
+    Search {
+        /// Search query.
+        query: String,
+    },
+
+    /// Look up a memory block by relative path.
+    Path {
+        /// Relative memory-block path to look up.
+        path: String,
+    },
+}
+
+/// Command group for dynamic plugin management.
+#[derive(Parser, Debug, Clone)]
+pub struct PluginCommandGroup {
+    #[command(subcommand)]
+    pub command: PluginCommand,
+
+    /// Output in machine-readable format.
+    #[arg(long, global = true)]
+    pub porcelain: bool,
+}
+
+#[derive(Subcommand, Debug, Clone, Default, PartialEq, Eq)]
+pub enum PluginCommand {
+    /// List loaded dynamic plugins.
+    #[default]
+    List,
+
+    /// Reload dynamic plugins from configured plugin sources.
+    Reload,
 }
 
 /// Configuration scope for settings.
@@ -1360,6 +1420,39 @@ mod tests {
                 _ => false,
             },
             _ => false,
+        };
+        let expected = true;
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_plugin_command_parses() {
+        let fixture = Cli::parse_from(["forge", "plugin", "list"]);
+        let actual = match fixture.subcommands {
+            Some(TopLevelCommand::Plugin(plugin)) => plugin.command,
+            _ => panic!("Expected Plugin command"),
+        };
+        let expected = PluginCommand::List;
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_plugins_alias_parses() {
+        let fixture = Cli::parse_from(["forge", "plugins", "reload"]);
+        let actual = match fixture.subcommands {
+            Some(TopLevelCommand::Plugin(plugin)) => plugin.command,
+            _ => panic!("Expected Plugin command"),
+        };
+        let expected = PluginCommand::Reload;
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_plugin_porcelain_flag_parses() {
+        let fixture = Cli::parse_from(["forge", "plugin", "list", "--porcelain"]);
+        let actual = match fixture.subcommands {
+            Some(TopLevelCommand::Plugin(plugin)) => plugin.porcelain,
+            _ => panic!("Expected Plugin command"),
         };
         let expected = true;
         assert_eq!(actual, expected);
