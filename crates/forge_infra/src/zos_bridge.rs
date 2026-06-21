@@ -6,21 +6,26 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use anyhow::{Context, Result};
 use dirs::home_dir;
+use forge_domain::PluginInfo;
 use libloading::{Library, Symbol};
+use serde::Deserialize;
+use toml_edit::de::from_str as from_toml_str;
 
 use crate::plugin::Plugin;
 
 /// Type definitions for ZOS plugin functions.
 type ZosPluginNameFn = unsafe extern "C" fn() -> *const std::os::raw::c_char;
 type ZosPluginInitFn = unsafe extern "C" fn() -> i32;
-type ZosPluginDestroyFn = unsafe extern "C" fn() -> i32;
+type ZosPluginShutdownFn = unsafe extern "C" fn() -> i32;
+type ZosPluginMetadataFn = unsafe extern "C" fn() -> *const std::os::raw::c_char;
 
-/// Wrapper for a loaded ZOS plugin that implements the Forge Plugin trait.
 pub(crate) struct ZosPluginWrapper<S> {
     _library: Arc<Library>, // Keep the library loaded.
     name: String,
+    description: String,
+    version: String,
     init_fn: ZosPluginInitFn,
-    destroy_fn: ZosPluginDestroyFn,
+    shutdown_fn: ZosPluginShutdownFn,
     initialized: AtomicBool,
     _service_type: std::marker::PhantomData<S>,
 }
@@ -38,20 +43,22 @@ impl<S: Send + Sync + 'static> ZosPluginWrapper<S> {
     /// Result containing the wrapper or an error if required symbols are missing.
     fn new(library: Library, name: String) -> Result<Self> {
         unsafe {
-            let init_fn_symbol: Symbol<ZosPluginInitFn> = library
-                .get(b"zos_plugin_init")
+            let init_fn = *library
+                .get::<ZosPluginInitFn>(b"zos_plugin_init")
                 .context("Failed to find zos_plugin_init symbol")?;
-            let destroy_fn_symbol: Symbol<ZosPluginDestroyFn> = library
-                .get(b"zos_plugin_destroy")
-                .context("Failed to find zos_plugin_destroy symbol")?;
-            let init_fn = *init_fn_symbol;
-            let destroy_fn = *destroy_fn_symbol;
+            let shutdown_fn = load_shutdown_fn(&library)?;
+            let description = load_optional_c_string_symbol(&library, b"zos_plugin_description")
+                .unwrap_or_else(|| "A ZOS plugin loaded via the ZOS plugin bridge".to_string());
+            let version = load_optional_c_string_symbol(&library, b"zos_plugin_version")
+                .unwrap_or_else(|| "0.1.0".to_string());
 
             Ok(Self {
                 _library: Arc::new(library),
                 name,
+                description,
+                version,
                 init_fn,
-                destroy_fn,
+                shutdown_fn,
                 initialized: AtomicBool::new(false),
                 _service_type: std::marker::PhantomData,
             })
@@ -66,11 +73,11 @@ impl<S: Send + Sync + 'static> Plugin<S> for ZosPluginWrapper<S> {
     }
 
     fn description(&self) -> &str {
-        "A ZOS plugin loaded via the ZOS plugin bridge"
+        &self.description
     }
 
     fn version(&self) -> &str {
-        "0.1.0"
+        &self.version
     }
 
     async fn initialize(&self, _services: Arc<S>) -> Result<()> {
@@ -104,7 +111,7 @@ impl<S: Send + Sync + 'static> Plugin<S> for ZosPluginWrapper<S> {
             return Ok(());
         }
 
-        let result = unsafe { (self.destroy_fn)() };
+        let result = unsafe { (self.shutdown_fn)() };
         if result != 0 {
             tracing::warn!(
                 plugin = self.name.as_str(),
@@ -166,6 +173,12 @@ impl<S: Send + Sync + 'static> ZosPluginBridge<S> {
     ///
     /// Result indicating success or failure.
     pub async fn load_all_plugins(&mut self) -> Result<()> {
+        let manifest_path = self.plugins_dir.join("plugins.toml");
+        if manifest_path.exists() {
+            self.load_plugins_from_manifest(&manifest_path).await?;
+            return Ok(());
+        }
+
         if !self.plugins_dir.exists() {
             tracing::debug!(
                 plugins_dir = %self.plugins_dir.display(),
@@ -192,7 +205,14 @@ impl<S: Send + Sync + 'static> ZosPluginBridge<S> {
             let path = entry.path();
 
             if path.is_file() && is_dynamic_library(&path) {
-                self.load_plugin_from_path(&path).await?;
+                if is_forge_zos_plugin_library(&path)? {
+                    self.load_plugin_from_path(&path).await?;
+                } else {
+                    tracing::debug!(
+                        plugin = path.display().to_string(),
+                        "Skipping non-Forge ZOS plugin library without zos_plugin_name"
+                    );
+                }
                 continue;
             }
 
@@ -201,8 +221,122 @@ impl<S: Send + Sync + 'static> ZosPluginBridge<S> {
             }
 
             if let Some(plugin_so_path) = find_plugin_library(&path) {
-                self.load_plugin_from_path(&plugin_so_path).await?;
+                if is_forge_zos_plugin_library(&plugin_so_path)? {
+                    self.load_plugin_from_path(&plugin_so_path).await?;
+                } else {
+                    tracing::debug!(
+                        plugin = plugin_so_path.display().to_string(),
+                        "Skipping non-Forge ZOS plugin library without zos_plugin_name"
+                    );
+                }
             }
+        }
+
+        Ok(())
+    }
+
+    /// Loads the default plugin set from the TOML manifest.
+    ///
+    /// The manifest is intentionally the only runtime source of plugin paths when
+    /// it exists. This lets ZOS use Nix store outputs as the loader input while
+    /// keeping local discovery available for tests and older plugin layouts.
+    ///
+    /// # Arguments
+    ///
+    /// * `manifest_path` - Path to the ZOS plugin TOML manifest
+    ///
+    /// # Returns
+    ///
+    /// Result indicating success or failure.
+    async fn load_plugins_from_manifest(&mut self, manifest_path: &Path) -> Result<()> {
+        let manifest_text = std::fs::read_to_string(manifest_path).with_context(|| {
+            format!(
+                "Failed to read ZOS plugin manifest: {}",
+                manifest_path.display()
+            )
+        })?;
+        let manifest: PluginManifest = from_toml_str(&manifest_text).with_context(|| {
+            format!(
+                "Failed to parse ZOS plugin manifest: {}",
+                manifest_path.display()
+            )
+        })?;
+
+        for entry in manifest.plugins {
+            let entry_name = entry.name.clone();
+            self.load_nix_manifest_plugin(entry)
+                .await
+                .with_context(|| format!("Failed to load ZOS plugin `{entry_name}`"))?;
+        }
+
+        Ok(())
+    }
+
+    async fn load_nix_manifest_plugin(&mut self, entry: PluginManifestEntry) -> Result<()> {
+        let shared_object = entry.shared_object.clone();
+        let store_path = entry.store_path.clone().or_else(|| {
+            shared_object
+                .as_ref()
+                .and_then(|path| path.parent().map(Path::to_path_buf))
+        });
+        let store_path = store_path.as_ref().with_context(|| {
+            format!(
+                "ZOS plugin `{}` manifest entry must include either store_path or shared_object",
+                entry.name
+            )
+        })?;
+        let plugin_so_path = match shared_object {
+            Some(path) => path,
+            None => find_plugin_library(store_path).with_context(|| {
+                format!(
+                    "ZOS plugin `{}` has no shared object in Nix store output {}",
+                    entry.name,
+                    store_path.display()
+                )
+            })?,
+        };
+
+        tracing::debug!(
+            plugin = entry.name.as_str(),
+            store_path = %store_path.display(),
+            flake = entry.flake.as_ref().map(|path| path.display().to_string()),
+            nora = entry.nora.as_deref(),
+            shared_object = plugin_so_path.display().to_string(),
+            "Loading ZOS plugin from Nix store manifest"
+        );
+
+        if !is_nix_store_path(store_path) {
+            anyhow::bail!(
+                "ZOS plugin `{}` store_path must point to a Nix store output, got {}",
+                entry.name,
+                store_path.display()
+            );
+        }
+
+        if !is_nix_store_path(&plugin_so_path) {
+            anyhow::bail!(
+                "ZOS plugin `{}` shared_object {} must point to a Nix store output",
+                entry.name,
+                plugin_so_path.display()
+            );
+        }
+
+        if !plugin_so_path.starts_with(store_path) {
+            anyhow::bail!(
+                "ZOS plugin `{}` shared_object {} must be inside store_path {}",
+                entry.name,
+                plugin_so_path.display(),
+                store_path.display()
+            );
+        }
+
+        if is_forge_zos_plugin_library(&plugin_so_path)? {
+            self.load_plugin_from_path(&plugin_so_path).await?;
+        } else {
+            tracing::debug!(
+                plugin = plugin_so_path.display().to_string(),
+                "Skipping non-Forge ZOS plugin library without zos_plugin_name"
+            );
         }
 
         Ok(())
@@ -261,6 +395,41 @@ impl<S: Send + Sync + 'static> ZosPluginBridge<S> {
     /// Returns true if any plugins have been loaded.
     pub fn has_plugins(&self) -> bool {
         !self.loaded_plugins.is_empty()
+    }
+
+    /// Lists loaded ZOS plugins as lightweight metadata sorted by name.
+    pub fn list_loaded_plugins(&self) -> Vec<PluginInfo> {
+        let mut plugins: Vec<_> = self
+            .loaded_plugins
+            .values()
+            .map(|plugin| PluginInfo {
+                name: plugin.name().to_string(),
+                description: plugin.description().to_string(),
+                version: plugin.version().to_string(),
+                active: plugin.is_active(),
+            })
+            .collect();
+        plugins.sort_by(|left, right| left.name.cmp(&right.name));
+        plugins
+    }
+
+    /// Searches loaded ZOS plugins by name, description, or version.
+    ///
+    /// An empty query returns all loaded plugins.
+    pub fn search_loaded_plugins(&self, query: &str) -> Vec<PluginInfo> {
+        let query = query.trim().to_ascii_lowercase();
+        if query.is_empty() {
+            return self.list_loaded_plugins();
+        }
+
+        self.list_loaded_plugins()
+            .into_iter()
+            .filter(|plugin| {
+                plugin.name.to_ascii_lowercase().contains(&query)
+                    || plugin.description.to_ascii_lowercase().contains(&query)
+                    || plugin.version.to_ascii_lowercase().contains(&query)
+            })
+            .collect()
     }
 
     /// Consumes the bridge and returns all loaded plugins as plugin trait objects.
@@ -328,6 +497,67 @@ impl<S: Send + Sync + 'static> Plugin<S> for ZosPluginBridge<S> {
     }
 }
 
+#[derive(Debug, Deserialize)]
+struct PluginManifest {
+    plugins: Vec<PluginManifestEntry>,
+}
+
+#[derive(Debug, Deserialize)]
+struct PluginManifestEntry {
+    name: String,
+    store_path: Option<PathBuf>,
+    flake: Option<PathBuf>,
+    nora: Option<String>,
+    shared_object: Option<PathBuf>,
+}
+
+#[cfg(not(test))]
+fn is_nix_store_path(path: &Path) -> bool {
+    path.starts_with(Path::new("/nix/store"))
+}
+
+#[cfg(test)]
+fn is_nix_store_path(path: &Path) -> bool {
+    path.starts_with(Path::new("/nix/store"))
+        || path
+            .components()
+            .any(|component| component.as_os_str() == "nix-store")
+}
+
+fn is_forge_zos_plugin_library(path: &Path) -> Result<bool> {
+    let library = unsafe { Library::new(path) }
+        .with_context(|| format!("Failed to load plugin library: {}", path.display()))?;
+
+    Ok(unsafe { library.get::<ZosPluginNameFn>(b"zos_plugin_name").is_ok() })
+}
+
+fn load_optional_c_string_symbol(library: &Library, name: &[u8]) -> Option<String> {
+    unsafe {
+        let Ok(symbol) = library.get::<ZosPluginMetadataFn>(name) else {
+            return None;
+        };
+        let ptr = symbol();
+        if ptr.is_null() {
+            return None;
+        }
+
+        CStr::from_ptr(ptr).to_str().ok().map(str::to_string)
+    }
+}
+
+fn load_shutdown_fn(library: &Library) -> Result<ZosPluginShutdownFn> {
+    match unsafe { library.get::<ZosPluginShutdownFn>(b"zos_plugin_destroy") } {
+        Ok(symbol) => Ok(*symbol),
+        Err(destroy_error) => unsafe { library.get::<ZosPluginShutdownFn>(b"zos_plugin_shutdown") }
+            .map(|symbol| *symbol)
+            .with_context(|| {
+                format!(
+                    "Failed to find zos_plugin_destroy or zos_plugin_shutdown symbol: {destroy_error}"
+                )
+            }),
+    }
+}
+
 fn is_dynamic_library(path: &Path) -> bool {
     matches!(
         path.extension().and_then(|extension| extension.to_str()),
@@ -361,6 +591,8 @@ fn find_library_file(directory: &Path) -> Option<PathBuf> {
 mod tests {
     use super::*;
     use crate::plugin::PluginManager;
+    use pretty_assertions::assert_eq;
+    use std::path::{Path, PathBuf};
     use std::sync::Arc;
 
     #[tokio::test]
@@ -397,6 +629,400 @@ mod tests {
         let actual = bridge.shutdown().await;
         assert!(actual.is_ok());
         assert!(!bridge.is_active());
+    }
+
+    #[tokio::test]
+    async fn test_zos_plugin_bridge_lists_loaded_plugins() {
+        let setup = tempfile::tempdir().unwrap();
+        compile_zos_plugin_fixture_with_name(
+            setup.path(),
+            "zos_plugin_destroy",
+            "beta-plugin",
+            Some("Beta searchable plugin"),
+            Some("0.2.0"),
+        );
+        compile_zos_plugin_fixture_with_name(
+            setup.path(),
+            "zos_plugin_destroy",
+            "alpha-plugin",
+            Some("Alpha searchable plugin"),
+            Some("0.1.0"),
+        );
+        let mut bridge = ZosPluginBridge::<()>::new(setup.path());
+
+        bridge.load_all_plugins().await.unwrap();
+        let actual = bridge.list_loaded_plugins();
+        let expected = vec![
+            PluginInfo {
+                name: "alpha-plugin".to_string(),
+                description: "Alpha searchable plugin".to_string(),
+                version: "0.1.0".to_string(),
+                active: false,
+            },
+            PluginInfo {
+                name: "beta-plugin".to_string(),
+                description: "Beta searchable plugin".to_string(),
+                version: "0.2.0".to_string(),
+                active: false,
+            },
+        ];
+
+        assert_eq!(actual, expected);
+    }
+
+    #[tokio::test]
+    async fn test_zos_plugin_bridge_searches_loaded_plugins() {
+        let setup = tempfile::tempdir().unwrap();
+        compile_zos_plugin_fixture_with_name(
+            setup.path(),
+            "zos_plugin_destroy",
+            "alpha-plugin",
+            Some("Alpha searchable plugin"),
+            Some("0.1.0"),
+        );
+        compile_zos_plugin_fixture_with_name(
+            setup.path(),
+            "zos_plugin_destroy",
+            "beta-plugin",
+            Some("Beta searchable plugin"),
+            Some("0.2.0"),
+        );
+        let mut bridge = ZosPluginBridge::<()>::new(setup.path());
+        bridge.load_all_plugins().await.unwrap();
+
+        let actual = bridge.search_loaded_plugins("beta");
+        let expected = vec![PluginInfo {
+            name: "beta-plugin".to_string(),
+            description: "Beta searchable plugin".to_string(),
+            version: "0.2.0".to_string(),
+            active: false,
+        }];
+        assert_eq!(actual, expected);
+
+        let actual = bridge.search_loaded_plugins("0.1.0");
+        let expected = vec![PluginInfo {
+            name: "alpha-plugin".to_string(),
+            description: "Alpha searchable plugin".to_string(),
+            version: "0.1.0".to_string(),
+            active: false,
+        }];
+        assert_eq!(actual, expected);
+
+        let actual = bridge.search_loaded_plugins("missing");
+        let expected = Vec::<PluginInfo>::new();
+        assert_eq!(actual, expected);
+    }
+
+    #[tokio::test]
+    async fn test_load_all_plugins_from_manifest_only() {
+        let setup = tempfile::tempdir().unwrap();
+        let plugins_dir = setup.path().join("plugins");
+        let nix_store_dir = setup.path().join("nix-store");
+        std::fs::create_dir_all(&plugins_dir).unwrap();
+        std::fs::create_dir_all(&nix_store_dir).unwrap();
+        compile_zos_plugin_fixture_with_name(
+            &nix_store_dir,
+            "zos_plugin_destroy",
+            "manifest-plugin",
+            Some("Manifest searchable plugin"),
+            Some("0.3.0"),
+        );
+        std::fs::write(
+            plugins_dir.join("plugins.toml"),
+            format!(
+                r#"
+[[plugins]]
+name = "manifest-plugin"
+store_path = "{}"
+flake = "{}"
+nora = "zos-plugin-manifest-plugin"
+"#,
+                nix_store_dir.display(),
+                nix_store_dir.join("flake.nix").display()
+            ),
+        )
+        .unwrap();
+
+        let mut bridge = ZosPluginBridge::<()>::new(&plugins_dir);
+        bridge.load_all_plugins().await.unwrap();
+        let actual = bridge.list_loaded_plugins();
+        let expected = vec![PluginInfo {
+            name: "manifest-plugin".to_string(),
+            description: "Manifest searchable plugin".to_string(),
+            version: "0.3.0".to_string(),
+            active: false,
+        }];
+
+        assert_eq!(actual, expected);
+    }
+
+    #[tokio::test]
+    async fn test_load_all_plugins_from_manifest_with_shared_object_only() {
+        let setup = tempfile::tempdir().unwrap();
+        let plugins_dir = setup.path().join("plugins");
+        let nix_store_dir = setup.path().join("nix-store");
+        std::fs::create_dir_all(&plugins_dir).unwrap();
+        std::fs::create_dir_all(&nix_store_dir).unwrap();
+        let plugin_so = compile_zos_plugin_fixture_with_name(
+            &nix_store_dir,
+            "zos_plugin_destroy",
+            "manifest-plugin",
+            Some("Manifest searchable plugin"),
+            Some("0.4.0"),
+        );
+        std::fs::write(
+            plugins_dir.join("plugins.toml"),
+            format!(
+                r#"
+[[plugins]]
+name = "manifest-plugin"
+flake = "{}"
+nora = "zos-plugin-manifest-plugin"
+shared_object = "{}"
+"#,
+                nix_store_dir.join("flake.nix").display(),
+                plugin_so.display()
+            ),
+        )
+        .unwrap();
+
+        let mut bridge = ZosPluginBridge::<()>::new(&plugins_dir);
+        bridge.load_all_plugins().await.unwrap();
+        let actual = bridge.list_loaded_plugins();
+        let expected = vec![PluginInfo {
+            name: "manifest-plugin".to_string(),
+            description: "Manifest searchable plugin".to_string(),
+            version: "0.4.0".to_string(),
+            active: false,
+        }];
+
+        assert_eq!(actual, expected);
+    }
+
+    #[tokio::test]
+    async fn test_load_all_plugins_rejects_non_nix_manifest_store_path() {
+        let setup = tempfile::tempdir().unwrap();
+        let plugins_dir = setup.path().join("plugins");
+        std::fs::create_dir_all(&plugins_dir).unwrap();
+        std::fs::write(
+            plugins_dir.join("plugins.toml"),
+            r#"
+[[plugins]]
+name = "local-plugin"
+store_path = "/tmp/local.so"
+"#,
+        )
+        .unwrap();
+
+        let mut bridge = ZosPluginBridge::<()>::new(&plugins_dir);
+        let actual = bridge.load_all_plugins().await;
+
+        assert!(actual.is_err());
+        assert_eq!(bridge.plugin_count(), 0);
+    }
+
+    #[tokio::test]
+    async fn test_zos_plugin_bridge_lifecycle_initializes_loaded_plugins() {
+        let setup = tempfile::tempdir().unwrap();
+        compile_zos_plugin_fixture_with_name(
+            setup.path(),
+            "zos_plugin_destroy",
+            "test-plugin",
+            None,
+            None,
+        );
+        let mut bridge = ZosPluginBridge::<()>::new(setup.path());
+        bridge.load_all_plugins().await.unwrap();
+
+        let actual = bridge.initialize(Arc::new(())).await;
+        assert!(actual.is_ok());
+        assert!(bridge.is_active());
+
+        let actual = bridge.shutdown().await;
+        assert!(actual.is_ok());
+        assert!(!bridge.is_active());
+    }
+
+    fn compile_zos_plugin_fixture(temp_dir: &Path, shutdown_symbol: &str) -> PathBuf {
+        compile_zos_plugin_fixture_with_name(temp_dir, shutdown_symbol, "test-plugin", None, None)
+    }
+
+    fn compile_zos_plugin_fixture_with_name(
+        temp_dir: &Path,
+        shutdown_symbol: &str,
+        plugin_name: &str,
+        description: Option<&str>,
+        version: Option<&str>,
+    ) -> PathBuf {
+        let safe_name = plugin_name
+            .chars()
+            .map(|character| {
+                if character == '-' || character == '_' {
+                    '_'
+                } else {
+                    character
+                }
+            })
+            .collect::<String>();
+        let source = temp_dir.join(format!("plugin_{safe_name}.rs"));
+        let description_fn = description
+            .map(|description| {
+                format!(
+                    r#"
+#[no_mangle]
+pub extern "C" fn zos_plugin_description() -> *const c_char {{
+    b"{description}\0".as_ptr() as *const c_char
+}}
+"#
+                )
+            })
+            .unwrap_or_default();
+        let version_fn = version
+            .map(|version| {
+                format!(
+                    r#"
+#[no_mangle]
+pub extern "C" fn zos_plugin_version() -> *const c_char {{
+    b"{version}\0".as_ptr() as *const c_char
+}}
+"#
+                )
+            })
+            .unwrap_or_default();
+        std::fs::write(
+            &source,
+            format!(
+                r#"
+use std::os::raw::c_char;
+
+#[no_mangle]
+pub extern "C" fn zos_plugin_name() -> *const c_char {{
+    b"{plugin_name}\0".as_ptr() as *const c_char
+}}
+
+{description_fn}
+
+{version_fn}
+
+#[no_mangle]
+pub extern "C" fn zos_plugin_init() -> i32 {{ 0 }}
+
+#[no_mangle]
+pub extern "C" fn {shutdown_symbol}() -> i32 {{ 0 }}
+"#
+            ),
+        )
+        .unwrap();
+
+        let library_name = format!(
+            "{}{safe_name}.{}",
+            if cfg!(windows) { "" } else { "lib" },
+            std::env::consts::DLL_EXTENSION
+        );
+        let output = temp_dir.join(library_name);
+
+        let status = std::process::Command::new("rustc")
+            .arg("--crate-type=cdylib")
+            .arg("-o")
+            .arg(&output)
+            .arg(&source)
+            .status()
+            .unwrap();
+
+        assert!(status.success());
+        output
+    }
+
+    #[test]
+    fn test_load_shutdown_fn_accepts_destroy_symbol() {
+        let setup = tempfile::tempdir().unwrap();
+        let library_path = compile_zos_plugin_fixture(setup.path(), "zos_plugin_destroy");
+        let library = unsafe { Library::new(&library_path).unwrap() };
+
+        let actual = load_shutdown_fn(&library)
+            .map(|_| "loaded".to_string())
+            .map_err(|error| error.to_string());
+        let expected = Ok("loaded".to_string());
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_load_shutdown_fn_accepts_shutdown_symbol() {
+        let setup = tempfile::tempdir().unwrap();
+        let library_path = compile_zos_plugin_fixture(setup.path(), "zos_plugin_shutdown");
+        let library = unsafe { Library::new(&library_path).unwrap() };
+
+        let actual = load_shutdown_fn(&library)
+            .map(|_| "loaded".to_string())
+            .map_err(|error| error.to_string());
+        let expected = Ok("loaded".to_string());
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_load_shutdown_fn_requires_shutdown_symbol() {
+        let setup = tempfile::tempdir().unwrap();
+        let source = setup.path().join("plugin.rs");
+        std::fs::write(
+            &source,
+            r#"
+use std::os::raw::c_char;
+
+#[no_mangle]
+pub extern "C" fn zos_plugin_name() -> *const c_char {
+    b"test-plugin\0".as_ptr() as *const c_char
+}
+
+#[no_mangle]
+pub extern "C" fn zos_plugin_init() -> i32 { 0 }
+"#,
+        )
+        .unwrap();
+
+        let library_name = format!(
+            "{}test_plugin.{}",
+            if cfg!(windows) { "" } else { "lib" },
+            std::env::consts::DLL_EXTENSION
+        );
+        let library_path = setup.path().join(library_name);
+        let status = std::process::Command::new("rustc")
+            .arg("--crate-type=cdylib")
+            .arg("-o")
+            .arg(&library_path)
+            .arg(&source)
+            .status()
+            .unwrap();
+        assert!(status.success());
+
+        let library = unsafe { Library::new(&library_path).unwrap() };
+
+        let actual = load_shutdown_fn(&library).unwrap_err().to_string();
+        let expected = "Failed to find zos_plugin_destroy or zos_plugin_shutdown symbol";
+
+        assert!(actual.contains(expected));
+    }
+
+    #[tokio::test]
+    async fn test_load_all_plugins_from_default_directory() {
+        let plugins_dir = dirs::home_dir()
+            .expect("home directory should be available")
+            .join("zos-server")
+            .join("plugins");
+
+        if !plugins_dir.exists() {
+            return;
+        }
+
+        let mut bridge = ZosPluginBridge::<()>::new(&plugins_dir);
+        let actual = bridge.load_all_plugins().await;
+
+        assert!(
+            actual.is_ok(),
+            "failed to load ZOS plugins from {}: {actual:?}",
+            plugins_dir.display()
+        );
     }
 
     #[test]

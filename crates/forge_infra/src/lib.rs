@@ -26,8 +26,9 @@
 ///
 /// * `zos_plugin_name()` - Returns the plugin name as a null-terminated C string
 /// * `zos_plugin_init()` - Returns 0 on success, non-zero on failure
-/// * `zos_plugin_destroy()` - Returns 0 on success, non-zero on failure
+/// * `zos_plugin_destroy()` or legacy `zos_plugin_shutdown()` - Returns 0 on success, non-zero on failure
 ///
+/// Libraries without `zos_plugin_name()` are treated as legacy non-Forge plugins and skipped.
 /// These plugins are written in Rust and compiled as cdylib dynamic libraries.
 ///
 /// # Using the Plugin System
