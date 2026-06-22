@@ -5,7 +5,7 @@ use syntect::easy::HighlightLines;
 use syntect::highlighting::ThemeSet;
 use syntect::parsing::SyntaxSet;
 use syntect::util::as_24_bit_terminal_escaped;
-use terminal_colorsaurus::{QueryOptions, ThemeMode, theme_mode};
+use terminal_colorsaurus::{theme_mode, QueryOptions, ThemeMode};
 use two_face::theme::EmbeddedThemeName;
 
 /// Maximum time to wait for a terminal color query response.

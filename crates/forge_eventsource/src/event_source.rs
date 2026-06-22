@@ -20,7 +20,7 @@ use reqwest::header::{HeaderName, HeaderValue};
 use reqwest::{Error as ReqwestError, IntoUrl, RequestBuilder, Response, StatusCode};
 
 use crate::error::{CannotCloneRequestError, Error};
-use crate::retry::{DEFAULT_RETRY, RetryPolicy};
+use crate::retry::{RetryPolicy, DEFAULT_RETRY};
 
 #[cfg(not(target_arch = "wasm32"))]
 type ResponseFuture = BoxFuture<'static, Result<Response, ReqwestError>>;

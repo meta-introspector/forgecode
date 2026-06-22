@@ -641,6 +641,17 @@ pub trait Services: Send + Sync + 'static + Clone + EnvironmentInfra {
     ///
     /// Returns plugin metadata sorted by plugin name.
     fn list_plugins(&self) -> anyhow::Result<Vec<forge_domain::PluginInfo>>;
+
+    /// Searches registered plugins by name, description, or version.
+    ///
+    /// # Arguments
+    ///
+    /// * `query` - Search query matched against plugin metadata.
+    ///
+    /// # Returns
+    ///
+    /// Returns matching plugin metadata sorted by plugin name.
+    fn search_plugins(&self, query: &str) -> anyhow::Result<Vec<forge_domain::PluginInfo>>;
 }
 
 #[async_trait::async_trait]

@@ -200,6 +200,17 @@ pub trait API: Sync + Send {
     /// Returns plugin metadata sorted by plugin name.
     async fn list_plugins(&self) -> Result<Vec<forge_domain::PluginInfo>>;
 
+    /// Searches registered plugins by name, description, or version.
+    ///
+    /// # Arguments
+    ///
+    /// * `query` - Search query matched against plugin metadata.
+    ///
+    /// # Returns
+    ///
+    /// Returns matching plugin metadata sorted by plugin name.
+    async fn search_plugins(&self, query: &str) -> Result<Vec<forge_domain::PluginInfo>>;
+
     /// Queries the IPLD CAR shared-memory store.
     async fn query_car_shmem(
         &self,

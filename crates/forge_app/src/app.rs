@@ -83,6 +83,19 @@ impl<S: Services + EnvironmentInfra<Config = forge_config::ForgeConfig>> ForgeAp
         self.services.list_plugins()
     }
 
+    /// Searches registered plugins by name, description, or version.
+    ///
+    /// # Arguments
+    ///
+    /// * `query` - Search query matched against plugin metadata.
+    ///
+    /// # Returns
+    ///
+    /// Returns matching plugin metadata sorted by plugin name.
+    pub fn search_plugins(&self, query: &str) -> anyhow::Result<Vec<forge_domain::PluginInfo>> {
+        self.services.search_plugins(query)
+    }
+
     /// Executes a chat request and returns a stream of responses.
     /// This method contains the core chat logic extracted from ForgeAPI.
     pub async fn chat(

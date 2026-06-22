@@ -18,8 +18,8 @@ use forge_app::{CommitResult, ToolResolver};
 use forge_config::ForgeConfig;
 use forge_display::MarkdownFormat;
 use forge_domain::{
-    AuthMethod, CarShmemQuery, ChatResponseContent, ConsoleWriter, ContextMessage, Role,
-    TitleFormat, UserCommand,
+    AuthMethod, CarShmemQuery, ChatResponseContent, ConsoleWriter, ContextMessage, PluginInfo,
+    Role, TitleFormat, UserCommand,
 };
 use forge_fs::ForgeFS;
 use forge_select::{ForgeWidget, SelectRow};
@@ -503,6 +503,12 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
         match command {
             PluginCommand::List => {
                 self.on_show_plugins(porcelain).await?;
+            }
+            PluginCommand::Search { query } => {
+                let query = query.join(" ");
+                self.spinner.start(Some("Searching plugins"))?;
+                let plugins = self.api.search_plugins(&query).await?;
+                self.on_show_plugin_infos(plugins, porcelain).await?;
             }
             PluginCommand::Reload => {
                 self.spinner.start(Some("Reloading plugins"))?;
@@ -1793,7 +1799,15 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
     async fn on_show_plugins(&mut self, porcelain: bool) -> anyhow::Result<()> {
         self.spinner.start(Some("Loading plugins"))?;
         let plugins = self.api.list_plugins().await?;
+        self.on_show_plugin_infos(plugins, porcelain).await
+    }
 
+    /// Displays plugin metadata.
+    async fn on_show_plugin_infos(
+        &mut self,
+        plugins: Vec<PluginInfo>,
+        porcelain: bool,
+    ) -> anyhow::Result<()> {
         let mut info = Info::new();
         for plugin in plugins {
             info = info

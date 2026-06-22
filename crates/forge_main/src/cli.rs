@@ -638,6 +638,13 @@ pub enum PluginCommand {
     #[default]
     List,
 
+    /// Search loaded dynamic plugins by name, description, or version.
+    Search {
+        /// Search query.
+        #[arg(trailing_var_arg = true, required = true)]
+        query: Vec<String>,
+    },
+
     /// Reload dynamic plugins from configured plugin sources.
     Reload,
 }
@@ -1433,6 +1440,18 @@ mod tests {
             _ => panic!("Expected Plugin command"),
         };
         let expected = PluginCommand::List;
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_plugin_search_command_parses() {
+        let fixture = Cli::parse_from(["forge", "plugin", "search", "beta", "plugin"]);
+        let actual = match fixture.subcommands {
+            Some(TopLevelCommand::Plugin(plugin)) => plugin.command,
+            _ => panic!("Expected Plugin command"),
+        };
+        let expected =
+            PluginCommand::Search { query: vec!["beta".to_string(), "plugin".to_string()] };
         assert_eq!(actual, expected);
     }
 

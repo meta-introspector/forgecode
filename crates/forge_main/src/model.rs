@@ -960,6 +960,25 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_plugin_search_command() {
+        // Setup
+        let cmd_manager = ForgeCommandManager::default();
+
+        // Execute
+        let result = cmd_manager.parse("/plugin search beta plugin").unwrap();
+
+        // Verify
+        assert_eq!(
+            result,
+            AppCommand::Plugin {
+                command: PluginCommand::Search {
+                    query: vec!["beta".to_string(), "plugin".to_string()]
+                }
+            }
+        );
+    }
+
+    #[test]
     fn test_plugin_is_reserved_command() {
         // Setup
         let command_name = "plugin";

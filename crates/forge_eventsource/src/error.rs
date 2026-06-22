@@ -3,9 +3,9 @@ use std::string::FromUtf8Error;
 
 use forge_eventsource_stream::EventStreamError;
 use nom::error::Error as NomError;
+use reqwest::header::HeaderValue;
 #[cfg(doc)]
 use reqwest::RequestBuilder;
-use reqwest::header::HeaderValue;
 use reqwest::{Error as ReqwestError, Response, StatusCode};
 
 /// Error raised when a [`RequestBuilder`] cannot be cloned. See

@@ -323,6 +323,10 @@ impl<
         self.services.list_plugins()
     }
 
+    async fn search_plugins(&self, query: &str) -> Result<Vec<forge_domain::PluginInfo>> {
+        self.services.search_plugins(query)
+    }
+
     async fn query_car_shmem(
         &self,
         query: forge_domain::CarShmemQuery,

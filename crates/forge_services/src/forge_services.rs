@@ -524,7 +524,45 @@ impl<
             .plugin_manager
             .lock()
             .map_err(|_| anyhow::anyhow!("plugin manager lock poisoned"))?;
-        Ok(plugin_manager.list_plugins())
+        let mut plugins: Vec<_> = plugin_manager
+            .get_all_plugins()
+            .into_iter()
+            .flat_map(|plugin| {
+                if let Some(bridge) = plugin
+                    .as_any()
+                    .downcast_ref::<ZosPluginBridge<ForgeServices<F>>>()
+                {
+                    bridge.list_loaded_plugins()
+                } else {
+                    vec![forge_domain::PluginInfo {
+                        name: plugin.name().to_string(),
+                        description: plugin.description().to_string(),
+                        version: plugin.version().to_string(),
+                        active: plugin.is_active(),
+                    }]
+                }
+            })
+            .collect();
+        plugins.sort_by(|left, right| left.name.cmp(&right.name));
+        plugins.dedup_by(|left, right| left.name == right.name);
+        Ok(plugins)
+    }
+
+    fn search_plugins(&self, query: &str) -> anyhow::Result<Vec<forge_domain::PluginInfo>> {
+        let query = query.trim().to_ascii_lowercase();
+        if query.is_empty() {
+            return self.list_plugins();
+        }
+
+        Ok(self
+            .list_plugins()?
+            .into_iter()
+            .filter(|plugin| {
+                plugin.name.to_ascii_lowercase().contains(&query)
+                    || plugin.description.to_ascii_lowercase().contains(&query)
+                    || plugin.version.to_ascii_lowercase().contains(&query)
+            })
+            .collect())
     }
 }
 
