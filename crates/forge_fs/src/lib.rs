@@ -15,10 +15,13 @@ mod is_binary;
 mod meta;
 mod read;
 mod read_range;
+mod symlink;
 mod write;
 
 pub use crate::binary_detection::is_binary;
 pub use crate::error::Error;
+pub use crate::symlink::{resolve_symlink_chain, is_symlink_fast, read_transparent, read_transparent_string};
+pub use crate::symlink::resolve_symlink_with_caching;
 
 /// ForgeFS provides a standardized interface for file system operations
 /// with consistent error handling.

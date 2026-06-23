@@ -1,5 +1,6 @@
 mod agent_registry;
 mod app_config;
+mod aristotle_manager_plugin;
 mod attachment;
 mod auth;
 mod car_shmem;
@@ -27,6 +28,7 @@ mod tool_services;
 mod utils;
 
 pub use app_config::*;
+pub use aristotle_manager_plugin::*;
 pub use car_shmem::*;
 pub use car_shmem_plugin::*;
 pub use clipper::*;
