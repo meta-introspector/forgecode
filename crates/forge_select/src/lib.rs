@@ -5,6 +5,7 @@ mod preview;
 mod select;
 mod widget;
 
+pub use confirm::ConfirmBuilder;
 pub use input::InputBuilder;
 pub use multi::MultiSelectBuilder;
 pub use preview::{PreviewLayout, PreviewPlacement, SelectMode, SelectRow, SelectUiOptions};

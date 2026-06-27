@@ -1,0 +1,13 @@
+[package]
+name = "forge_vendormod"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+forge_domain = { path = "../forge_domain" }
+forge_fs = { path = "../forge_fs" }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+serde_json = { workspace = true }
+forge_services.workspace = true

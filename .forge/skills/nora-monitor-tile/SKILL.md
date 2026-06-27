@@ -87,3 +87,13 @@ bash deploy.sh deploy
 | terraform | disabled | `/terraform/` |
 | ansible | disabled | `/ansible/` |
 | raw | disabled | `/raw/` |
+
+## Shmem Cross-References
+
+> Generated: 2026-06-23 10:20:01 | REPL: http://localhost:8156 | Declarations loaded: 366
+
+| Keyword | Shmem Matches | Type |
+|---------|--------------|------|
+| Nix | meme_bach_bwv_nix | theorem |
+| Nix | meme_emoji_dao_nix | theorem |
+| Nix | meme_fractran_proof_nix | theorem |

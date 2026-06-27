@@ -28,7 +28,7 @@ async fn execute_update_command(api: Arc<impl API>, auto_update: bool) {
                     true
                 } else {
                     let answer = forge_select::ForgeWidget::confirm(
-                        "You need to close forge to complete update. Do you want to close it now?",
+                        "You need to close forge to complete update. Do you want to close it now?", None, None, None
                     )
                     .with_default(true)
                     .prompt();
@@ -54,7 +54,7 @@ async fn confirm_update(version: Version) -> bool {
         "Confirm upgrade from {} -> {} (latest)?",
         VERSION.to_string().bold().white(),
         version.to_string().bold().white()
-    ))
+    ), None, None, None)
     .with_default(true)
     .prompt();
 

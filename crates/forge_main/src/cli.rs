@@ -119,6 +119,9 @@ pub enum TopLevelCommand {
     /// Query IPLD CAR shared-memory blocks.
     Shmem(ShmemCommandGroup),
 
+    /// Manage Aristotle project pipeline (poll, download, build, split, merge, index).
+    Aristotle(AristotleCommandGroup),
+
     /// Manage dynamic plugins.
     #[command(alias = "plugins")]
     Plugin(PluginCommandGroup),
@@ -618,6 +621,50 @@ pub enum ShmemCommand {
     Path {
         /// Relative memory-block path to look up.
         path: String,
+    },
+}
+
+/// Command group for Aristotle manager integration.
+#[derive(Parser, Debug, Clone)]
+pub struct AristotleCommandGroup {
+    #[command(subcommand)]
+    pub command: AristotleCommand,
+}
+
+#[derive(Subcommand, Debug, Clone, Default, PartialEq, Eq)]
+pub enum AristotleCommand {
+    /// Poll Aristotle API for new results.
+    #[default]
+    Poll,
+
+    /// Download a specific result by ID.
+    Download { result_id: String },
+
+    /// Build all downloaded Lean4 projects.
+    Build,
+
+    /// Split declarations in all projects.
+    Split,
+
+    /// Split all projects at once.
+    SplitAll,
+
+    /// Show declaration table.
+    DeclTable,
+
+    /// Merge split declarations.
+    Merge,
+
+    /// Refresh project index.
+    Refresh,
+
+    /// Index projects into shared memory.
+    Index,
+
+    /// Configure Aristotle settings.
+    Configure {
+        key: Option<String>,
+        value: Option<String>,
     },
 }
 

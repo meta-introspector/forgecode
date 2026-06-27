@@ -32,7 +32,7 @@ use tokio_stream::StreamExt;
 use url::Url;
 
 use crate::cli::{
-    Cli, CommitCommandGroup, ConversationCommand, ListCommand, McpCommand, PluginCommand,
+    Cli, AristotleCommand, AristotleCommandGroup, CommitCommandGroup, ConversationCommand, ListCommand, McpCommand, PluginCommand,
     SelectCommand, ShmemCommand, TopLevelCommand,
 };
 use crate::conversation_selector::ConversationSelector;
@@ -495,6 +495,41 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
         Ok(())
     }
 
+    async fn handle_aristotle_command(&mut self, command: AristotleCommand) -> anyhow::Result<()> {
+        let args: Vec<String> = match command {
+            AristotleCommand::Poll => vec!["poll".to_string()],
+            AristotleCommand::Download { result_id } => vec!["download-result".to_string(), result_id],
+            AristotleCommand::Build => vec!["build".to_string()],
+            AristotleCommand::Split => vec!["split".to_string()],
+            AristotleCommand::SplitAll => vec!["split-all".to_string()],
+            AristotleCommand::DeclTable => vec!["decl-table".to_string()],
+            AristotleCommand::Merge => vec!["merge".to_string()],
+            AristotleCommand::Refresh => vec!["refresh".to_string()],
+            AristotleCommand::Index => vec!["index".to_string()],
+            AristotleCommand::Configure { key, value } => {
+                let mut cmd = vec!["configure".to_string(), "set".to_string()];
+                if let Some(k) = key { cmd.push(k); }
+                if let Some(v) = value { cmd.push(v); }
+                cmd
+            }
+        };
+
+        let output = tokio::process::Command::new("cargo")
+            .args(&["run", "--manifest-path", "/home/mdupont/projects/arist/Cargo.toml", "--release"])
+            .args(&args)
+            .output()
+            .await?;
+
+        if output.status.success() {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            self.writeln(stdout.trim().to_string())?;
+        } else {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            self.writeln(TitleFormat::error(format!("aristotle-manager failed: {}", stderr.trim())).display())?;
+        }
+        Ok(())
+    }
+
     async fn handle_plugin_command(
         &mut self,
         command: PluginCommand,
@@ -688,6 +723,10 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
             },
             TopLevelCommand::Shmem(shmem_command) => {
                 self.handle_shmem_command(shmem_command.command).await?;
+                return Ok(());
+            }
+            TopLevelCommand::Aristotle(aristo_command) => {
+                self.handle_aristotle_command(aristo_command.command).await?;
                 return Ok(());
             }
             TopLevelCommand::Plugin(plugin_command) => {
@@ -1982,7 +2021,7 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
         );
 
         let can_see_nerd_fonts =
-            ForgeWidget::confirm("Can you see all the icons clearly without any overlap?")
+            ForgeWidget::confirm("Can you see all the icons clearly without any overlap?", None, None, None)
                 .with_default(true)
                 .prompt()?;
 
@@ -3485,7 +3524,7 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
                 .sub_title("Your account may be suspended or banned. Continue at your own risk."),
             )?;
 
-            let confirmed = ForgeWidget::confirm("Do you want to continue with this provider?")
+            let confirmed = ForgeWidget::confirm("Do you want to continue with this provider?", None, None, None)
                 .with_default(false)
                 .prompt()?;
 
@@ -4242,7 +4281,7 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
     }
 
     async fn should_continue(&mut self) -> anyhow::Result<bool> {
-        let should_continue = ForgeWidget::confirm("Do you want to continue anyway?")
+        let should_continue = ForgeWidget::confirm("Do you want to continue anyway?", None, None, None)
             .with_default(true)
             .prompt()?;
 
@@ -5123,7 +5162,7 @@ impl<A: API + ConsoleWriter + 'static, F: Fn(ForgeConfig) -> A + Send + Sync> UI
             ForgeWidget::confirm(format!(
                 "This will sync and share the contents of '{}' with ForgeCode Services. Do you wish to continue?",
                 display_path
-            ))
+            ), None, None, None)
             .with_default(true)
             .prompt()?
         };

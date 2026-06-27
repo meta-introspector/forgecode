@@ -23,3 +23,12 @@ description: Create zos-server plugin dashlm-index exposing HTTP/Unix-socket API
 
 - `~/zos-server/plugins/dashlm-index/Cargo.toml`
 - `~/zos-server/plugins/dashlm-index/src/lib.rs`
+
+## Shmem Cross-References
+
+> Generated: 2026-06-23 11:12:43 | REPL: http://localhost:8156 | Declarations loaded: 366
+
+| Keyword | Shmem Matches | Type |
+|---------|--------------|------|
+| — | No matches in shmem for 4 keywords | — |
+| — | Searchable terms: Cargo.toml, Cross-References, Shmem, Source | — |

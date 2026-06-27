@@ -1,0 +1,23 @@
+[package]
+name = "forge_task_manager_plugin"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.94"
+description = "Task Manager ZOS Plugin - GOAP-based task planning and management"
+license = "MIT OR Apache-2.0"
+
+[lib]
+name = "forge_task_manager_plugin"
+crate-type = ["cdylib"]
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+forge_infra = { workspace = true }
+forge_domain = { workspace = true }
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+strip = true

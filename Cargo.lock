@@ -1350,7 +1350,7 @@ checksum = "829d955a0bb380ef178a640b91779e3987da38c9aea133b20614cfed8cdea9c6"
 dependencies = [
  "bitflags 2.11.0",
  "crossterm_winapi",
- "mio",
+ "mio 1.2.0",
  "parking_lot",
  "rustix 0.38.44",
  "signal-hook 0.3.18",
@@ -1369,7 +1369,7 @@ dependencies = [
  "derive_more",
  "document-features",
  "filedescriptor",
- "mio",
+ "mio 1.2.0",
  "parking_lot",
  "rustix 1.1.4",
  "signal-hook 0.3.18",
@@ -2354,6 +2354,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "forge_dotagents_plugin"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "forge_domain",
+ "forge_infra",
+ "libloading",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "forge_embed"
 version = "0.1.0"
 dependencies = [
@@ -2746,6 +2759,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "forge_task_manager_plugin"
+version = "0.1.0"
+dependencies = [
+ "forge_domain",
+ "forge_infra",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "forge_template"
 version = "0.1.0"
 dependencies = [
@@ -2800,6 +2823,19 @@ dependencies = [
  "url",
  "uuid",
  "whoami 2.1.2",
+]
+
+[[package]]
+name = "forge_vendormod"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "forge_domain",
+ "forge_fs",
+ "forge_services",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]
@@ -5118,6 +5154,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
+name = "lean4_prover_plugin"
+version = "0.1.0"
+dependencies = [
+ "forge_domain",
+ "forge_infra",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "leb128fmt"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5430,6 +5477,18 @@ checksum = "1fa76a2c86f704bdb222d66965fb3d63269ce38518b83cb0575fca855ebb6316"
 dependencies = [
  "adler2",
  "simd-adler32",
+]
+
+[[package]]
+name = "mio"
+version = "0.8.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a4a650543ca06a924e8b371db273b2756685faae30f8487da1b56505a8f78b0c"
+dependencies = [
+ "libc",
+ "log",
+ "wasi 0.11.1+wasi-snapshot-preview1",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -7686,7 +7745,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b75a19a7a740b25bc7944bdee6172368f988763b744e3d4dfe753f6b4ece40cc"
 dependencies = [
  "libc",
- "mio",
+ "mio 1.2.0",
  "signal-hook 0.3.18",
 ]
 
@@ -8182,7 +8241,7 @@ dependencies = [
  "cfg-if",
  "libc",
  "memchr",
- "mio",
+ "mio 1.2.0",
  "terminal-trx",
  "windows-sys 0.61.2",
  "xterm-color",
@@ -8357,7 +8416,7 @@ checksum = "8fc7f01b389ac15039e4dc9531aa973a135d7a4135281b12d7c1bc79fd57fffe"
 dependencies = [
  "bytes",
  "libc",
- "mio",
+ "mio 1.2.0",
  "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
@@ -8808,6 +8867,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "885c31f06fce836457fe3ef09a59f83fe8db95d270b11cd78f40a4666c4d1661"
 dependencies = [
  "libc",
+ "mio 0.8.11",
+ "tokio",
 ]
 
 [[package]]
@@ -10112,6 +10173,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.117",
+]
+
+[[package]]
+name = "zkprologml_plugin"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "libloading",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

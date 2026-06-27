@@ -96,3 +96,14 @@ as Nora-discoverable content-addressed objects.
 
 See [[cargo-vendormod]] for the full vendormod architecture and
 [[vendormod-module-tile]] for the interactive module visualization.
+
+## Shmem Cross-References
+
+> Generated: 2026-06-23 10:20:01 | REPL: http://localhost:8156 | Declarations loaded: 366
+
+| Keyword | Shmem Matches | Type |
+|---------|--------------|------|
+| CAR | exists_isPicardLindelof_const_of_contDiffAt | theorem |
+| CAR | exists_finite_card_le_of_finite_of_linearIndependent_of_span | theorem |
+| CAR | IsPicardLindelof.exists_forall_hasDerivWithinAt_Icc_eq | theorem |
+| CID | computeCID | def |

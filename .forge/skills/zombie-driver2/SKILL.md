@@ -169,3 +169,31 @@ cargo run --bin oci_deployer -- "<compartment_id>"
 ## Integration with ZOS Server
 
 The zombie_driver2 and zos-server share the same IPLD CAR shmem server at `@ipld_car_shmem`. Both write to the `compiler/` path prefix, enabling cross-process introspection where LLM iterations from zos-server and AST/HIR/MIR fragments from zombie_driver2 coexist in the same content-addressed store.
+
+## Shmem Cross-References
+
+> Generated: 2026-06-23 10:20:06 | REPL: http://localhost:8156 | Declarations loaded: 366
+
+| Keyword | Shmem Matches | Type |
+|---------|--------------|------|
+| Apply | dist_apply_le_dist | theorem |
+| Apply | isBigO_norm_rpow_add_one_of_fderiv_of_apply_eq_zero | theorem |
+| Apply | End.algebraMap_isUnit_inv_apply_eq_iff | theorem |
+| Build | buildPrefixTree | def |
+| CAR | exists_isPicardLindelof_const_of_contDiffAt | theorem |
+| CAR | exists_finite_card_le_of_finite_of_linearIndependent_of_span | theorem |
+| CAR | IsPicardLindelof.exists_forall_hasDerivWithinAt_Icc_eq | theorem |
+| CID | computeCID | def |
+| File | isDocFile | def |
+| File | writeDaslFile | def |
+| File | extractClaimsFromFile | def |
+| Free | _root_.Module.Free.of_det_ne_one | theorem |
+| Monster | monsterPrime | def |
+| Monster | meme_clifford_fractran_monster | theorem |
+| Monster | meme_MONSTER_WALK_INDEX_COMPLETE | theorem |
+| Spectral | pow_norm_pow_one_div_tendsto_nhds_spectralRadius | theorem |
+| Spectral | pow_nnnorm_pow_one_div_tendsto_nhds_spectralRadius | theorem |
+| Spectral | limsup_pow_nnnorm_pow_one_div_le_spectralRadius | theorem |
+| Test | test_lemma | lemma |
+| Test | test_ingest | theorem |
+| Test | test_pow | theorem |

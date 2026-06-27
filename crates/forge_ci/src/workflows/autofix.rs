@@ -2,6 +2,15 @@ use gh_workflow::generate::Generate;
 use gh_workflow::toolchain::Component;
 use gh_workflow::*;
 
+
+/**
+ * Generate the autofix workflow
+ *
+ * This workflow uses specific permissions for different types of events.
+ * For pull requests, it needs contents read permission to review changes.
+ * For other events, it has default permissions.
+ */
+
 use crate::jobs;
 use crate::steps::setup_protoc;
 

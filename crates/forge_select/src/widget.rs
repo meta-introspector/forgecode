@@ -26,9 +26,24 @@ impl ForgeWidget {
         }
     }
 
-    /// Convenience method for confirm (yes/no).
-    pub fn confirm(message: impl Into<String>) -> ConfirmBuilder {
-        ConfirmBuilder { message: message.into(), default: None }
+    /// Convenience method for confirm (yes/no) prompts.
+    pub fn confirm(
+        message: impl Into<String>,
+        preview: Option<String>,
+        permissions: Option<String>,
+        patterns: Option<String>,
+    ) -> ConfirmBuilder {
+        ConfirmBuilder {
+            message: message.into(),
+            preview,
+            permissions,
+            patterns,
+            default: None,
+            view_more: None,
+            actions: Vec::new(),
+            dry_run: false,
+            action_log: Vec::new(),
+        }
     }
 
     /// Prompt a question and get text input.
@@ -43,7 +58,10 @@ impl ForgeWidget {
 
     /// Multi-select prompt.
     pub fn multi_select<T>(message: impl Into<String>, options: Vec<T>) -> MultiSelectBuilder<T> {
-        MultiSelectBuilder { message: message.into(), options }
+        MultiSelectBuilder {
+            message: message.into(),
+            options,
+        }
     }
 
     /// Entry point for row-based select operations.

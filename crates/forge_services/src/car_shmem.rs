@@ -538,7 +538,7 @@ struct CarShmemClient {
 
 impl CarShmemClient {
     fn connect() -> Result<Self> {
-        let stream = UnixStream::connect_to_unix_addr(&UnixSocketAddr::new("@ipld_car_shmem")?)?;
+        let stream = UnixStreamExt::connect_to_unix_addr(&UnixSocketAddr::new("@ipld_car_shmem")?)?;
         let mut client = Self { stream, id: -1 };
 
         client.send(&ServedShMemRequest::Hello)?;
