@@ -23,6 +23,7 @@ forge_fs.workspace = true
 dashmap.workspace = true
 anyhow.workspace = true
 futures.workspace = true
+tantivy.workspace = true
 reqwest.workspace = true
 derive_more.workspace = true
 regex.workspace = true
